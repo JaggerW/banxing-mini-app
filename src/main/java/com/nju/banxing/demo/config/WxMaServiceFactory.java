@@ -30,6 +30,7 @@ public class WxMaServiceFactory {
         return wxMaService;
     }
 
+
     @PostConstruct
     public void init(){
         if(wxMaConfig == null){
