@@ -4,7 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 /src/test/
-/src/main/resources/*.properties
+*.properties
 
 ### mvn ###
 .mvn
