@@ -24,8 +24,8 @@ public class AppContantConfig implements Serializable {
     // aliyun oss
     public final static String ALIYUN_OSS_END_POINT = "http://oss-cn-beijing.aliyuncs.com";
     public final static String ALIYUN_OSS_BUCKET = "jaggerw-second-test";
-    public final static String ALIYUN_OSS_IMAGES_FOLDER = "images";
-    public final static String ALIYUN_OSS_PDF_FOLDER = "pdf";
+    public final static String ALIYUN_OSS_IMAGES_FOLDER = "images/";
+    public final static String ALIYUN_OSS_PDF_FOLDER = "pdf/";
     public final static String ALIYUN_OSS_URL_PREFIX = "https://codingboy.top/";
 
     // redis expireTime

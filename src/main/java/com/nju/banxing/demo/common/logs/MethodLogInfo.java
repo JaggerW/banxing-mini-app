@@ -1,4 +1,4 @@
-package com.nju.banxing.demo.common;
+package com.nju.banxing.demo.common.logs;
 
 
 import lombok.Data;

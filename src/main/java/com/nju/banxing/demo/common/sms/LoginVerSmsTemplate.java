@@ -1,4 +1,4 @@
-package com.nju.banxing.demo.common;
+package com.nju.banxing.demo.common.sms;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * @Author: jaggerw
- * @Description: TODO
+ * @Description: 登录验证码模板
  * @Date: 2020/11/3
  */
 @Data

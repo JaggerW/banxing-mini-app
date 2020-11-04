@@ -1,5 +1,9 @@
 package com.nju.banxing.demo.service;
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.*;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -15,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.InputStream;
+
 /**
  * @Author: jaggerw
  * @Description: 阿里云服务类
@@ -27,6 +34,11 @@ public class AliyunService {
     @Autowired
     private AliyunConfig aliyunConfig;
 
+    /**
+     * 发送短信
+     * @param param
+     * @return
+     */
     public boolean sendSMS(AliyunSmsVO param){
         DefaultProfile defaultProfile = DefaultProfile.getProfile(
                 AppContantConfig.ALIYUN_REGION_ID,aliyunConfig.getId(),aliyunConfig.getSecret());
@@ -53,4 +65,52 @@ public class AliyunService {
             return false;
         }
     }
+
+
+    /**
+     * 上传文件，返回可访问的url路径
+     * @param folderName
+     * @param fileName
+     * @param inputStream
+     * @return
+     */
+    public String uploadFile(String folderName, String fileName, InputStream inputStream){
+
+        OSS ossClient = new OSSClientBuilder().build(
+                AppContantConfig.ALIYUN_OSS_END_POINT, aliyunConfig.getId(), aliyunConfig.getSecret());
+        log.info("Getting Started with OSS SDK for Java\n");
+        try {
+            if (!ossClient.doesBucketExist(AppContantConfig.ALIYUN_OSS_BUCKET)) {
+                /*
+                 * Create a new OSS bucket
+                 */
+                log.info("Creating bucket " + AppContantConfig.ALIYUN_OSS_BUCKET + "\n");
+                ossClient.createBucket(AppContantConfig.ALIYUN_OSS_BUCKET);
+                CreateBucketRequest createBucketRequest= new CreateBucketRequest(AppContantConfig.ALIYUN_OSS_BUCKET);
+                createBucketRequest.setCannedACL(CannedAccessControlList.PublicRead);
+                ossClient.createBucket(createBucketRequest);
+                log.info("Creating bucket " + AppContantConfig.ALIYUN_OSS_BUCKET + "end\n");
+            }
+            log.info("Uploading a new object to OSS from a file\n");
+            PutObjectResult putObjectResult = ossClient.putObject(new PutObjectRequest(AppContantConfig.ALIYUN_OSS_BUCKET, folderName + fileName, inputStream));
+            if(putObjectResult != null){
+                return AppContantConfig.ALIYUN_OSS_URL_PREFIX + folderName + fileName;
+            }else{
+                return null;
+            }
+        } catch (OSSException oe) {
+            System.out.println("Caught an OSSException, which means your request made it to OSS, "
+                    + "but was rejected with an error response for some reason.");
+            System.out.println("Error Message: " + oe.getErrorMessage());
+            System.out.println("Error Code:       " + oe.getErrorCode());
+            System.out.println("Request ID:      " + oe.getRequestId());
+            System.out.println("Host ID:           " + oe.getHostId());
+            return null;
+        } finally {
+            ossClient.shutdown();
+        }
+
+    }
+
+
 }

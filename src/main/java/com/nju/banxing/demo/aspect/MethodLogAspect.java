@@ -2,8 +2,8 @@ package com.nju.banxing.demo.aspect;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.nju.banxing.demo.common.MethodErrorInfo;
-import com.nju.banxing.demo.common.MethodLogInfo;
+import com.nju.banxing.demo.common.logs.MethodErrorInfo;
+import com.nju.banxing.demo.common.logs.MethodLogInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
