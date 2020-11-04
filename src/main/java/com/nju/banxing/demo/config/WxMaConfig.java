@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "wx.miniapp")
+@ConfigurationProperties(prefix = "weixin.miniapp")
 public class WxMaConfig implements Serializable {
     private static final long serialVersionUID = 284090659678487192L;
 

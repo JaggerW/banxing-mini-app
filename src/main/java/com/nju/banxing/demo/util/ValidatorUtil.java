@@ -15,11 +15,12 @@ public class ValidatorUtil {
 
     /**
      * 判断是否符合手机号格式
+     *
      * @param inputStr
      * @return
      */
-    public static boolean isMobile(String inputStr){
-        if(StringUtils.isEmpty(inputStr)){
+    public static boolean isMobile(String inputStr) {
+        if (StringUtils.isEmpty(inputStr)) {
             return false;
         }
         Matcher m = mobilePattern.matcher(inputStr);

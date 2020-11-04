@@ -9,7 +9,6 @@ import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
-import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.nju.banxing.demo.config.AliyunConfig;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -99,12 +97,12 @@ public class AliyunService {
                 return null;
             }
         } catch (OSSException oe) {
-            System.out.println("Caught an OSSException, which means your request made it to OSS, "
+            log.info("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
-            System.out.println("Error Message: " + oe.getErrorMessage());
-            System.out.println("Error Code:       " + oe.getErrorCode());
-            System.out.println("Request ID:      " + oe.getRequestId());
-            System.out.println("Host ID:           " + oe.getHostId());
+            log.info("Error Message: " + oe.getErrorMessage());
+            log.info("Error Code:       " + oe.getErrorCode());
+            log.info("Request ID:      " + oe.getRequestId());
+            log.info("Host ID:           " + oe.getHostId());
             return null;
         } finally {
             ossClient.shutdown();
