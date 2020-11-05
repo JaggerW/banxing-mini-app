@@ -18,4 +18,5 @@ public class UserRedisKeyPrefix extends BaseRedisKeyPrefix {
 
     public static UserRedisKeyPrefix userToken = new UserRedisKeyPrefix(AppContantConfig.USER_TOKEN_EXPIRE_TIME,"USER_TOKEN");
 
+    public static UserRedisKeyPrefix userOpenId = new UserRedisKeyPrefix(AppContantConfig.USER_TOKEN_EXPIRE_TIME, "OPEN_ID");
 }
