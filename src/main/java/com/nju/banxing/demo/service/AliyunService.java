@@ -13,6 +13,8 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.nju.banxing.demo.config.AliyunConfig;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,7 @@ public class AliyunService {
      * @param param
      * @return
      */
-    public boolean sendSMS(AliyunSmsVO param){
+    public void sendSMS(AliyunSmsVO param){
         DefaultProfile defaultProfile = DefaultProfile.getProfile(
                 AppContantConfig.ALIYUN_REGION_ID,aliyunConfig.getId(),aliyunConfig.getSecret());
         IAcsClient client = new DefaultAcsClient(defaultProfile);
@@ -57,10 +59,9 @@ public class AliyunService {
         try {
             CommonResponse response = client.getCommonResponse(request);
             log.info(response.getData());
-            return true;
         } catch (ClientException e) {
             e.printStackTrace();
-            return false;
+            throw new GlobalException(CodeMsg.SMS_ERROR);
         }
     }
 

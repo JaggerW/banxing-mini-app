@@ -29,7 +29,7 @@ public class AppContantConfig implements Serializable {
     public final static String ALIYUN_OSS_URL_PREFIX = "https://codingboy.top/";
 
     // redis expireTime
-    public final static Integer USER_TOKEN_EXPIRE_TIME = 1800;
+    public final static Integer USER_TOKEN_EXPIRE_TIME = 7200;
     public final static Integer VER_CODE_EXPIRE_TIME = 300;
 
     // 用户token放入url传输中的参数名称
