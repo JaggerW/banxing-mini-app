@@ -1,6 +1,7 @@
 package com.nju.banxing.demo.exception;
 
 import com.nju.banxing.demo.common.SingleResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,11 +15,13 @@ import java.util.List;
  * @Description: 全局异常处理类
  * @Date: 2020/11/5
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandle {
     @ExceptionHandler(value=Exception.class)
     public SingleResult<String> exceptionHandler(HttpServletRequest request, Exception e){
         e.printStackTrace();
+        log.error(e.getMessage());
         if(e instanceof GlobalException) {
             GlobalException ex = (GlobalException)e;
             return SingleResult.error(ex.getCodeMsg());

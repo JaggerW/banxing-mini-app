@@ -44,7 +44,6 @@ public class UserService {
         if (StringUtils.isEmpty(token) || !redisService.exists(UserRedisKeyPrefix.userToken, token)) {
             return false;
         }
-
         redisService.updateExpire(UserRedisKeyPrefix.userToken, token);
         return true;
     }
@@ -52,7 +51,6 @@ public class UserService {
     public String getOpenidByToken(String token) {
         WxMaSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken, token, WxMaSessionInfo.class);
         if (null != sessionInfo) {
-            redisService.updateExpire(UserRedisKeyPrefix.userToken, token);
             return sessionInfo.getOpenId();
         }
         return null;

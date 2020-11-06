@@ -1,6 +1,7 @@
 package com.nju.banxing.demo.config;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
@@ -33,7 +34,12 @@ public class AppContantConfig implements Serializable {
     public final static Integer VER_CODE_EXPIRE_TIME = 300;
 
     // 用户token放入url传输中的参数名称
-    public static final String USER_TOKEN_PARAM_NAME = "userToken";
+    public static final String USER_TOKEN_HEADER_NAME = "userToken";
+    public static final String USER_TOKEN_PARAM_NAME = "token";
+    public static final String OPEN_ID_PARAM_NAME = "openid";
+
+    // 不需要校验用户token的路径
+    public static final String[] IGNORE_TOKEN_PATH = {"/user/login"};
 
 
 }
