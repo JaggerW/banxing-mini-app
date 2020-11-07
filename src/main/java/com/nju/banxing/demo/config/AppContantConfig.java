@@ -1,7 +1,6 @@
 package com.nju.banxing.demo.config;
 
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 

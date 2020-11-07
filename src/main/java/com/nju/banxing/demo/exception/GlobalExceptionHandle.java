@@ -24,6 +24,7 @@ public class GlobalExceptionHandle {
         log.error(e.getMessage());
         if(e instanceof GlobalException) {
             GlobalException ex = (GlobalException)e;
+            log.error(ex.getCodeMsg().getMsg());
             return SingleResult.error(ex.getCodeMsg());
         }else if(e instanceof BindException) {
             BindException ex = (BindException)e;

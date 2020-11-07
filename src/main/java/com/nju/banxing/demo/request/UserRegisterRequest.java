@@ -35,6 +35,9 @@ public class UserRegisterRequest implements Serializable {
     @IsEmail
     private String email;
 
+    @NotNull
+    private String verCode;
+
     // 咨询方向List<Enum> 待定
 
 }

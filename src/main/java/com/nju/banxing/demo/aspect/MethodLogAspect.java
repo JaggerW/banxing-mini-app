@@ -79,7 +79,7 @@ public class MethodLogAspect {
                 joinPoint.getSignature().getName()));
         requestErrorInfo.setRequestParams(getRequestParamsByJoinPoint(joinPoint));
         requestErrorInfo.setException(e);
-        log.info("Error Request Info      : {}", JSON.toJSONString(requestErrorInfo));
+        log.error("=============== Error Request Info   : {} ===============", JSON.toJSONString(requestErrorInfo));
     }
 
     /**

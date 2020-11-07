@@ -1,6 +1,6 @@
 package com.nju.banxing.demo.service;
 
-import com.nju.banxing.demo.common.wx.WxMaSessionInfo;
+import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
@@ -49,7 +49,7 @@ public class UserService {
     }
 
     public String getOpenidByToken(String token) {
-        WxMaSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken, token, WxMaSessionInfo.class);
+        WxSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken, token, WxSessionInfo.class);
         if (null != sessionInfo) {
             return sessionInfo.getOpenId();
         }

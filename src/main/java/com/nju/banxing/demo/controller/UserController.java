@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
-import com.nju.banxing.demo.common.wx.WxMaSessionInfo;
+import com.nju.banxing.demo.common.wx.WxSessionInfo;
+import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.TestDO;
 import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.mw.redis.SmsRedisKeyPrefix;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.TestRequest;
@@ -21,17 +23,11 @@ import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.util.ValidatorUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
 import lombok.extern.slf4j.Slf4j;
-import netscape.security.UserTarget;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.weaver.ast.Test;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.ObjectError;
+import org.springframework.cglib.core.CodeEmitter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import static com.nju.banxing.demo.config.AppContantConfig.USER_TOKEN_PARAM_NAME;
 
 
 /**
@@ -97,7 +93,7 @@ public class UserController {
         }
 
         // 调用微信登录接口，获取微信登陆状态
-        WxMaSessionInfo sessionInfo = weixinService.login(code);
+        WxSessionInfo sessionInfo = weixinService.login(code);
         if (null == sessionInfo) {
             return SingleResult.error(CodeMsg.SERVER_ERROR);
         }
@@ -137,22 +133,42 @@ public class UserController {
 
     @MethodLog("新用户注册")
     @PostMapping(value = "/register")
-    public SingleResult<UserDO> register(String openid, @Validated @RequestBody UserRegisterRequest registerRequest) {
-        // @RequestBody 与 @RequestParam 能否共用，即一个java对象和单独一个变量能否传过来，content-type是啥
-        // @RequestBody 与 @Validated能否共用
+    public SingleResult<UserDO> register(String token, @Validated @RequestBody UserRegisterRequest registerRequest) {
 
-        // 获取openid
+        // 获取登录态
+        WxSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken,token,WxSessionInfo.class);
+        String openid = sessionInfo.getOpenId();
+        String sessionKey = sessionInfo.getSessionKey();
 
         // 校验验证码
-
-        // 删除redis缓存
+        String redisKey = openid+registerRequest.getMobile();
+        if(registerRequest.getVerCode().equals(redisService.get(SmsRedisKeyPrefix.verCode,redisKey,String.class))){
+            redisService.delete(SmsRedisKeyPrefix.verCode,redisKey);
+        }else{
+            return SingleResult.error(CodeMsg.ERROR_VER_CODE);
+        }
 
         // 获取用户加密数据 (try-catch:sessionKey过期->重新登陆)
+        try {
+            WxUserInfo userInfo = weixinService.getUserInfo(sessionKey, registerRequest.getSignature(),
+                    registerRequest.getRawData(), registerRequest.getEncryptedData(), registerRequest.getIv());
 
-        // 插入数据库
-        UserDO userDO = new UserDO();
+            // 插入数据库
+            UserDO userDO = new UserDO();
 
-        return SingleResult.success(userDO);
+            return SingleResult.success(userDO);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if(e instanceof GlobalException){
+                GlobalException ge = (GlobalException) e;
+                CodeMsg cm = ge.getCodeMsg();
+                log.error(cm.getMsg());
+                return SingleResult.error(cm);
+            }else{
+                return SingleResult.error(CodeMsg.SERVER_ERROR);
+            }
+        }
     }
 
     /**
@@ -161,7 +177,7 @@ public class UserController {
      * @param token
      * @param sessionInfo
      */
-    private void addToken2Redis(String token, WxMaSessionInfo sessionInfo) {
+    private void addToken2Redis(String token, WxSessionInfo sessionInfo) {
         // 删掉该用户以前的token
         if (redisService.exists(UserRedisKeyPrefix.userOpenId, sessionInfo.getOpenId())) {
             String oldToken = redisService.get(UserRedisKeyPrefix.userOpenId, sessionInfo.getOpenId(), String.class);

@@ -10,15 +10,15 @@ import java.io.Serializable;
  * @Date: 2020/11/5
  */
 @Data
-public class WxMaSessionInfo implements Serializable {
+public class WxSessionInfo implements Serializable {
     private static final long serialVersionUID = 3941607680534582583L;
 
     private String openId;
     private String sessionKey;
 
-    public WxMaSessionInfo(){}
+    public WxSessionInfo(){}
 
-    public WxMaSessionInfo(String o, String s){
+    public WxSessionInfo(String o, String s){
         this.openId = o;
         this.sessionKey = s;
     }
