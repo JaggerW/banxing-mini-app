@@ -2,6 +2,7 @@ package com.nju.banxing.demo.service;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
@@ -14,6 +15,8 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author: jaggerw
@@ -75,6 +78,28 @@ public class WeixinService {
         log.info("微信用户信息为：{}", JSON.toJSONString(innerUserInfo));
         return innerUserInfo;
 
+    }
+
+    /**
+     * 发送小程序通知
+     * @return
+     */
+    public boolean sendWxMessage(String userOpenid, String templateId, String page, List<WxMaSubscribeMessage.Data> dataList){
+        final WxMaService wxMaService = WxMaServiceFactory.getWxMaService();
+        WxMaSubscribeMessage message = new WxMaSubscribeMessage();
+        List<WxMaSubscribeMessage.Data> data = null;
+        message.setData(dataList);
+        message.setToUser(userOpenid);
+        message.setTemplateId(templateId);
+        message.setPage(page);
+
+        try {
+            wxMaService.getMsgService().sendSubscribeMsg(message);
+            return true;
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
