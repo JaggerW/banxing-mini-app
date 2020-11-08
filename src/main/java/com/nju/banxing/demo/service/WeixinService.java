@@ -5,6 +5,7 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.config.WxMaServiceFactory;
@@ -17,6 +18,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author: jaggerw
@@ -87,7 +90,6 @@ public class WeixinService {
     public boolean sendWxMessage(String userOpenid, String templateId, String page, List<WxMaSubscribeMessage.Data> dataList){
         final WxMaService wxMaService = WxMaServiceFactory.getWxMaService();
         WxMaSubscribeMessage message = new WxMaSubscribeMessage();
-        List<WxMaSubscribeMessage.Data> data = null;
         message.setData(dataList);
         message.setToUser(userOpenid);
         message.setTemplateId(templateId);
@@ -100,6 +102,27 @@ public class WeixinService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 给用户下发腾讯会议通知
+     * @param meetTitle
+     * @param date
+     * @param teacherName
+     * @param meetNum
+     * @param tips
+     * @return
+     */
+    public List<WxMaSubscribeMessage.Data> getWxMeetMessage(String meetTitle, String date, String teacherName, String meetNum, String tips){
+        Map<String,String> map = Maps.newHashMap();
+        map.put("thing1",meetTitle);
+        map.put("time2",date);
+        map.put("thing3",teacherName);
+        map.put("character_string4",meetNum);
+        map.put("thing5",tips);
+        return map.entrySet().stream().map(
+                m -> new WxMaSubscribeMessage.Data(m.getKey(),m.getValue())
+        ).collect(Collectors.toList());
     }
 
 
