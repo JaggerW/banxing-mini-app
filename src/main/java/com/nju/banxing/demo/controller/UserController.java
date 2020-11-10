@@ -104,7 +104,6 @@ public class UserController {
         return SingleResult.success(userToken);
     }
 
-
     @MethodLog("获取验证码")
     @GetMapping(value = "/ver_code")
     public SingleResult<Boolean> sendVerCode(String openid, String mobile) {

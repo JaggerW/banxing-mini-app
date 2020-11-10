@@ -34,7 +34,6 @@ public class MessageUtil {
         return res;
     }
 
-
     private static String getMeetingTime(String str) {
         int index = str.indexOf(MEETING_TIME_KEY_POINT);
         index += MEETING_TIME_KEY_POINT.length();
@@ -52,7 +51,6 @@ public class MessageUtil {
         index += MEETING_URL_KEY_POINT.length();
         return str.substring(index, index + 42);
     }
-
 
     private static String getMeetingID(String str) {
         int index = str.indexOf(MEETING_ID_KEY_POINT);
