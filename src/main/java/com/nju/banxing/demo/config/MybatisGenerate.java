@@ -22,7 +22,7 @@ public class MybatisGenerate {
 
         GlobalConfig gc = new GlobalConfig();
         String projectPath = "D:\\Document\\code\\java\\banxing-mini-app";
-        gc.setOutputDir(projectPath+"/src/main");
+        gc.setOutputDir(projectPath+"/src/main/java");
         gc.setAuthor("JaggerW");
         gc.setOpen(false);
         gc.setFileOverride(false);
@@ -44,13 +44,13 @@ public class MybatisGenerate {
         mpg.setDataSource(dsc);
 
         PackageConfig pc = new PackageConfig();
-        pc.setParent("java.com.nju.banxing.demo");
+        pc.setParent("com.nju.banxing.demo");
         pc.setModuleName("banxing-mini-app");
         pc.setEntity("domain");
-        pc.setMapper("domain.mapper");
+        pc.setMapper("mapper");
         pc.setService("service");
         pc.setController("controller");
-        pc.setXml("resources.mapper");
+        pc.setXml("mapper.xml");
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();
