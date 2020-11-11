@@ -2,7 +2,7 @@ package com.nju.banxing.demo.service;
 
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.domain.UserDO;
-import com.nju.banxing.demo.domain.mapper.UserMapper;
+import com.nju.banxing.demo.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class UserService {
     public UserDO insertUser(UserDO userDO) {
         // TODO 1 插入成功
         userMapper.insert(userDO);
-        return userMapper.getById(userDO.getOpenid());
+        return userMapper.getById(userDO.getId());
     }
 
     public Boolean existToken(String token) {

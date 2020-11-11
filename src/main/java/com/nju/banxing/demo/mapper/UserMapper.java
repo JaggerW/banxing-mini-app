@@ -1,4 +1,4 @@
-package com.nju.banxing.demo.domain.mapper;
+package com.nju.banxing.demo.mapper;
 
 
 import com.nju.banxing.demo.domain.UserDO;
