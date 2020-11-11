@@ -27,6 +27,7 @@ public class CodeMsg {
     public static CodeMsg PARAM_ERROR = new CodeMsg(101,"参数校验异常：%s");
     public static CodeMsg OTHER_ERROR = new CodeMsg(102, "哎呀，不好意思出错了：%s");
     public static CodeMsg ERROR_VER_CODE = new CodeMsg(103,"验证失败，请重新获取验证码");
+    public static CodeMsg FAIL_REGISTER = new CodeMsg(104,"注册失败");
 
     // 微信
     public static CodeMsg WX_ERROR_CHECK_USER_INFO = new CodeMsg(200,"用户信息校验失败");

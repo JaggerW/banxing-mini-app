@@ -22,7 +22,9 @@ import com.nju.banxing.demo.service.WeixinService;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.util.ValidatorUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
+import com.nju.banxing.demo.vo.UserInfoVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +56,7 @@ public class UserController {
 
     @PostMapping(value = "/test")
     @MethodLog("测试")
-    public SingleResult<TestDO> test(@RequestBody TestRequest request, String token){
+    public SingleResult<TestDO> test(@RequestBody TestRequest request, String token) {
         TestDO testDO = new TestDO();
         testDO.setName(request.getName());
         testDO.setToken(token);
@@ -65,6 +67,7 @@ public class UserController {
 
     /**
      * token 在header中，拦截器以做处理判断
+     *
      * @return
      */
     @GetMapping(value = "/check/token")
@@ -74,14 +77,13 @@ public class UserController {
     }
 
     /**
-     * 参数解析器会自动将UserDO参数注入，且已做判空处理
-     * @param userDO
+     * @param openid
      * @return
      */
     @GetMapping(value = "/check/user")
     @MethodLog("查询该用户是否已注册")
-    public SingleResult<UserDO> checkUser(UserDO userDO) {
-        return SingleResult.success(userDO);
+    public SingleResult<Boolean> checkUser(String openid) {
+        return SingleResult.success(userService.existUser(openid));
     }
 
     @GetMapping(value = "/login")
@@ -100,6 +102,13 @@ public class UserController {
         // 生成token并缓存
         String userToken = UUIDUtil.getUserToken();
         addToken2Redis(userToken, sessionInfo);
+
+        // 若存在用户，则更新登录次数和最近登录时间
+        String openid = sessionInfo.getOpenId();
+        if(userService.existUser(openid)){
+            userService.updateUserLog(openid);
+        }
+
         return SingleResult.success(userToken);
     }
 
@@ -131,18 +140,15 @@ public class UserController {
 
     @MethodLog("新用户注册")
     @PostMapping(value = "/register")
-    public SingleResult<UserDO> register(String token, @Validated @RequestBody UserRegisterRequest registerRequest) {
+    public SingleResult<Boolean> register(String token, @Validated @RequestBody UserRegisterRequest registerRequest) {
 
         // 获取登录态
-        WxSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken,token,WxSessionInfo.class);
+        WxSessionInfo sessionInfo = redisService.get(UserRedisKeyPrefix.userToken, token, WxSessionInfo.class);
         String openid = sessionInfo.getOpenId();
         String sessionKey = sessionInfo.getSessionKey();
 
         // 校验验证码
-        String redisKey = openid+registerRequest.getMobile();
-        if(registerRequest.getVerCode().equals(redisService.get(SmsRedisKeyPrefix.verCode,redisKey,String.class))){
-            redisService.delete(SmsRedisKeyPrefix.verCode,redisKey);
-        }else{
+        if (!checkVerCode(openid, registerRequest.getMobile(), registerRequest.getVerCode())) {
             return SingleResult.error(CodeMsg.ERROR_VER_CODE);
         }
 
@@ -152,18 +158,16 @@ public class UserController {
                     registerRequest.getRawData(), registerRequest.getEncryptedData(), registerRequest.getIv());
 
             // 插入数据库
-            UserDO userDO = new UserDO();
-
-            return SingleResult.success(userDO);
-
+            boolean flag = userService.insertUser(openid, registerRequest, userInfo);
+            return flag ? SingleResult.success(true) : SingleResult.error(CodeMsg.FAIL_REGISTER);
         } catch (Exception e) {
             e.printStackTrace();
-            if(e instanceof GlobalException){
+            if (e instanceof GlobalException) {
                 GlobalException ge = (GlobalException) e;
                 CodeMsg cm = ge.getCodeMsg();
                 log.error(cm.getMsg());
                 return SingleResult.error(cm);
-            }else{
+            } else {
                 return SingleResult.error(CodeMsg.SERVER_ERROR);
             }
         }
@@ -185,5 +189,15 @@ public class UserController {
         // 插入新的token
         redisService.set(UserRedisKeyPrefix.userOpenId, sessionInfo.getOpenId(), token);
         redisService.set(UserRedisKeyPrefix.userToken, token, sessionInfo);
+    }
+
+    private boolean checkVerCode(String openid, String mobile, String verCode) {
+        String redisKey = openid + mobile;
+        String redisVerCode = redisService.get(SmsRedisKeyPrefix.verCode, redisKey, String.class);
+        if (verCode.equals(redisVerCode)) {
+            return redisService.delete(SmsRedisKeyPrefix.verCode, redisKey);
+        } else {
+            return false;
+        }
     }
 }

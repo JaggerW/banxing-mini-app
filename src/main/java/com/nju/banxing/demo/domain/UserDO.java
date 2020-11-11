@@ -47,7 +47,7 @@ public class UserDO implements Serializable {
     /**
      * 咨询类型：0001，保研；0010，考研
      */
-    private Boolean consultationType;
+    private Integer consultationType;
 
     /**
      * 头像
@@ -77,7 +77,7 @@ public class UserDO implements Serializable {
     /**
      * 性别：0，未知；1，男；2，女
      */
-    private Boolean gender;
+    private Integer gender;
 
     /**
      * 国家

@@ -13,12 +13,16 @@ import java.util.Date;
 public class DateUtil {
     public static SimpleDateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    public static Date getCurrentDate(){
+        return new Date();
+    }
+
     /**
      * 获取string类型当前时间
      *
      * @return
      */
-    public static String getCurrentDate() {
+    public static String getCurrentDateStr() {
         return defaultDateFormat.format(new Date());
     }
 

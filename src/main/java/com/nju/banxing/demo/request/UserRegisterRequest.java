@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author: jaggerw
@@ -38,6 +39,8 @@ public class UserRegisterRequest implements Serializable {
     @NotNull
     private String verCode;
 
-    // 咨询方向List<Enum> 待定
+    // 咨询方向(可多选)
+    @NotNull
+    private List<Integer> consultationTypeList;
 
 }
