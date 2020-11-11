@@ -45,7 +45,6 @@ public class MybatisGenerate {
 
         PackageConfig pc = new PackageConfig();
         pc.setParent("com.nju.banxing.demo");
-        pc.setModuleName("banxing-mini-app");
         pc.setEntity("domain");
         pc.setMapper("mapper");
         pc.setService("service");
@@ -54,8 +53,7 @@ public class MybatisGenerate {
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();
-        sc.setInclude("tutor");
-        sc.setInclude("user");
+        sc.setInclude("tutor","user");
         sc.setNaming(NamingStrategy.underline_to_camel);
         sc.setColumnNaming(NamingStrategy.underline_to_camel);
         sc.setEntityLombokModel(true);
