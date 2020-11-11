@@ -1,14 +1,138 @@
 package com.nju.banxing.demo.domain;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.IdType;
+import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: jaggerw
- * @Description: 用户
- * @Date: 2020/11/5
+ * <p>
+ * 用户表
+ * </p>
+ *
+ * @author JaggerW
+ * @since 2020-11-11
  */
 @Data
-public class UserDO {
+@EqualsAndHashCode(callSuper = false)
+@TableName("user")
+public class UserDO implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 微信用户openid
+     */
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
+
+    /**
+     * 昵称
+     */
+    private String nickName;
+
+    /**
+     * 电话
+     */
+    private String mobile;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 咨询类型：0001，保研；0010，考研
+     */
+    private Boolean consultationType;
+
+    /**
+     * 头像
+     */
+    private String avatarUrl;
+
+    /**
+     * 是否为导师：0，不是；1，是
+     */
+    private Boolean tutorFlag;
+
+    /**
+     * 是否为管理员：0，不是；1，是
+     */
+    private Boolean adminFlag;
+
+    /**
+     * 短信发送许可：1，同意；0，拒绝
+     */
+    private Boolean smsPermission;
+
+    /**
+     * 邮箱发送许可：1，同意；0，拒绝
+     */
+    private Boolean emailPermission;
+
+    /**
+     * 性别：0，未知；1，男；2，女
+     */
+    private Boolean gender;
+
+    /**
+     * 国家
+     */
+    private String country;
+
+    /**
+     * 省份
+     */
+    private String province;
+
+    /**
+     * 城市
+     */
+    private String city;
+
+    /**
+     * 注册时间
+     */
+    private Date registerTime;
+
+    /**
+     * 上次登录时间
+     */
+    private Date latestLoginTime;
+
+    /**
+     * 登录次数
+     */
+    private Long loginCount;
+
+    /**
+     * 扩展字段，留备用
+     */
+    private String extension;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 创建人openid
+     */
+    private String creator;
+
+    /**
+     * 修改时间
+     */
+    private Date modifyTime;
+
+    /**
+     * 修改人openid
+     */
+    private String modifier;
+
+
 }

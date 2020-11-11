@@ -23,7 +23,7 @@ public class UserService {
     private RedisService redisService;
 
     public UserDO getById(String openid) {
-        return userMapper.getById(openid);
+        return userMapper.selectById(openid);
     }
 
     public UserDO getByToken(String token) {
@@ -37,7 +37,7 @@ public class UserService {
     public UserDO insertUser(UserDO userDO) {
         // TODO 1 插入成功
         userMapper.insert(userDO);
-        return userMapper.getById(userDO.getId());
+        return userMapper.selectById(userDO.getId());
     }
 
     public Boolean existToken(String token) {
