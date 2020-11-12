@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +38,8 @@ public class TutorController {
 
     @PostMapping("/register")
     @MethodLog("申请注册导师")
-    public SingleResult<Boolean> register(String openid, @RequestBody TutorRegisterRequest request){
+    public SingleResult<Boolean> register(String openid,
+                                          @Validated @RequestBody TutorRegisterRequest request){
         boolean flag = tutorService.register(openid,request);
         if(flag){
             // todo 通知管理员审核

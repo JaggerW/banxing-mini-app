@@ -6,6 +6,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
@@ -24,23 +25,23 @@ public class UserRegisterRequest implements Serializable {
     private String encryptedData;
     private String iv;
 
-    @NotNull
+    @NotNull(message = "昵称不能为空")
     @Length(min = 3, max = 8)
     private String nickName;
 
-    @NotNull
+    @NotNull(message = "手机号不能为空")
     @IsMobile
     private String mobile;
 
-    @NotNull
+    @NotNull(message = "邮箱不能为空")
     @IsEmail
     private String email;
 
-    @NotNull
+    @NotNull(message = "请输入验证码")
     private String verCode;
 
     // 咨询方向(可多选)
-    @NotNull
+    @NotNull(message = "请选择您要咨询得方向（可多选）")
     private List<Integer> consultationTypeList;
 
 }

@@ -24,8 +24,7 @@ public class CodeMsg {
     public static CodeMsg NULL_USER = new CodeMsg(-1,"对不起，您还没有注册");
     public static CodeMsg NULL_TOKEN = new CodeMsg(-2,"token已失效，请重新登录");
     public static CodeMsg SERVER_ERROR = new CodeMsg(100,"服务端异常");
-    public static CodeMsg PARAM_ERROR = new CodeMsg(101,"参数校验异常：%s");
-    public static CodeMsg OTHER_ERROR = new CodeMsg(102, "哎呀，不好意思出错了：%s");
+    public static CodeMsg BIND_ERROR = new CodeMsg(101,"%s");  // 参数校验异常
 
     // 服务端 用户
     public static CodeMsg ERROR_VER_CODE = new CodeMsg(103,"验证失败，请重新获取验证码");

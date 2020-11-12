@@ -31,7 +31,7 @@ public class GlobalExceptionHandle {
             List<ObjectError> errors = ex.getAllErrors();
             ObjectError error = errors.get(0);
             String msg = error.getDefaultMessage();
-            return SingleResult.error(CodeMsg.PARAM_ERROR.fillArgs(msg));
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs(msg));
         }else {
             return SingleResult.error(CodeMsg.SERVER_ERROR);
         }

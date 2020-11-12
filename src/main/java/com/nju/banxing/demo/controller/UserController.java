@@ -90,7 +90,7 @@ public class UserController {
     @MethodLog("用户登录")
     public SingleResult<String> login(String code) {
         if (StringUtils.isEmpty(code)) {
-            return SingleResult.error(CodeMsg.PARAM_ERROR.fillArgs("code不能为空"));
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("code不能为空"));
         }
 
         // 调用微信登录接口，获取微信登陆状态
@@ -116,7 +116,7 @@ public class UserController {
     @GetMapping(value = "/get_ver_code")
     public SingleResult<Boolean> sendVerCode(String openid, String mobile) {
         if (!ValidatorUtil.isMobile(mobile)) {
-            return SingleResult.error(CodeMsg.PARAM_ERROR.fillArgs("手机号码格式错误"));
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("手机号码格式错误"));
         }
 
         // 生成验证码并缓存
