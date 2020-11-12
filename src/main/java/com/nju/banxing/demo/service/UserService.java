@@ -1,20 +1,16 @@
 package com.nju.banxing.demo.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.domain.UserDO;
-import com.nju.banxing.demo.mapper.UserMapper;
+import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.UserRegisterRequest;
-import com.nju.banxing.demo.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 
 /**
  * @Author: jaggerw
@@ -85,18 +81,21 @@ public class UserService {
         userDO.setConsultationType(consultationType);
 
         // 默认值
-        Date curDate = DateUtil.getCurrentDate();
-        userDO.setAdminFlag(false);
-        userDO.setCreateTime(curDate);
         userDO.setCreator(openid);
-        userDO.setEmailPermission(true);
-        userDO.setLatestLoginTime(curDate);
-        userDO.setLoginCount(1L);
         userDO.setModifier(openid);
-        userDO.setModifyTime(curDate);
-        userDO.setRegisterTime(curDate);
-        userDO.setSmsPermission(true);
-        userDO.setTutorFlag(false);
+
+//        Date curDate = DateUtil.getCurrentDate();
+//        userDO.setAdminFlag(false);
+//        userDO.setCreateTime(curDate);
+//        userDO.setCreator(openid);
+//        userDO.setEmailPermission(true);
+//        userDO.setLatestLoginTime(curDate);
+//        userDO.setLoginCount(1L);
+//        userDO.setModifier(openid);
+//        userDO.setModifyTime(curDate);
+//        userDO.setRegisterTime(curDate);
+//        userDO.setSmsPermission(true);
+//        userDO.setTutorFlag(false);
 //        userDO.setExtension(null);
 
         return userMapper.insert(userDO) > 0;
@@ -108,14 +107,7 @@ public class UserService {
      * @return
      */
     public boolean updateUserLog(String openid){
-        Date curDate = DateUtil.getCurrentDate();
-        LambdaUpdateWrapper<UserDO> wrapper = new UpdateWrapper<UserDO>().lambda()
-                .eq(UserDO::getId, openid)
-                .set(UserDO::getLatestLoginTime, curDate)
-                .set(UserDO::getModifyTime, curDate)
-                .set(UserDO::getModifier, openid);
-        int flag = userMapper.updateUserLog(wrapper);
-        return flag>0;
+        return userMapper.updateUserLog(openid) > 0;
     }
 
     public Boolean existToken(String token) {

@@ -46,10 +46,10 @@ public class MybatisGenerate {
         PackageConfig pc = new PackageConfig();
         pc.setParent("com.nju.banxing.demo");
         pc.setEntity("domain");
-        pc.setMapper("mapper");
+        pc.setMapper("domain.mapper");
         pc.setService("service");
         pc.setController("controller");
-        pc.setXml("mapper.xml");
+//        pc.setXml("mapper.xml");
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();

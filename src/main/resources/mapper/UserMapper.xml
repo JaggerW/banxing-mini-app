@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nju.banxing.demo.domain.mapper.UserMapper">
+
+    <update id="updateUserLog" parameterType="java.lang.String">
+        update user
+        <set>
+            login_count = login_count + 1,
+            latest_login_time = now(),
+            modify_time = now(),
+            modifier = #{openid, jdbcType = VARCHAR}
+        </set>
+        where id = #{openid, jdbcType = VARCHAR}
+    </update>
+
+</mapper>

@@ -1,4 +1,4 @@
-package com.nju.banxing.demo.mapper;
+package com.nju.banxing.demo.domain.mapper;
 
 import com.nju.banxing.demo.domain.TutorDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
