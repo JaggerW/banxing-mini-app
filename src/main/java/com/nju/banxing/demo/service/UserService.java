@@ -7,7 +7,9 @@ import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.UserRegisterRequest;
+import com.nju.banxing.demo.vo.UserInfoVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -126,4 +128,10 @@ public class UserService {
         return null;
     }
 
+    public UserInfoVO getUserInfo(String openid) {
+        UserDO userDO = userMapper.selectById(openid);
+        UserInfoVO vo = new UserInfoVO();
+        BeanUtils.copyProperties(userDO,vo);
+        return vo;
+    }
 }

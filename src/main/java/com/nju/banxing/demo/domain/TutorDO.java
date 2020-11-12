@@ -3,6 +3,8 @@ package com.nju.banxing.demo.domain;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -53,7 +55,7 @@ public class TutorDO implements Serializable {
     /**
      * 指导方向：0001，保研；0010，考研
      */
-    private Boolean instructionType;
+    private Integer instructionType;
 
     /**
      * 咨询费用（每十分钟）
@@ -133,17 +135,17 @@ public class TutorDO implements Serializable {
     /**
      * 审核状态：0，待审核；1，审核通过；2，审核失败
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 申请时间
      */
-    private Date applicationTime;
+    private LocalDateTime applicationTime;
 
     /**
      * 通过时间
      */
-    private Date passedTime;
+    private LocalDateTime passedTime;
 
     /**
      * 搜索关键词
@@ -158,7 +160,7 @@ public class TutorDO implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /**
      * 创建人id
@@ -168,7 +170,7 @@ public class TutorDO implements Serializable {
     /**
      * 修改时间
      */
-    private Date modifyTime;
+    private LocalDateTime modifyTime;
 
     /**
      * 修改人id

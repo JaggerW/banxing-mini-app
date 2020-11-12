@@ -77,7 +77,7 @@ public class AliyunService {
 
         OSS ossClient = new OSSClientBuilder().build(
                 AppContantConfig.ALIYUN_OSS_END_POINT, aliyunConfig.getId(), aliyunConfig.getSecret());
-        log.info("Getting Started with OSS SDK for Java\n");
+        log.info("Getting Started with OSS SDK for Java");
         try {
             if (!ossClient.doesBucketExist(AppContantConfig.ALIYUN_OSS_BUCKET)) {
                 /*
@@ -90,7 +90,7 @@ public class AliyunService {
                 ossClient.createBucket(createBucketRequest);
                 log.info("Creating bucket " + AppContantConfig.ALIYUN_OSS_BUCKET + "end\n");
             }
-            log.info("Uploading a new object to OSS from a file\n");
+            log.info("Uploading a new object to OSS from a file");
             PutObjectResult putObjectResult = ossClient.putObject(new PutObjectRequest(AppContantConfig.ALIYUN_OSS_BUCKET, folderName + fileName, inputStream));
             if(putObjectResult != null){
                 return AppContantConfig.ALIYUN_OSS_URL_PREFIX + folderName + fileName;

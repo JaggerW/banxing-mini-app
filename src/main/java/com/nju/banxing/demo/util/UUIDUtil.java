@@ -69,4 +69,9 @@ public class UUIDUtil {
         long timeStr = System.currentTimeMillis();
         return "DD" + timeStr + getVerCode();
     }
+
+    public static String getFileName(){
+        long timeStr = System.currentTimeMillis();
+        return "image_" + timeStr + getVerCode();
+    }
 }

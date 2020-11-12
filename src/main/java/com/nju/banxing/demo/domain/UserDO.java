@@ -2,6 +2,8 @@ package com.nju.banxing.demo.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -97,12 +99,12 @@ public class UserDO implements Serializable {
     /**
      * 注册时间
      */
-    private Date registerTime;
+    private LocalDateTime registerTime;
 
     /**
      * 上次登录时间
      */
-    private Date latestLoginTime;
+    private LocalDateTime latestLoginTime;
 
     /**
      * 登录次数
@@ -117,7 +119,7 @@ public class UserDO implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /**
      * 创建人openid
@@ -127,7 +129,7 @@ public class UserDO implements Serializable {
     /**
      * 修改时间
      */
-    private Date modifyTime;
+    private LocalDateTime modifyTime;
 
     /**
      * 修改人openid

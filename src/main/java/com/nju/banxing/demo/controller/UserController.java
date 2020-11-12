@@ -70,7 +70,7 @@ public class UserController {
      *
      * @return
      */
-    @GetMapping(value = "/check/token")
+    @GetMapping(value = "/check_token")
     @MethodLog("查询userToken是否有效")
     public SingleResult<Boolean> checkUserToken() {
         return SingleResult.success(true);
@@ -80,7 +80,7 @@ public class UserController {
      * @param openid
      * @return
      */
-    @GetMapping(value = "/check/user")
+    @GetMapping(value = "/check_user")
     @MethodLog("查询该用户是否已注册")
     public SingleResult<Boolean> checkUser(String openid) {
         return SingleResult.success(userService.existUser(openid));
@@ -113,7 +113,7 @@ public class UserController {
     }
 
     @MethodLog("获取验证码")
-    @GetMapping(value = "/ver_code")
+    @GetMapping(value = "/get_ver_code")
     public SingleResult<Boolean> sendVerCode(String openid, String mobile) {
         if (!ValidatorUtil.isMobile(mobile)) {
             return SingleResult.error(CodeMsg.PARAM_ERROR.fillArgs("手机号码格式错误"));
@@ -172,6 +172,19 @@ public class UserController {
             }
         }
     }
+
+    @MethodLog("获取当前用户信息")
+    @GetMapping("get_info")
+    public SingleResult<UserInfoVO> getUserInfo(String openid){
+        UserInfoVO userInfo = userService.getUserInfo(openid);
+        if(ObjectUtils.isEmpty(userInfo)){
+            return SingleResult.error(CodeMsg.NULL_USER);
+        }else{
+            return SingleResult.success(userInfo);
+        }
+    }
+
+
 
     /**
      * 将token缓存到redis中

@@ -1,6 +1,8 @@
 package com.nju.banxing.demo.enums;
 
 
+import java.io.Serializable;
+
 /**
  * @Author: jaggerw
  * @Description: 咨询类型
