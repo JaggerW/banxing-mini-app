@@ -20,7 +20,6 @@ import lombok.EqualsAndHashCode;
  * @since 2020-11-11
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
 @TableName("tutor")
 public class TutorDO implements Serializable {
 
@@ -31,6 +30,11 @@ public class TutorDO implements Serializable {
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
+
+    /**
+     * 昵称
+     */
+    private String nickName;
 
     /**
      * 本科学校
@@ -55,7 +59,7 @@ public class TutorDO implements Serializable {
     /**
      * 指导方向：0001，保研；0010，考研
      */
-    private Integer instructionType;
+    private Integer consultationType;
 
     /**
      * 咨询费用（每十分钟）
@@ -125,12 +129,12 @@ public class TutorDO implements Serializable {
     /**
      * 咨询人数
      */
-    private Integer instructionCount;
+    private Integer consultationCount;
 
     /**
      * 评分
      */
-    private Float instructionScore;
+    private Float commentScore;
 
     /**
      * 审核状态：0，待审核；1，审核通过；2，审核失败

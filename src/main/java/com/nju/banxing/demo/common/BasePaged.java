@@ -13,8 +13,8 @@ import java.io.Serializable;
 public class BasePaged implements Serializable {
     private static final long serialVersionUID = 6008855424801110010L;
 
-    private Integer index = 0;
-    private Integer rowNum = 20;
+    private Long pageIndex = 1L;
+    private Long pageSize = 20L;
     private Long offset;
     private Long total;
 

@@ -19,7 +19,6 @@ import lombok.EqualsAndHashCode;
  * @since 2020-11-11
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
 @TableName("user")
 public class UserDO implements Serializable {
 
