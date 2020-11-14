@@ -2,6 +2,8 @@ package com.nju.banxing.demo.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -50,9 +52,14 @@ public class CommentDO implements Serializable {
     private String userAvatarUrl;
 
     /**
+     * 咨询类型
+     */
+    private Integer consultationType;
+
+    /**
      * 评价时间
      */
-    private Date commentTime;
+    private LocalDateTime commentTime;
 
     /**
      * 评价分数
@@ -72,7 +79,7 @@ public class CommentDO implements Serializable {
     /**
      * 创建日期
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /**
      * 创建人
@@ -82,7 +89,7 @@ public class CommentDO implements Serializable {
     /**
      * 修改日期
      */
-    private Date modifyTime;
+    private LocalDateTime modifyTime;
 
     /**
      * 修改人

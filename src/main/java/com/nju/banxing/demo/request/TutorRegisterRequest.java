@@ -33,7 +33,7 @@ public class TutorRegisterRequest implements Serializable {
 
     // 1,保研；2，考研；（单选）
     @NotNull(message = "请选择指导方向")
-    private Integer instructionType;
+    private Integer consultationType;
 
     @NotNull(message = "请填写咨询费用")
     private BigDecimal consultationCost;

@@ -1,15 +1,26 @@
 package com.nju.banxing.demo.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.google.common.collect.Lists;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
+import com.nju.banxing.demo.common.SingleResult;
+import com.nju.banxing.demo.common.TimePair;
+import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.TutorDO;
-import com.nju.banxing.demo.request.HomePageQuery;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.request.CommentListQuery;
+import com.nju.banxing.demo.request.TutorListQuery;
+import com.nju.banxing.demo.service.CommentService;
 import com.nju.banxing.demo.service.TutorService;
+import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.vo.CommentVO;
+import com.nju.banxing.demo.vo.TutorDetailInfoVO;
 import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
+import com.nju.banxing.demo.vo.WorkTimeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,10 +45,13 @@ public class HomeController {
     @Autowired
     private TutorService tutorService;
 
+    @Autowired
+    private CommentService commentService;
 
-    @GetMapping("/list")
+
+    @GetMapping("/tutor_list")
     @MethodLog("获取首页列表")
-    public PagedResult<TutorSimpleInfoVO> list(HomePageQuery query){
+    public PagedResult<TutorSimpleInfoVO> list(TutorListQuery query){
         Integer type = query.getConsultationType();
         if(ObjectUtils.isEmpty(type) || (ObjectUtils.isNotEmpty(type) && type != 1 && type != 2)){
             type = 1;
@@ -52,6 +65,52 @@ public class HomeController {
         }).collect(Collectors.toList());
 
         return PagedResult.success(voList,page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
+    }
+
+    @GetMapping("/tutor_detail")
+    @MethodLog("获取导师详细信息")
+    public SingleResult<TutorDetailInfoVO> detail(@RequestParam(value = "tutorId") String tutorId){
+        if(StringUtils.isEmpty(tutorId)){
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("tutorId不能为空"));
+        }
+
+        TutorDO tutorDO = tutorService.getById(tutorId);
+        TutorDetailInfoVO detail = buildVO(tutorDO);
+        if(ObjectUtils.isEmpty(detail)){
+            return SingleResult.error(CodeMsg.NULL_TUTOR);
+        }
+        return SingleResult.success(detail);
+    }
+
+    @GetMapping("/comment_list")
+    @MethodLog("获取评论列表")
+    public PagedResult<CommentVO> getComment(CommentListQuery query){
+        Integer type = query.getConsultationType();
+        if(ObjectUtils.isEmpty(type) || (ObjectUtils.isNotEmpty(type) && type != 1 && type != 2)){
+            type = 1;
+        }
+
+        IPage<CommentVO> page = commentService.getAll(type, query.getTutorId(), query.getPageIndex(), query.getPageSize());
+        return PagedResult.success(page.getRecords(),page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
+    }
+
+    private TutorDetailInfoVO buildVO(TutorDO tutorDO){
+        TutorDetailInfoVO vo = new TutorDetailInfoVO();
+        BeanUtils.copyProperties(tutorDO,vo);
+        vo.setOpenid(tutorDO.getId());
+        String workTime = tutorDO.getWorkTime();
+        List<TimePair> timePairList = JSON.parseArray(workTime, TimePair.class);
+        List<WorkTimeVO> workTimeVOList = timePairList.stream().map(timePair -> {
+            WorkTimeVO workTimeVO = new WorkTimeVO();
+            workTimeVO.setKey(timePair.getKey());
+            workTimeVO.setStartTime(timePair.getStartTime());
+            workTimeVO.setEndTime(timePair.getEndTime());
+            boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
+            workTimeVO.setReserveFlag(!b);
+            return workTimeVO;
+        }).collect(Collectors.toList());
+        vo.setWorkTimeList(workTimeVOList);
+        return vo;
     }
 
 }

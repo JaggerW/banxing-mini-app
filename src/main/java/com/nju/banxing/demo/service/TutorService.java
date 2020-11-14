@@ -5,13 +5,17 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
+import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.vo.TutorDetailInfoVO;
 import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
+import com.nju.banxing.demo.vo.WorkTimeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -55,11 +60,7 @@ public class TutorService {
         tutorDO.setCreator(openid);
         tutorDO.setModifier(openid);
 
-        List<Map<String, Object>> maps = userMapper.selectMaps(
-                new QueryWrapper<UserDO>().lambda()
-                        .select(UserDO::getNickName)
-                        .eq(UserDO::getId, openid));
-        String nickName = (String) maps.get(0).get("nickName");
+        String nickName = userMapper.getNickNameById(openid);
         tutorDO.setNickName(nickName);
 
         return tutorMapper.insert(tutorDO) > 0;
@@ -71,12 +72,21 @@ public class TutorService {
      * @param openid
      * @return
      */
-    public int getStatus(String openid) {
+    public int getStatusById(String openid) {
         List<Map<String, Object>> maps = tutorMapper.selectMaps(
                 new QueryWrapper<TutorDO>().lambda()
                         .select(TutorDO::getStatus)
                         .eq(TutorDO::getId, openid));
         return (int) maps.get(0).get("status");
+    }
+
+    public String getWorkTimeById(String openid){
+        List<Map<String, Object>> maps = tutorMapper.selectMaps(
+                new QueryWrapper<TutorDO>().lambda()
+                        .select(TutorDO::getWorkTime)
+                        .eq(TutorDO::getId, openid));
+        System.out.println(maps);
+        return (String) maps.get(0).get("work_time");
     }
 
 
@@ -101,4 +111,9 @@ public class TutorService {
                                 .like(TutorDO::getCurrentProfession, keyword));
         return tutorMapper.selectPage(page, queryWrapper);
     }
+
+    public TutorDO getById(String tutorId){
+        return tutorMapper.selectById(tutorId);
+    }
+
 }
