@@ -51,7 +51,7 @@ public class HomeController {
             return tutorSimpleInfoVO;
         }).collect(Collectors.toList());
 
-        return PagedResult.success(voList,page.getCurrent(),page.getSize(),page.getTotal());
+        return PagedResult.success(voList,page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
     }
 
 }

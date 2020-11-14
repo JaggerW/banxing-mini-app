@@ -79,6 +79,15 @@ public class TutorService {
         return (int) maps.get(0).get("status");
     }
 
+
+    /**
+     * 查询
+     * @param type
+     * @param keyword
+     * @param pageIndex
+     * @param pageSize
+     * @return
+     */
     public IPage<TutorDO> getAll(Integer type, String keyword, Long pageIndex, Long pageSize) {
 
         Page<TutorDO> page = new Page<>(pageIndex, pageSize);
@@ -90,11 +99,6 @@ public class TutorService {
                                 .like(TutorDO::getKeyword, keyword).or()
                                 .like(TutorDO::getCurrentUniversity, keyword).or()
                                 .like(TutorDO::getCurrentProfession, keyword));
-        Page<TutorDO> selectPage = tutorMapper.selectPage(page, queryWrapper);
-        log.error("index:{}",selectPage.getCurrent());
-        log.error("size:{}",selectPage.getSize());
-        log.error("total:{}",selectPage.getTotal());
-        log.error("pages:{}",selectPage.getPages());
-        return selectPage;
+        return tutorMapper.selectPage(page, queryWrapper);
     }
 }

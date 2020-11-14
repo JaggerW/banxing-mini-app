@@ -21,7 +21,7 @@ public class PagedResult<T> extends BasePaged {
 
     private List<T> data;
 
-    private PagedResult(List<T> data, long index, long size, long total){
+    private PagedResult(List<T> data, long index, long size, long total, long pages){
         this.code = 0;
         this.msg = "success";
         this.data = data;
@@ -29,6 +29,7 @@ public class PagedResult<T> extends BasePaged {
         super.setPageSize(size);
         super.setTotal(total);
         super.setOffset(size * (index - 1));
+        super.setPages(pages);
     }
 
     private PagedResult(CodeMsg codeMsg){
@@ -37,8 +38,12 @@ public class PagedResult<T> extends BasePaged {
         data = null;
     }
 
-    public static <T> PagedResult<T> success(List<T> data, long index, long size, long total){
-        return new PagedResult<>(data, index, size, total);
+    public static <T> PagedResult<T> success(List<T> data, long index, long size){
+        return new PagedResult<>(data, index, size, 0, 0);
+    }
+
+    public static <T> PagedResult<T> success(List<T> data, long index, long size, long total, long pages){
+        return new PagedResult<>(data, index, size, total, pages);
     }
 
     public static <T> PagedResult<T> error(CodeMsg codeMsg){

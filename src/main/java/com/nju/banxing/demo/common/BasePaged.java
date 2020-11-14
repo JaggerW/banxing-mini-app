@@ -17,5 +17,6 @@ public class BasePaged implements Serializable {
     private Long pageSize = 20L;
     private Long offset;
     private Long total;
+    private Long pages;
 
 }
