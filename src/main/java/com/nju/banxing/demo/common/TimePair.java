@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Data
 public class TimePair implements Serializable {
     private static final long serialVersionUID = 3313171205318843026L;
-
+    private Integer key;
     private LocalTime startTime;
     private LocalTime endTime;
 

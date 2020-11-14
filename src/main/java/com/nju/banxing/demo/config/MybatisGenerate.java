@@ -28,7 +28,7 @@ public class MybatisGenerate {
         gc.setFileOverride(false);
         gc.setIdType(IdType.ASSIGN_ID);
         gc.setDateType(DateType.ONLY_DATE);
-        gc.setEntityName("%sEntity");
+        gc.setEntityName("%sDO");
         gc.setMapperName("%sMapper");
         gc.setXmlName("%sMapper");
         gc.setServiceName("%sService");
@@ -53,7 +53,7 @@ public class MybatisGenerate {
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();
-        sc.setInclude("tutor","user");
+        sc.setInclude("comment");
         sc.setNaming(NamingStrategy.underline_to_camel);
         sc.setColumnNaming(NamingStrategy.underline_to_camel);
         sc.setEntityLombokModel(true);
