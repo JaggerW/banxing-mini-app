@@ -82,15 +82,26 @@ public class OrderController {
             WorkTimeVO workTimeVO = new WorkTimeVO();
             int day = dateTime.getDayOfWeek().getValue();
             TimePair timePair = maps.get(day);
-            // TODO 判断空，但正常都有的
-            boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
+            // 判断空，但正常都有的
+            if(ObjectUtils.isEmpty(timePair)){
+                continue;
+            }
+
+            LocalTime startTime = timePair.getStartTime();
+            LocalTime endTime = timePair.getEndTime();
+
+            // 判断是否不可预约
+            boolean b = DateUtil.equalZero(startTime, endTime);
             if(!b){
                 workTimeVO.setReserveFlag(true);
-                workTimeVO.setStartTime(timePair.getStartTime());
-                workTimeVO.setEndTime(timePair.getEndTime());
+                workTimeVO.setStartTime(startTime);
+                workTimeVO.setEndTime(endTime);
+                workTimeVO.setStartTimeSecondOfDay(DateUtil.getSecond(startTime));
+                workTimeVO.setEndTimeSecondOfDay(DateUtil.getSecond(endTime));
                 workTimeVO.setKey(timePair.getKey());
+                workTimeVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime));
                 workTimeVO.setDate(dateTime);
-                workTimeVO.setDateStr(dateTime.format(DateUtil.cnMonthDay));
+                workTimeVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));
                 list.add(workTimeVO);
             }
         }
@@ -124,13 +135,16 @@ public class OrderController {
                 break;
             }
         }
-        reserveVO.setDayOfWeek(day);
         reserveVO.setStartTime(startTime);
-        reserveVO.setStartTimeStr(startTime.format(DateUtil.enHourMinute));
+        reserveVO.setStartTimeSecondOfDay(DateUtil.getSecond(startTime));
 
         LocalDateTime dateTime = DateUtil.getNextDayOfWeek(day);
         reserveVO.setDate(dateTime);
-        reserveVO.setDateStr(dateTime.format(DateUtil.cnMonthDay));
+        reserveVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime));
+
+        reserveVO.setKey(day);
+        reserveVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));
+
         return reserveVO;
     }
 }

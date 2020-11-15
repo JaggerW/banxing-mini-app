@@ -3,7 +3,9 @@ package com.nju.banxing.demo.exception;
 import com.nju.banxing.demo.common.SingleResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,7 +34,14 @@ public class GlobalExceptionHandle {
             ObjectError error = errors.get(0);
             String msg = error.getDefaultMessage();
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs(msg));
-        }else {
+        }else if(e instanceof MethodArgumentNotValidException){
+            MethodArgumentNotValidException ex = (MethodArgumentNotValidException) e;
+            BindingResult bindingResult = ex.getBindingResult();
+            List<ObjectError> allErrors = bindingResult.getAllErrors();
+            ObjectError objectError = allErrors.get(0);
+            String defaultMessage = objectError.getDefaultMessage();
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs(defaultMessage));
+        } else {
             return SingleResult.error(CodeMsg.SERVER_ERROR);
         }
     }

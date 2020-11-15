@@ -30,6 +30,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private UserDOArgumentResolver userDOArgumentResolver;
 
+    @Autowired
+    private OpenIdArgumentResolver openIdArgumentResolver;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(securityInterceptor).addPathPatterns("/**");
@@ -39,6 +42,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(userTokenArgumentResolver);
         resolvers.add(userDOArgumentResolver);
+        resolvers.add(openIdArgumentResolver);
     }
 
     @Override

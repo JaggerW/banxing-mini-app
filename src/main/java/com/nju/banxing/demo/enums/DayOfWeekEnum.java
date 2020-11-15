@@ -11,13 +11,13 @@ import java.io.Serializable;
  */
 public enum DayOfWeekEnum {
 
-    MONDAY(1,"星期一"),
-    TUESDAY(2,"星期二"),
-    WEDNESDAY(3,"星期三"),
-    THURSDAY(4,"星期四"),
-    FRIDAY(5,"星期五"),
-    SATURDAY(6,"星期六"),
-    SUNDAY(7,"星期天");
+    MONDAY(1,"周一"),
+    TUESDAY(2,"周二"),
+    WEDNESDAY(3,"周三"),
+    THURSDAY(4,"周四"),
+    FRIDAY(5,"周五"),
+    SATURDAY(6,"周六"),
+    SUNDAY(7,"周天");
 
 
     private Integer code;

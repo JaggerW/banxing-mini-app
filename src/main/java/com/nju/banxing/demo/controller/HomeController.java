@@ -8,6 +8,7 @@ import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.TutorDO;
+import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.request.CommentListQuery;
 import com.nju.banxing.demo.request.TutorListQuery;
@@ -28,7 +29,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.swing.*;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -102,10 +106,15 @@ public class HomeController {
         List<TimePair> timePairList = JSON.parseArray(workTime, TimePair.class);
         List<WorkTimeVO> workTimeVOList = timePairList.stream().map(timePair -> {
             WorkTimeVO workTimeVO = new WorkTimeVO();
+            LocalTime startTime = timePair.getStartTime();
+            LocalTime endTime = timePair.getEndTime();
             workTimeVO.setKey(timePair.getKey());
-            workTimeVO.setStartTime(timePair.getStartTime());
-            workTimeVO.setEndTime(timePair.getEndTime());
-            boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
+            workTimeVO.setStartTime(startTime);
+            workTimeVO.setEndTime(endTime);
+            workTimeVO.setStartTimeSecondOfDay(DateUtil.getSecond(startTime));
+            workTimeVO.setEndTimeSecondOfDay(DateUtil.getSecond(endTime));
+            workTimeVO.setDayOfWeek(Objects.requireNonNull(DayOfWeekEnum.getEnumByCode(timePair.getKey())).getDesc());
+            boolean b = DateUtil.equalZero(startTime, endTime);
             workTimeVO.setReserveFlag(!b);
             return workTimeVO;
         }).collect(Collectors.toList());

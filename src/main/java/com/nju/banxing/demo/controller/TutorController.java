@@ -42,6 +42,7 @@ public class TutorController {
     @MethodLog("申请注册导师")
     public SingleResult<Boolean> register(String openid,
                                           @Validated @RequestBody TutorRegisterRequest request){
+        log.error("=======openid:{}",openid);
         boolean flag = tutorService.register(openid,request);
         if(flag){
             // todo 通知管理员审核

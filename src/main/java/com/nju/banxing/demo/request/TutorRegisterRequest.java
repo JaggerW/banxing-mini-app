@@ -3,6 +3,7 @@ package com.nju.banxing.demo.request;
 import com.nju.banxing.demo.common.TimePair;
 import com.sun.security.jgss.InquireSecContextPermission;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -56,7 +57,7 @@ public class TutorRegisterRequest implements Serializable {
     @NotNull(message = "复试排名不能为空")
     private Integer secondTotal;
 
-    @Min(value = 100, message = "自我介绍至少需要100字以上")
+    @Length(min = 100, message = "自我介绍至少需要100字以上")
     private String introduction;
 
     // 证明材料url路径
