@@ -14,6 +14,7 @@ import com.nju.banxing.demo.request.CommentListQuery;
 import com.nju.banxing.demo.request.TutorListQuery;
 import com.nju.banxing.demo.service.CommentService;
 import com.nju.banxing.demo.service.TutorService;
+import com.nju.banxing.demo.service.UserService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.vo.CommentVO;
 import com.nju.banxing.demo.vo.TutorDetailInfoVO;
@@ -51,6 +52,9 @@ public class HomeController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private UserService userService;
 
 
     @GetMapping("/tutor_list")
@@ -94,8 +98,16 @@ public class HomeController {
             type = 1;
         }
 
-        IPage<CommentVO> page = commentService.getAll(type, query.getTutorId(), query.getPageIndex(), query.getPageSize());
-        return PagedResult.success(page.getRecords(),page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
+        IPage<CommentDO> page = commentService.getAll(type, query.getTutorId(), query.getPageIndex(), query.getPageSize());
+        List<CommentVO> list = page.getRecords().stream().map(commentDO -> {
+            CommentVO commentVO = new CommentVO();
+            BeanUtils.copyProperties(commentDO, commentVO);
+            commentVO.setNickName(userService.getNickNameById(commentDO.getUserId()));
+            commentVO.setCommentTimeStamp(DateUtil.toTimeStamp(commentDO.getCommentTime()));
+            return commentVO;
+        }).collect(Collectors.toList());
+
+        return PagedResult.success(list,page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
     }
 
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){

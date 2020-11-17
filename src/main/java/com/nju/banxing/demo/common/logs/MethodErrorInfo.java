@@ -18,5 +18,5 @@ public class MethodErrorInfo implements Serializable {
     private String httpMethod;
     private String classMethod;
     private Object requestParams;
-    private RuntimeException exception;
+    private String exceptionMsg;
 }

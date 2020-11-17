@@ -80,6 +80,11 @@ public class TutorService {
         return (int) maps.get(0).get("status");
     }
 
+    /**
+     * 获取工作时间列表
+     * @param openid
+     * @return
+     */
     public String getWorkTimeById(String openid){
         List<Map<String, Object>> maps = tutorMapper.selectMaps(
                 new QueryWrapper<TutorDO>().lambda()

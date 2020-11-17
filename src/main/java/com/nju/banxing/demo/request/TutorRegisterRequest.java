@@ -39,22 +39,17 @@ public class TutorRegisterRequest implements Serializable {
     @NotNull(message = "请填写咨询费用")
     private BigDecimal consultationCost;
 
-    @NotNull(message = "初试分数不能为空")
+    // 若保研则可以为空
     private Float firstScore;
 
-    @NotNull(message = "复试分数不能为空")
     private Float secondScore;
 
-    @NotNull(message = "初试排名不能为空")
     private Integer firstRank;
 
-    @NotNull(message = "初试排名不能为空")
     private Integer firstTotal;
 
-    @NotNull(message = "复试排名不能为空")
     private Integer secondRank;
 
-    @NotNull(message = "复试排名不能为空")
     private Integer secondTotal;
 
     @Length(min = 100, message = "自我介绍至少需要100字以上")

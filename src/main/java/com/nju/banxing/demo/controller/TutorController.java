@@ -4,7 +4,9 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
 import com.nju.banxing.demo.service.AliyunService;
 import com.nju.banxing.demo.service.TutorService;
@@ -19,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 /**
@@ -43,6 +46,11 @@ public class TutorController {
     public SingleResult<Boolean> register(String openid,
                                           @Validated @RequestBody TutorRegisterRequest request){
         log.error("=======openid:{}",openid);
+        Integer consultationType = request.getConsultationType();
+        if(ConsultationTypeEnum.KAO_YAN.getCode().equals(consultationType)){
+            checkParam(request);
+        }
+
         boolean flag = tutorService.register(openid,request);
         if(flag){
             // todo 通知管理员审核
@@ -64,7 +72,10 @@ public class TutorController {
 
         String originalFilename = file.getOriginalFilename();
         String extension = "." + FilenameUtils.getExtension(originalFilename);
-        String fileName = UUIDUtil.getFileName();
+        if(!"PNG".equals(extension.toUpperCase()) && !"JPG".equals(extension.toUpperCase()) && !"JPEG".equals(extension.toUpperCase())){
+            return SingleResult.error(CodeMsg.ERROR_EXTENSION);
+        }
+        String fileName = UUIDUtil.getImageFileName();
         String realName = fileName+extension;
 
         try {
@@ -73,6 +84,27 @@ public class TutorController {
         } catch (Exception e) {
             e.printStackTrace();
             return SingleResult.error(CodeMsg.FAIL_UPLOAD);
+        }
+    }
+
+    private void checkParam(TutorRegisterRequest request){
+        if(null == request.getFirstScore()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试成绩不能为空"));
+        }
+        if(null == request.getFirstRank() || null == request.getFirstTotal()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能为空"));
+        }
+        if(request.getFirstRank() > request.getFirstTotal()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能大于初试总人数"));
+        }
+        if(null == request.getSecondScore()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试成绩不能为空"));
+        }
+        if(null == request.getSecondRank() || null == request.getSecondTotal()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能为空"));
+        }
+        if(request.getSecondRank() > request.getSecondTotal()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能大于复试总人数"));
         }
     }
 

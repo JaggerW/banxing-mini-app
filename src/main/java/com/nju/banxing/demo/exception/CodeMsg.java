@@ -39,6 +39,7 @@ public class CodeMsg {
 
     // 阿里云
     public static final CodeMsg SMS_ERROR = new CodeMsg(300,"短信发送失败");
+    public static final CodeMsg ERROR_EXTENSION = new CodeMsg(301,"不支持该类型文件上传！");
 
     // 工具类
     public static final CodeMsg ERROR_DATE = new CodeMsg(400, "获取日期错误");

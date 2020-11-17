@@ -134,4 +134,8 @@ public class UserService {
         BeanUtils.copyProperties(userDO,vo);
         return vo;
     }
+
+    public String getNickNameById(String openid){
+        return userMapper.getNickNameById(openid);
+    }
 }

@@ -30,26 +30,10 @@ public class CommentService {
     @Autowired
     private UserMapper userMapper;
 
-    public IPage<CommentVO> getAll(Integer type, String tutorId, Long pageIndex, Long pageSize){
+    public IPage<CommentDO> getAll(Integer type, String tutorId, Long pageIndex, Long pageSize){
         Page<CommentDO> page = new Page<>(pageIndex,pageSize);
-        Page<CommentDO> selectPage = commentMapper.selectPage(page, new QueryWrapper<CommentDO>().lambda()
+        return commentMapper.selectPage(page, new QueryWrapper<CommentDO>().lambda()
                 .eq(CommentDO::getId, tutorId)
                 .eq(CommentDO::getConsultationType, type));
-        Page<CommentVO> commentVOPage = new Page<>();
-
-        List<CommentVO> list = selectPage.getRecords().stream().map(commentDO -> {
-            CommentVO commentVO = new CommentVO();
-            BeanUtils.copyProperties(commentDO, commentVO);
-            String nickName = userMapper.getNickNameById(commentDO.getUserId());
-            commentVO.setNickName(nickName);
-            return commentVO;
-        }).collect(Collectors.toList());
-
-        commentVOPage.setTotal(selectPage.getTotal());
-        commentVOPage.setCurrent(selectPage.getCurrent());
-        commentVOPage.setSize(selectPage.getSize());
-        commentVOPage.setPages(selectPage.getPages());
-        commentVOPage.setRecords(list);
-        return commentVOPage;
     }
 }

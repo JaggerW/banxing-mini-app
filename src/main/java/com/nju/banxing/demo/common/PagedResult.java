@@ -28,7 +28,7 @@ public class PagedResult<T> extends BasePaged {
         super.setPageIndex(index);
         super.setPageSize(size);
         super.setTotal(total);
-        super.setOffset(size * (index - 1));
+        super.setOffset(index * data.size());
         super.setPages(pages);
     }
 

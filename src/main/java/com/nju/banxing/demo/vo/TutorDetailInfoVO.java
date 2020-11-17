@@ -16,6 +16,5 @@ import java.util.List;
 public class TutorDetailInfoVO extends TutorSimpleInfoVO {
     private static final long serialVersionUID = -5312148173157029745L;
 
-    private BigDecimal consultationCost;
     private List<WorkTimeVO> workTimeList;
 }

@@ -70,8 +70,13 @@ public class UUIDUtil {
         return "DD" + timeStr + getVerCode();
     }
 
-    public static String getFileName(){
+    public static String getImageFileName(){
         long timeStr = System.currentTimeMillis();
         return "image_" + timeStr + getVerCode();
+    }
+
+    public static String getPdfFileName(){
+        long timeStr = System.currentTimeMillis();
+        return "pdf_" + timeStr + getVerCode();
     }
 }
