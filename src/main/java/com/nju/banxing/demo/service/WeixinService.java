@@ -5,6 +5,12 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
+import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
+import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
+import com.github.binarywang.wxpay.exception.WxPayException;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
@@ -123,6 +129,17 @@ public class WeixinService {
         return map.entrySet().stream().map(
                 m -> new WxMaSubscribeMessage.Data(m.getKey(),m.getValue())
         ).collect(Collectors.toList());
+    }
+
+    /**
+     * 微信支付统一下单
+     * @throws WxPayException
+     */
+    public void createPayOrder() throws WxPayException {
+        WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
+        WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
+        WxPayUnifiedOrderResult result = wxPayService.createOrder(request);
+
     }
 
 

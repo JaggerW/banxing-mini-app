@@ -147,6 +147,13 @@
             <version>3.9.0</version>
         </dependency>
 
+        <!-- weixin-pay -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-pay</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+
         <!-- aliyun -->
         <dependency>
             <groupId>com.aliyun</groupId>

@@ -1,17 +1,21 @@
 package com.nju.banxing.demo.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.UserRegisterRequest;
+import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.vo.UserInfoVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 
 /**
@@ -133,6 +137,25 @@ public class UserService {
         UserInfoVO vo = new UserInfoVO();
         BeanUtils.copyProperties(userDO,vo);
         return vo;
+    }
+
+    public boolean updateUserInfo(String openid, UserRegisterRequest registerRequest){
+        // 设置咨询类型，可多选
+        int consultationType = 0;
+        for (int type : registerRequest.getConsultationTypeList()) {
+            consultationType |= type;
+        }
+        int update = userMapper.update(null,
+                new UpdateWrapper<UserDO>().lambda()
+                        .eq(UserDO::getId, openid)
+                        .set(UserDO::getNickName, registerRequest.getNickName())
+                        .set(UserDO::getEmail, registerRequest.getEmail())
+                        .set(UserDO::getMobile, registerRequest.getMobile())
+                        .set(UserDO::getConsultationType, consultationType)
+                        .set(UserDO::getModifyTime, DateUtil.now())
+                        .set(UserDO::getModifier,openid));
+
+        return update>0;
     }
 
     public String getNickNameById(String openid){

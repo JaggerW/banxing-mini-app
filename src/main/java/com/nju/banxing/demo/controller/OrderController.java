@@ -14,7 +14,10 @@ import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
+import com.nju.banxing.demo.mw.redis.OrderRedisKeyPrefix;
+import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.service.AliyunService;
+import com.nju.banxing.demo.service.RedisService;
 import com.nju.banxing.demo.service.TutorService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
@@ -29,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -51,6 +56,9 @@ public class OrderController {
 
     @Autowired
     private AliyunService aliyunService;
+
+    @Autowired
+    private RedisService redisService;
 
     @GetMapping("to_reserve")
     @MethodLog("打开预约界面")
@@ -118,15 +126,32 @@ public class OrderController {
     }
 
     // TODO 下单，付款技术方案
-//
-//    @PostMapping("create")
-//    @MethodLog("用户下单")
-//    public SingleResult<Boolean> createOrder(){
-//
-//    }
+
+    @PostMapping("create")
+    @MethodLog("用户下单")
+    public SingleResult<Boolean> createOrder(String openid, OrderCreateRequest request){
+        if(ObjectUtils.isEmpty(request)) {
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请求体为空！"));
+        }
+
+        // 订单判重
+        Boolean success = redisService.setnx(OrderRedisKeyPrefix.dupKey, request.getDupKey(),request.getDupKey());
+        if(!success){
+            return SingleResult.error(CodeMsg.DUP_ORDER);
+        }
+
+        // 参数校验
+        checkParam(request);
+
+        // 生成订单号
+        String orderCode = UUIDUtil.getOrderCode();
+
+
+        return null;
+    }
 
     @PostMapping("/upload_pdf")
-    @MethodLog("上传审核文件")
+    @MethodLog("上传简历文件")
     public SingleResult<String> upload (@RequestBody MultipartFile file){
 
         if(ObjectUtils.isEmpty(file) || file.isEmpty()){
@@ -186,4 +211,35 @@ public class OrderController {
 
         return reserveVO;
     }
+
+    private void checkParam(OrderCreateRequest request){
+        LocalTime calEndTime = request.getReserveStartTime().plusMinutes(request.getConsultationTime());
+        if(calEndTime.equals(request.getReserveEndTime())){
+            deleteRedis(request.getDupKey());
+            throw new GlobalException(CodeMsg.ERROR_RESERVE_TIME);
+        }
+        BigDecimal calTotalCost = request.getConsultationCost().multiply(new BigDecimal(request.getConsultationTime()));
+        if(calTotalCost.equals(request.getTotalCost())){
+            deleteRedis(request.getDupKey());
+            throw new GlobalException(CodeMsg.ERROR_RESERVE_COST);
+        }
+        String tutorId = request.getTutorId();
+        String workTimeById = tutorService.getWorkTimeById(tutorId);
+        List<WorkTimeVO> workTimeVOS = JSON.parseArray(workTimeById, WorkTimeVO.class);
+        for(WorkTimeVO workTime : workTimeVOS){
+            if(workTime.getKey().equals(request.getDayKey())){
+                boolean included = DateUtil.isIncluded(request.getReserveStartTime(), request.getReserveEndTime(), workTime.getStartTime(), workTime.getEndTime());
+                if(!included){
+                    deleteRedis(request.getDupKey());
+                    throw new GlobalException(CodeMsg.OUT_OF_TIME_RANGE);
+                }
+                break;
+            }
+        }
+    }
+
+    private void deleteRedis(String dupKey){
+        redisService.delete(OrderRedisKeyPrefix.dupKey,dupKey);
+    }
+
 }

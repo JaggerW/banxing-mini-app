@@ -6,10 +6,7 @@ import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -62,6 +59,10 @@ public class DateUtil {
         return time.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
+    public static LocalDate toLocalDate(long timeStamp){
+        return Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.of("+8")).toLocalDate();
+    }
+
     public static int getSecond(LocalTime time) {
         return time.toSecondOfDay();
     }
@@ -89,21 +90,21 @@ public class DateUtil {
     /**
      * 判断是否在时间范围内
      *
-     * @param targetTime
+     * @param sourceTime
      * @param rangeStart
      * @param rangeEnd
      * @return
      */
-    public static boolean isIncluded(LocalDateTime targetTime,
-                                     LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        return isIncluded(targetTime, targetTime, rangeStart, rangeEnd);
+    public static boolean isIncluded(LocalTime sourceTime,
+                                     LocalTime rangeStart, LocalTime rangeEnd) {
+        return isIncluded(sourceTime, sourceTime, rangeStart, rangeEnd);
     }
 
-    public static boolean isIncluded(LocalDateTime targetStart, LocalDateTime targetEnd,
-                                     LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        return (targetStart.isBefore(targetEnd) || targetStart.isEqual(targetEnd))
-                && targetStart.isAfter(rangeStart)
-                && targetEnd.isBefore(rangeEnd);
+    public static boolean isIncluded(LocalTime sourceStart, LocalTime sourceEnd,
+                                     LocalTime rangeStart, LocalTime rangeEnd) {
+        return (sourceStart.isBefore(sourceEnd) || sourceStart.equals(sourceEnd))
+                && sourceStart.isAfter(rangeStart)
+                && sourceEnd.isBefore(rangeEnd);
     }
 
     /**

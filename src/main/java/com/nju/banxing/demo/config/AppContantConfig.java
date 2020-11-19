@@ -31,6 +31,7 @@ public class AppContantConfig implements Serializable {
     // redis expireTime
     public final static Integer USER_TOKEN_EXPIRE_TIME = 24*3600;
     public final static Integer VER_CODE_EXPIRE_TIME = 300;
+    public final static Integer DUP_KEY_EXPIRE_TIME = 1800;
 
     // 用户token放入url传输中的参数名称
     public static final String USER_TOKEN_HEADER_NAME = "userToken";

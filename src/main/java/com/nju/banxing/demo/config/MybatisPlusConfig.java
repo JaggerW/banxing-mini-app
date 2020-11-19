@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.dialects.IDialect;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ public class MybatisPlusConfig {
     public MybatisPlusInterceptor mybatisPlusInterceptor(){
         MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
         mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        mybatisPlusInterceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         return mybatisPlusInterceptor;
     }
 

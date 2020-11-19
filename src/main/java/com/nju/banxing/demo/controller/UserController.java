@@ -174,7 +174,7 @@ public class UserController {
     }
 
     @MethodLog("获取当前用户信息")
-    @GetMapping("get_info")
+    @GetMapping("/get_info")
     public SingleResult<UserInfoVO> getUserInfo(String openid){
         UserInfoVO userInfo = userService.getUserInfo(openid);
         if(ObjectUtils.isEmpty(userInfo)){
@@ -184,6 +184,22 @@ public class UserController {
         }
     }
 
+    @PostMapping("update_info")
+    @MethodLog("更新用户信息")
+    public SingleResult<Boolean> updateUserInfo(String openid, @Validated @RequestBody UserRegisterRequest registerRequest){
+
+        // 校验验证码
+        if (!checkVerCode(openid, registerRequest.getMobile(), registerRequest.getVerCode())) {
+            return SingleResult.error(CodeMsg.ERROR_VER_CODE);
+        }
+
+        boolean b = userService.updateUserInfo(openid, registerRequest);
+        if(b){
+            return SingleResult.success(true);
+        }else {
+            return SingleResult.error(CodeMsg.FAIL_UPDATE);
+        }
+    }
 
 
     /**

@@ -31,8 +31,6 @@ public class MybatisGenerate {
         gc.setEntityName("%sDO");
         gc.setMapperName("%sMapper");
         gc.setXmlName("%sMapper");
-        gc.setServiceName("%sService");
-        gc.setServiceImplName("%sServiceImpl");
         gc.setControllerName("%sController");
         mpg.setGlobalConfig(gc);
 
@@ -53,7 +51,7 @@ public class MybatisGenerate {
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();
-        sc.setInclude("comment");
+        sc.setInclude("coin","coin_log","order","order_log");
         sc.setNaming(NamingStrategy.underline_to_camel);
         sc.setColumnNaming(NamingStrategy.underline_to_camel);
         sc.setEntityLombokModel(true);

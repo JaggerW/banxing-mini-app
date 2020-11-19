@@ -90,6 +90,36 @@ public class RedisService {
     }
 
     /**
+     * setnx + setex 注意！非原子操作
+     *
+     * @param prefix
+     * @param key
+     * @param value
+     * @return
+     */
+    public <T> Boolean setnx(RedisKeyPrefix prefix, String key, T value) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            String str = JSON.toJSONString(value);
+            if (StringUtils.isEmpty(str)) {
+                return false;
+            }
+            String realKey = prefix.getPrefix() + key;
+            int seconds = prefix.getExpireSeconds();
+            Long res = jedis.setnx(realKey, str);
+            if(seconds > 0 && res > 0){
+                jedis.expire(realKey,seconds);
+                return true;
+            }else {
+                return res > 0;
+            }
+        } finally {
+            return2Pool(jedis);
+        }
+    }
+
+    /**
      * 删除该KEY
      * @param prefix
      * @param key

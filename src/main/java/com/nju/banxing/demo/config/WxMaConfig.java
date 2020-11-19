@@ -19,4 +19,8 @@ public class WxMaConfig implements Serializable {
 
     private String appid;
     private String secret;
+
+    private String mchid;
+    private String mchkey;
+    private String keypath;
 }
