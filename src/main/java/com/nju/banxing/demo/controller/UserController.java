@@ -54,15 +54,10 @@ public class UserController {
     private AliyunService aliyunService;
 
 
-    @PostMapping(value = "/test")
+    @GetMapping(value = "/test")
     @MethodLog("测试")
-    public SingleResult<TestDO> test(@RequestBody TestRequest request, String token) {
-        TestDO testDO = new TestDO();
-        testDO.setName(request.getName());
-        testDO.setToken(token);
-        testDO.setId(request.getId());
-        testDO.setList(request.getList());
-        return SingleResult.success(testDO);
+    public SingleResult<String> test() {
+        return SingleResult.success("hello world");
     }
 
     /**

@@ -39,7 +39,7 @@ public class AppContantConfig implements Serializable {
     public static final String OPEN_ID_PARAM_NAME = "openid";
 
     // 不需要校验用户token的路径
-    public static final String[] IGNORE_TOKEN_PATH = {"/user/login","/test","/upload_image","/home/list"};
+    public static final String[] IGNORE_TOKEN_PATH = {"/user/login","/test","/home/tutor_list","/home/comment_list","/home/tutor_detail"};
 
 
 }

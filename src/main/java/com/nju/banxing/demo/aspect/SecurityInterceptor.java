@@ -28,22 +28,22 @@ public class SecurityInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // TODO for dev
-        return true;
+//        // TODO for dev
+//        return true;
 
 
-//        String path = request.getServletPath();
-//        if (ignore(path)) {
-//            return true;
-//        }
-//
-//        String token = request.getHeader(AppContantConfig.USER_TOKEN_HEADER_NAME);
-//        if(userService.existToken(token)){
-//            log.debug(token);
-//            return true;
-//        }else {
-//            throw new GlobalException(CodeMsg.NULL_TOKEN);
-//        }
+        String path = request.getServletPath();
+        if (ignore(path)) {
+            return true;
+        }
+
+        String token = request.getHeader(AppContantConfig.USER_TOKEN_HEADER_NAME);
+        if(userService.existToken(token)){
+            log.debug(token);
+            return true;
+        }else {
+            throw new GlobalException(CodeMsg.NULL_TOKEN);
+        }
     }
 
     @Override
