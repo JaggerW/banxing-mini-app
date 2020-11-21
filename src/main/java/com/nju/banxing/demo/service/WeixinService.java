@@ -6,6 +6,7 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
+import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -135,10 +137,19 @@ public class WeixinService {
      * 微信支付统一下单
      * @throws WxPayException
      */
-    public void createPayOrder() throws WxPayException {
+    public WxPayUnifiedOrderResult createPayOrder() throws WxPayException {
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
         WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
-        WxPayUnifiedOrderResult result = wxPayService.createOrder(request);
+
+        request.setBody("主题");
+        request.setOutTradeNo("订单号");
+        request.setTotalFee(BaseWxPayRequest.yuanToFen("1000"));//元转成分
+        request.setOpenid("openId");
+        request.setSpbillCreateIp("userIp");
+        request.setTimeStart("yyyyMMddHHmmss");
+        request.setTimeExpire("yyyyMMddHHmmss");
+
+        return wxPayService.createOrder(request);
 
     }
 
