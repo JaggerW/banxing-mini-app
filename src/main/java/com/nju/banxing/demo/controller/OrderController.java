@@ -2,6 +2,11 @@ package com.nju.banxing.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.api.R;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
+import com.github.binarywang.wxpay.exception.WxPayException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.annotation.MethodLog;
@@ -16,10 +21,10 @@ import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.mw.redis.OrderRedisKeyPrefix;
 import com.nju.banxing.demo.request.OrderCreateRequest;
-import com.nju.banxing.demo.service.AliyunService;
-import com.nju.banxing.demo.service.RedisService;
-import com.nju.banxing.demo.service.TutorService;
+import com.nju.banxing.demo.request.WxPayOrderRequest;
+import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.util.NetworkUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.ReserveVO;
 import com.nju.banxing.demo.vo.TutorDetailInfoVO;
@@ -32,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -59,6 +65,12 @@ public class OrderController {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private WeixinService weixinService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("to_reserve")
     @MethodLog("打开预约界面")
@@ -125,11 +137,12 @@ public class OrderController {
         return PagedResult.success(list,1,list.size(),list.size(),1);
     }
 
-    // TODO 下单，付款技术方案
 
     @PostMapping("create")
     @MethodLog("用户下单")
-    public SingleResult<Boolean> createOrder(String openid, OrderCreateRequest request){
+    public SingleResult<WxPayMpOrderResult> createOrder(String openid,
+                                                        OrderCreateRequest request,
+                                                        HttpServletRequest httpServletRequest){
         if(ObjectUtils.isEmpty(request)) {
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请求体为空！"));
         }
@@ -146,8 +159,57 @@ public class OrderController {
         // 生成订单号
         String orderCode = UUIDUtil.getOrderCode();
 
+        try {
+            // 发起微信支付
+            WxPayOrderRequest orderRequest = buildOrderRequest(openid,request,orderCode ,httpServletRequest);
+            WxPayMpOrderResult payOrder = weixinService.createPayOrder(orderRequest);
 
-        return null;
+            // 订单初始化
+            boolean b = orderService.initOrder(openid, request);
+            if(b){
+                return SingleResult.success(payOrder);
+            }else {
+                log.error("数据库初始化订单失败");
+                return SingleResult.error(CodeMsg.ERROR_ORDER);
+            }
+        } catch (WxPayException e) {
+            e.printStackTrace();
+            log.error("微信支付统一下单接口调用异常");
+            deleteRedis(request.getDupKey());
+            throw new GlobalException(CodeMsg.FAIL_PAY);
+        }
+    }
+
+    @PostMapping("/notify")
+    @MethodLog("微信支付回调方法")
+    public String parseOrderNotifyResult(@RequestBody String xmlData) {
+        try {
+            WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
+
+            // 支付成功
+            orderService.successPay();
+            return WxPayNotifyResponse.success("成功");
+        } catch (WxPayException e) {
+            e.printStackTrace();
+
+            // 支付失败
+            orderService.failPay();
+            return WxPayNotifyResponse.fail("微信支付参数解析异常");
+        } catch (GlobalException e){
+            log.error(e.getCodeMsg().getMsg());
+
+            // 支付失败
+            orderService.failPay();
+            return WxPayNotifyResponse.fail("微信支付服务端异常");
+        }
+    }
+
+    @GetMapping("/query_result")
+    @MethodLog("查询微信支付结果")
+    public SingleResult<Integer> queryPay(String openid,
+                                          @RequestParam(value = "orderCode") String orderCode){
+
+        return SingleResult.success(orderService.getStatusByIdAndCode(openid,orderCode));
     }
 
     @PostMapping("/upload_pdf")
@@ -174,7 +236,6 @@ public class OrderController {
             return SingleResult.error(CodeMsg.FAIL_UPLOAD);
         }
     }
-
 
     private ReserveVO buildReserveVO(TutorDO tutorDO, Integer day){
         ReserveVO reserveVO = new ReserveVO();
@@ -210,6 +271,20 @@ public class OrderController {
         reserveVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));
 
         return reserveVO;
+    }
+
+    private WxPayOrderRequest buildOrderRequest(String openid, OrderCreateRequest createRequest, String outTradeNo, HttpServletRequest httpServletRequest){
+        WxPayOrderRequest request = new WxPayOrderRequest();
+        request.setBody("预约支付测试");
+        request.setDetail("预约支付测试详情");
+        request.setIp(NetworkUtil.getIpAddress(httpServletRequest));
+        request.setNonceStr(UUIDUtil.getNonceStr());
+        request.setOpenid(openid);
+        request.setOutTradeNo(outTradeNo);
+        request.setTradeType("JSAPI");
+        request.setTotalTee(createRequest.getTotalCost().setScale(2,4).multiply(new BigDecimal(100)).intValue());
+        request.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/order/notify");
+        return request;
     }
 
     private void checkParam(OrderCreateRequest request){

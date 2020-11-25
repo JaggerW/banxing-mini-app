@@ -5,7 +5,9 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
@@ -18,6 +20,8 @@ import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.config.WxMaServiceFactory;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
+import com.nju.banxing.demo.request.WxPayOrderRequest;
+import com.nju.banxing.demo.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.ObjectUtils;
@@ -137,19 +141,50 @@ public class WeixinService {
      * 微信支付统一下单
      * @throws WxPayException
      */
-    public WxPayUnifiedOrderResult createPayOrder() throws WxPayException {
+    public WxPayMpOrderResult createPayOrder(WxPayOrderRequest orderRequest) throws WxPayException {
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
         WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
 
-        request.setBody("主题");
-        request.setOutTradeNo("订单号");
-        request.setTotalFee(BaseWxPayRequest.yuanToFen("1000"));//元转成分
-        request.setOpenid("openId");
-        request.setSpbillCreateIp("userIp");
-        request.setTimeStart("yyyyMMddHHmmss");
-        request.setTimeExpire("yyyyMMddHHmmss");
+        request.setOpenid(orderRequest.getOpenid());
+        request.setBody(orderRequest.getBody());
+        request.setDetail(orderRequest.getDetail());
+        request.setOutTradeNo(orderRequest.getOutTradeNo());
+        request.setTotalFee(orderRequest.getTotalTee());
+        request.setSpbillCreateIp(orderRequest.getIp());
+        request.setNonceStr(orderRequest.getNonceStr());
+        request.setNotifyUrl(orderRequest.getNotifyUrl());
+        request.setTradeType(orderRequest.getTradeType());
+        request.setTimeStart(DateUtil.now().format(DateUtil.wxPayFormatter));
+        request.setTimeExpire(DateUtil.now().plusMinutes(30).format(DateUtil.wxPayFormatter));
 
         return wxPayService.createOrder(request);
+
+    }
+
+    public WxPayOrderNotifyResult notifyOrderResult(String xml) throws WxPayException, GlobalException {
+        WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
+
+        WxPayOrderNotifyResult result = wxPayService.parseOrderNotifyResult(xml);
+
+        if(!result.getReturnMsg().isEmpty()){
+            log.error("=====微信支付回调失败：签名失败，格式校验错误！");
+            log.error(result.getReturnMsg());
+            throw new GlobalException(CodeMsg.FAIL_PAY);
+        }
+
+        if("FAIL".equals(result.getReturnCode())){
+            log.error("=====微信支付回调失败：通信异常=====");
+            throw new GlobalException(CodeMsg.FAIL_PAY);
+        }else {
+            if("FAIL".equals(result.getResultCode())){
+                log.error("=====微信支付失败！=====");
+                throw new GlobalException(CodeMsg.FAIL_PAY);
+            }else {
+                log.info("=====微信支付成功，商户订单号为：{}",result.getOutTradeNo());
+            }
+        }
+
+        return result;
 
     }
 

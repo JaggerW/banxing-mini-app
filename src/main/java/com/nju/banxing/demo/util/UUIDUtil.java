@@ -79,4 +79,8 @@ public class UUIDUtil {
         long timeStr = System.currentTimeMillis();
         return "pdf_" + timeStr + getVerCode();
     }
+
+    public static String getNonceStr(){
+        return System.currentTimeMillis() + getUserToken();
+    }
 }

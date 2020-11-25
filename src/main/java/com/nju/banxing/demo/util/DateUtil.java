@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +21,7 @@ public class DateUtil {
     public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static DateTimeFormatter cnMonthDay = DateTimeFormatter.ofPattern("MM月dd日");
     public static DateTimeFormatter enHourMinute = DateTimeFormatter.ofPattern("HH:mm");
+    public static DateTimeFormatter wxPayFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     /**
      * 获取当前时间

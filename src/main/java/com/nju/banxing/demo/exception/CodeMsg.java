@@ -45,6 +45,7 @@ public class CodeMsg {
     // 微信
     public static final CodeMsg WX_ERROR_CHECK_USER_INFO = new CodeMsg(200,"用户信息校验失败");
     public static final CodeMsg WX_ERROR_GET_USER_INFO = new CodeMsg(201,"用户信息获取失败");
+    public static final CodeMsg FAIL_PAY = new CodeMsg(202,"支付失败");
 
     // 阿里云
     public static final CodeMsg SMS_ERROR = new CodeMsg(300,"短信发送失败");
