@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
+import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.UserDO;
+import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.UserRegisterRequest;
@@ -14,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -28,6 +31,9 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private TutorMapper tutorMapper;
 
     @Autowired
     private RedisService redisService;
@@ -139,6 +145,7 @@ public class UserService {
         return vo;
     }
 
+    @Transactional
     public boolean updateUserInfo(String openid, UserRegisterRequest registerRequest){
         // 设置咨询类型，可多选
         int consultationType = 0;
@@ -154,6 +161,13 @@ public class UserService {
                         .set(UserDO::getConsultationType, consultationType)
                         .set(UserDO::getModifyTime, DateUtil.now())
                         .set(UserDO::getModifier,openid));
+
+        tutorMapper.update(null,
+                new UpdateWrapper<TutorDO>().lambda()
+                        .eq(TutorDO::getId, openid)
+                        .set(TutorDO::getNickName, registerRequest.getNickName())
+                        .set(TutorDO::getModifyTime, DateUtil.now())
+                        .set(TutorDO::getCreator, openid));
 
         return update>0;
     }
