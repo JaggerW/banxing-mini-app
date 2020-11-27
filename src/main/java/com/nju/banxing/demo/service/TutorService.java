@@ -5,17 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.domain.TutorDO;
-import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
-import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.enums.TutorApplyStatusEnum;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
-import com.nju.banxing.demo.util.DateUtil;
-import com.nju.banxing.demo.vo.TutorDetailInfoVO;
-import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
-import com.nju.banxing.demo.vo.WorkTimeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -24,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -107,7 +100,7 @@ public class TutorService {
 
         Page<TutorDO> page = new Page<>(pageIndex, pageSize);
         LambdaQueryWrapper<TutorDO> queryWrapper = new QueryWrapper<TutorDO>().lambda()
-                .eq(TutorDO::getStatus, TutorStatusEnum.VERIFY_PASS.getCode())
+                .eq(TutorDO::getStatus, TutorApplyStatusEnum.VERIFY_PASS.getCode())
                 .eq(TutorDO::getConsultationType, type)
                 .and(StringUtils.isNotEmpty(keyword),
                         qw -> qw.like(TutorDO::getNickName, keyword).or()

@@ -1,24 +1,19 @@
 package com.nju.banxing.demo.enums;
 
-import lombok.Getter;
-
 /**
  * @Author: jaggerw
- * @Description: 订单中导师回复状态
+ * @Description: 评论状态
  * @Date: 2020/11/27
  */
-@Getter
-public enum TutorStatusEnum {
-
-    TO_CONFIRM(0,"待确认"),
-    ACCEPTED(1,"已接受"),
-    REFUSED(2, "已拒绝"),
-    AUTO_REFUSED(3, "已自动拒绝");
+public enum CommentStatusEnum {
+    TO_COMMENT(0,"待评价"),
+    COMMENTED(1, "已评价"),
+    AUTO_COMMENTED(2,"已自动评价");
 
     private Integer code;
     private String desc;
 
-    TutorStatusEnum(int c, String d){
+    CommentStatusEnum(int c, String d){
         this.code = c;
         this.desc = d;
     }
@@ -31,12 +26,12 @@ public enum TutorStatusEnum {
         return desc;
     }
 
-    public TutorStatusEnum getEnumByCode(Integer code){
+    public CommentStatusEnum getEnumByCode(Integer code){
         if(null == code){
             return null;
         }
 
-        for(TutorStatusEnum statusEnum : values()){
+        for(CommentStatusEnum statusEnum : values()){
             if(code.equals(statusEnum.code)){
                 return statusEnum;
             }

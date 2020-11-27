@@ -1,11 +1,9 @@
 package com.nju.banxing.demo.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -15,8 +13,6 @@ import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.TutorDO;
-import com.nju.banxing.demo.enums.DayOfWeekEnum;
-import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.mw.redis.OrderRedisKeyPrefix;
@@ -27,7 +23,6 @@ import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.NetworkUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.ReserveVO;
-import com.nju.banxing.demo.vo.TutorDetailInfoVO;
 import com.nju.banxing.demo.vo.WorkTimeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -38,14 +33,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author: jaggerw
