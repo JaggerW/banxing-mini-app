@@ -3,6 +3,8 @@ package com.nju.banxing.demo.domain;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -51,7 +53,7 @@ public class CoinDO implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /**
      * 创建人openid
@@ -61,7 +63,7 @@ public class CoinDO implements Serializable {
     /**
      * 修改时间
      */
-    private Date modifyTime;
+    private LocalDateTime modifyTime;
 
     /**
      * 修改人openid

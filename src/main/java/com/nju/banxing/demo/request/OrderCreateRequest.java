@@ -46,7 +46,7 @@ public class OrderCreateRequest implements Serializable {
      * 咨询时长
      */
     @NotNull(message = "咨询时长不能为空")
-    private Long consultationTime;
+    private Integer consultationTime;
 
     /**
      * 咨询单价

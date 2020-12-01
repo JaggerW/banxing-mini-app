@@ -3,6 +3,10 @@ package com.nju.banxing.demo.domain;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -50,17 +54,17 @@ public class OrderDO implements Serializable {
     /**
      * 预约时间
      */
-    private Date reserveDate;
+    private LocalDate reserveDate;
 
     /**
      * 咨询开始时间
      */
-    private Date reserveStartTime;
+    private LocalTime reserveStartTime;
 
     /**
      * 咨询结束时间
      */
-    private Date reserveEndTime;
+    private LocalTime reserveEndTime;
 
     /**
      * 咨询费用单价（/min）
@@ -115,7 +119,6 @@ public class OrderDO implements Serializable {
     /**
      * 版本号
      */
-    @Version
     private Integer version;
 
     /**
@@ -131,7 +134,7 @@ public class OrderDO implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /**
      * 创建人openid
@@ -141,7 +144,7 @@ public class OrderDO implements Serializable {
     /**
      * 修改时间
      */
-    private Date modifyTime;
+    private LocalDateTime modifyTime;
 
     /**
      * 修改人openid

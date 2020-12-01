@@ -26,7 +26,7 @@ public enum CommentStatusEnum {
         return desc;
     }
 
-    public CommentStatusEnum getEnumByCode(Integer code){
+    public static CommentStatusEnum getEnumByCode(Integer code){
         if(null == code){
             return null;
         }

@@ -4,6 +4,9 @@ import com.nju.banxing.demo.domain.OrderDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 /**
  * <p>
  * 订单表 Mapper 接口
@@ -14,7 +17,9 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface OrderMapper extends BaseMapper<OrderDO> {
 
-    Integer getStatusByIdAndCode(@Param("openid") String openid, @Param("orderCode") String orderCode);
+    Integer getStatusByCode(@Param("orderCode") String orderCode);
 
+    Map<String, Integer> getStatusAndVersionByCode(@Param("orderCode") String orderCode);
 
+    BigDecimal getTotalCostByCode(@Param("orderCode") String orderCode);
 }

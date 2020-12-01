@@ -45,7 +45,9 @@ public class CodeMsg {
     // 微信
     public static final CodeMsg WX_ERROR_CHECK_USER_INFO = new CodeMsg(200,"用户信息校验失败");
     public static final CodeMsg WX_ERROR_GET_USER_INFO = new CodeMsg(201,"用户信息获取失败");
-    public static final CodeMsg FAIL_PAY = new CodeMsg(202,"支付失败");
+    public static final CodeMsg FAIL_PAY_ERROR_ORDER = new CodeMsg(202,"微信支付失败：统一下单异常");
+    public static final CodeMsg FAIL_PAY_ERROR_SIGN = new CodeMsg(203,"微信支付回调失败:签名校验异常");
+    public static final CodeMsg FAIL_PAY_ERROR_COM = new CodeMsg(204,"微信支付回调失败:通信异常");
 
     // 阿里云
     public static final CodeMsg SMS_ERROR = new CodeMsg(300,"短信发送失败");

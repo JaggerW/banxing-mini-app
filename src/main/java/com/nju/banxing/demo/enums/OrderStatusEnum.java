@@ -1,6 +1,5 @@
 package com.nju.banxing.demo.enums;
 
-import lombok.Getter;
 
 /**
  * @Author: jaggerw
@@ -10,19 +9,73 @@ import lombok.Getter;
 public enum OrderStatusEnum {
 
     // 预留状态，暂不使用
-    ORDER_INIT(10,"订单未支付"),
+    ORDER_INIT(10,"订单未支付"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return ORDER_TO_PAY;
+        }
+    },
 
     // 订单正常进行中状态
-    ORDER_TO_PAY(20,"订单付款中"),
-    ORDER_PAID(30,"订单已付款"),
-    TUTOR_ACCEPT(40,"导师已确认"),
-    ORDER_COMPLETE(50,"订单已完成"),
+    ORDER_TO_PAY(20,"订单付款中"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            if(successFlag){
+                return ORDER_PAID;
+            }else {
+                return ORDER_FAIL_PAY;
+            }
+        }
+    },
+    ORDER_PAID(30,"订单已付款"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            if(successFlag){
+                return TUTOR_ACCEPT;
+            }else {
+                return TUTOR_REFUSE;
+            }
+        }
+    },
+    TUTOR_ACCEPT(40,"导师已确认"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return ORDER_COMPLETE;
+        }
+    },
+    ORDER_COMPLETE(50,"订单已完成"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return ORDER_CLOSED;
+        }
+    },
 
     // 订单已结束状态
-    ORDER_CLOSED(100,"订单已关闭"),
-    ORDER_FAIL_PAY(130,"订单支付失败"),
-    TUTOR_REFUSE(140,"导师已拒绝"),
-    ORDER_REFUNDED(150,"订单已退款");
+    ORDER_CLOSED(100,"订单已关闭"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return null;
+        }
+    },
+    ORDER_FAIL_PAY(130,"订单支付失败"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return null;
+        }
+    },
+    TUTOR_REFUSE(140,"导师已拒绝"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return ORDER_REFUNDED;
+        }
+    },
+    ORDER_REFUNDED(150,"订单已退款"){
+        @Override
+        public OrderStatusEnum getNext(boolean successFlag) {
+            return null;
+        }
+    };
+
 
     private Integer code;
     private String desc;
@@ -40,7 +93,7 @@ public enum OrderStatusEnum {
         return desc;
     }
 
-    public OrderStatusEnum getEnumByCode(Integer code){
+    public static OrderStatusEnum getEnumByCode(Integer code){
         if(null == code){
             return null;
         }
@@ -52,4 +105,6 @@ public enum OrderStatusEnum {
         }
         return null;
     }
+
+    abstract public OrderStatusEnum getNext(boolean successFlag);
 }

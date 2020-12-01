@@ -31,7 +31,7 @@ public enum TutorStatusEnum {
         return desc;
     }
 
-    public TutorStatusEnum getEnumByCode(Integer code){
+    public static TutorStatusEnum getEnumByCode(Integer code){
         if(null == code){
             return null;
         }

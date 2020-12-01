@@ -161,30 +161,10 @@ public class WeixinService {
 
     }
 
-    public WxPayOrderNotifyResult notifyOrderResult(String xml) throws WxPayException, GlobalException {
+    public WxPayOrderNotifyResult notifyOrderResult(String xml) throws WxPayException {
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
 
-        WxPayOrderNotifyResult result = wxPayService.parseOrderNotifyResult(xml);
-
-        if(!result.getReturnMsg().isEmpty()){
-            log.error("=====微信支付回调失败：签名失败，格式校验错误！");
-            log.error(result.getReturnMsg());
-            throw new GlobalException(CodeMsg.FAIL_PAY);
-        }
-
-        if("FAIL".equals(result.getReturnCode())){
-            log.error("=====微信支付回调失败：通信异常=====");
-            throw new GlobalException(CodeMsg.FAIL_PAY);
-        }else {
-            if("FAIL".equals(result.getResultCode())){
-                log.error("=====微信支付失败！=====");
-                throw new GlobalException(CodeMsg.FAIL_PAY);
-            }else {
-                log.info("=====微信支付成功，商户订单号为：{}",result.getOutTradeNo());
-            }
-        }
-
-        return result;
+        return wxPayService.parseOrderNotifyResult(xml);
 
     }
 

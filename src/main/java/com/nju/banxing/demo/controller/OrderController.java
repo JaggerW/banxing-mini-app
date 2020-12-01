@@ -13,6 +13,7 @@ import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.TutorDO;
+import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.mw.redis.OrderRedisKeyPrefix;
@@ -20,6 +21,7 @@ import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.request.WxPayOrderRequest;
 import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.util.NetworkUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.ReserveVO;
@@ -157,7 +159,7 @@ public class OrderController {
             WxPayMpOrderResult payOrder = weixinService.createPayOrder(orderRequest);
 
             // 订单初始化
-            boolean b = orderService.initOrder(openid, request);
+            boolean b = orderService.initOrder(openid, orderCode, request);
             if(b){
                 return SingleResult.success(payOrder);
             }else {
@@ -168,7 +170,7 @@ public class OrderController {
             e.printStackTrace();
             log.error("微信支付统一下单接口调用异常");
             deleteRedis(request.getDupKey());
-            throw new GlobalException(CodeMsg.FAIL_PAY);
+            throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_ORDER);
         }
     }
 
@@ -177,31 +179,64 @@ public class OrderController {
     public String parseOrderNotifyResult(@RequestBody String xmlData) {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
+            checkPayResult(result);
 
-            // 支付成功
-            orderService.successPay();
+            // 判断是否已处理过
+            Map<String, Integer> map = orderService.getStatusAndVersionByCode(result.getOutTradeNo());
+            Integer status = map.get("status");
+            Integer version = map.get("version");
+            if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(status) ||
+                    OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status)){
+
+                if(OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status) && "FAIL".equals(result.getResultCode())){
+                    // 已处理过
+                    return WxPayNotifyResponse.success("成功");
+                }
+
+                // 验证金额是否一致防止伪造通知
+                boolean b = checkPayCost(result);
+                if(!b){
+                    log.error("支付金额校验错误");
+                    return WxPayNotifyResponse.fail("支付金额校验错误");
+                }
+
+                // 处理
+                if("SUCCESS".equals(result.getResultCode())){
+
+                    // 支付成功
+                    boolean successPay = orderService.successPay(result, status, version);
+                    // 乐观锁递归调用
+                    if(!successPay){
+                        return parseOrderNotifyResult(xmlData);
+                    }else {
+                        // 短信通知导师
+
+                    }
+                }else {
+
+                    // 支付失败
+                    boolean failPay = orderService.failPay(result, status, version);
+                    // 乐观锁递归调用
+                    if(!failPay){
+                        return parseOrderNotifyResult(xmlData);
+                    }
+                }
+            }
             return WxPayNotifyResponse.success("成功");
         } catch (WxPayException e) {
             e.printStackTrace();
-
-            // 支付失败
-            orderService.failPay();
-            return WxPayNotifyResponse.fail("微信支付参数解析异常");
+            return WxPayNotifyResponse.fail("参数校验错误");
         } catch (GlobalException e){
             log.error(e.getCodeMsg().getMsg());
-
-            // 支付失败
-            orderService.failPay();
-            return WxPayNotifyResponse.fail("微信支付服务端异常");
+            return WxPayNotifyResponse.fail("参数校验错误");
         }
     }
 
     @GetMapping("/query_result")
     @MethodLog("查询微信支付结果")
-    public SingleResult<Integer> queryPay(String openid,
-                                          @RequestParam(value = "orderCode") String orderCode){
+    public SingleResult<Integer> queryPay(@RequestParam(value = "orderCode") String orderCode){
 
-        return SingleResult.success(orderService.getStatusByIdAndCode(openid,orderCode));
+        return SingleResult.success(orderService.getStatusByCode(orderCode));
     }
 
     @PostMapping("/upload_pdf")
@@ -274,7 +309,7 @@ public class OrderController {
         request.setOpenid(openid);
         request.setOutTradeNo(outTradeNo);
         request.setTradeType("JSAPI");
-        request.setTotalTee(createRequest.getTotalCost().setScale(2,4).multiply(new BigDecimal(100)).intValue());
+        request.setTotalTee(MathUtil.bigYuan2Fee(createRequest.getTotalCost()));
         request.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/order/notify");
         return request;
     }
@@ -307,6 +342,26 @@ public class OrderController {
 
     private void deleteRedis(String dupKey){
         redisService.delete(OrderRedisKeyPrefix.dupKey,dupKey);
+    }
+
+    private void checkPayResult(WxPayOrderNotifyResult result){
+        if(!result.getReturnMsg().isEmpty()){
+            log.error(result.getReturnMsg());
+            throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_SIGN);
+        }
+
+        if("FAIL".equals(result.getReturnCode())){
+            throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_COM);
+        }
+    }
+
+    private boolean checkPayCost(WxPayOrderNotifyResult result){
+        Integer totalFee = result.getTotalFee();
+        String orderCode = result.getOutTradeNo();
+        BigDecimal totalCost = orderService.getTotalCostByCode(orderCode);
+        int calFee = MathUtil.bigYuan2Fee(totalCost);
+        log.info("微信支付回调金额为：{}; 数据库订单中支付金额为：{}",totalFee,calFee);
+        return totalFee.equals(calFee);
     }
 
 }

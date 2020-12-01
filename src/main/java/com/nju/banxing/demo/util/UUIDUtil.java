@@ -67,7 +67,17 @@ public class UUIDUtil {
      */
     public static String getOrderCode() {
         long timeStr = System.currentTimeMillis();
-        return "DD" + timeStr + getVerCode();
+        return "OC" + timeStr + getVerCode();
+    }
+
+    public static String getOrderLogCode() {
+        long timeStr = System.currentTimeMillis();
+        return "OL" + timeStr + getVerCode();
+    }
+
+    public static String getCoinLogCode() {
+        long timeStr = System.currentTimeMillis();
+        return "CL" + timeStr + getVerCode();
     }
 
     public static String getImageFileName(){
