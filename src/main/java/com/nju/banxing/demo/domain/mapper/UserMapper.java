@@ -17,4 +17,6 @@ public interface UserMapper extends BaseMapper<UserDO> {
 
     String getNickNameById(@Param("openid") String openid);
 
+    String getMobileById(@Param("openid") String openid);
+
 }

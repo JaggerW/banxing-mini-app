@@ -46,6 +46,9 @@ public class OrderService {
     private CoinService coinService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private WxMaConfig wxMaConfig;
 
     @Transactional
@@ -173,6 +176,11 @@ public class OrderService {
             return updateOrder > 0 && insertOrderLog > 0 && updateCoin > 0 && insertCoinLog > 0;
         }
         return true;
+    }
+
+    public String getTutorMobileByOrderCode(String orderCode){
+        String tutorId = orderMapper.getTutorIdByCode(orderCode);
+        return userService.getMobileById(tutorId);
     }
 
     public Integer getStatusByCode(String orderCode) {

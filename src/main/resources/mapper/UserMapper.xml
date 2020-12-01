@@ -17,4 +17,8 @@
         select nick_name from user where id = #{openid, jdbcType = VARCHAR}
     </select>
 
+    <select id="getMobileById" parameterType="java.lang.String" resultType="java.lang.String">
+        select mobile from user where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
 </mapper>

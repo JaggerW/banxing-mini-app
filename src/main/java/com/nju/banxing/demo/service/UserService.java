@@ -175,4 +175,8 @@ public class UserService {
     public String getNickNameById(String openid){
         return userMapper.getNickNameById(openid);
     }
+
+    public String getMobileById(String openid){
+        return userMapper.getNickNameById(openid);
+    }
 }

@@ -8,6 +8,11 @@
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
+    <select id="getTutorIdByCode" resultType="java.lang.String">
+        select tutor_id from order
+        where id = #{orderCode, jdbcType = VARCHAR}
+    </select>
+
     <select id="getStatusAndVersionByCode" resultMap="map">
         select
         order_status as status

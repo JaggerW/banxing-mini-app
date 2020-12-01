@@ -24,6 +24,7 @@ import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.util.NetworkUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
+import com.nju.banxing.demo.vo.AliyunSmsVO;
 import com.nju.banxing.demo.vo.ReserveVO;
 import com.nju.banxing.demo.vo.WorkTimeVO;
 import lombok.extern.slf4j.Slf4j;
@@ -209,7 +210,10 @@ public class OrderController {
                     if(!successPay){
                         return parseOrderNotifyResult(xmlData);
                     }else {
-                        // 短信通知导师
+                        // TODO 短信通知导师
+                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+                        aliyunService.sendSMS(aliyunSmsVO);
 
                     }
                 }else {
