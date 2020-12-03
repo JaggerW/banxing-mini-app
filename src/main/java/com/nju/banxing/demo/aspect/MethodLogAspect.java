@@ -1,6 +1,7 @@
 package com.nju.banxing.demo.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.logs.MethodErrorInfo;
@@ -30,6 +31,9 @@ import java.util.Map;
 @Slf4j
 public class MethodLogAspect {
 
+    // TODO 入参打印有问题
+    // TODO 异常栈打印有问题
+
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     /**
@@ -49,7 +53,7 @@ public class MethodLogAspect {
         log.info("HTTP Method    : {}", request.getMethod());
         log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         log.info("IP             : {}", NetworkUtil.getIpAddress(request));
-        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
+//        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
 
     }
 
