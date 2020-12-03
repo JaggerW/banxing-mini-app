@@ -14,4 +14,5 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface TutorMapper extends BaseMapper<TutorDO> {
 
+    String getWorkTimeById(@Param("openid") String openid);
 }

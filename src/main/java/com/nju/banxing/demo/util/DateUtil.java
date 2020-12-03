@@ -65,6 +65,10 @@ public class DateUtil {
         return Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.of("+8")).toLocalDate();
     }
 
+    public static LocalDateTime toLocalDateTime(long timeStamp){
+        return Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.of("+8")).toLocalDateTime();
+    }
+
     public static int getSecond(LocalTime time) {
         return time.toSecondOfDay();
     }

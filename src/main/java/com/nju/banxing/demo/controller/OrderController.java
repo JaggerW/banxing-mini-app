@@ -32,6 +32,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -132,11 +133,12 @@ public class OrderController {
         return PagedResult.success(list,1,list.size(),list.size(),1);
     }
 
+    // TODO 下单支付拆分
 
     @PostMapping("create")
     @MethodLog("用户下单")
     public SingleResult<WxPayMpOrderResult> createOrder(String openid,
-                                                        OrderCreateRequest request,
+                                                        @Validated @RequestBody OrderCreateRequest request,
                                                         HttpServletRequest httpServletRequest){
         if(ObjectUtils.isEmpty(request)) {
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请求体为空！"));
@@ -180,10 +182,15 @@ public class OrderController {
     public String parseOrderNotifyResult(@RequestBody String xmlData) {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
+            log.info("===== 微信支付回调数据： {} =====",JSON.toJSONString(result));
+
             checkPayResult(result);
 
             // 判断是否已处理过
             Map<String, Integer> map = orderService.getStatusAndVersionByCode(result.getOutTradeNo());
+            if(ObjectUtils.isEmpty(map)){
+                return WxPayNotifyResponse.fail("不存在该订单数据");
+            }
             Integer status = map.get("status");
             Integer version = map.get("version");
             if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(status) ||
@@ -324,13 +331,16 @@ public class OrderController {
             deleteRedis(request.getDupKey());
             throw new GlobalException(CodeMsg.ERROR_RESERVE_TIME);
         }
-        BigDecimal calTotalCost = request.getConsultationCost().multiply(new BigDecimal(request.getConsultationTime()));
+        BigDecimal calTotalCost = request.getConsultationCost().multiply(new BigDecimal(request.getConsultationTime() / 10));
         if(calTotalCost.equals(request.getTotalCost())){
             deleteRedis(request.getDupKey());
             throw new GlobalException(CodeMsg.ERROR_RESERVE_COST);
         }
         String tutorId = request.getTutorId();
         String workTimeById = tutorService.getWorkTimeById(tutorId);
+        if(StringUtils.isEmpty(workTimeById)){
+            throw new GlobalException(CodeMsg.NULL_TUTOR);
+        }
         List<WorkTimeVO> workTimeVOS = JSON.parseArray(workTimeById, WorkTimeVO.class);
         for(WorkTimeVO workTime : workTimeVOS){
             if(workTime.getKey().equals(request.getDayKey())){

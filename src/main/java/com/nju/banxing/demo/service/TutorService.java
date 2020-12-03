@@ -81,12 +81,7 @@ public class TutorService {
      * @return
      */
     public String getWorkTimeById(String openid){
-        List<Map<String, Object>> maps = tutorMapper.selectMaps(
-                new QueryWrapper<TutorDO>().lambda()
-                        .select(TutorDO::getWorkTime)
-                        .eq(TutorDO::getId, openid));
-        System.out.println(maps);
-        return (String) maps.get(0).get("work_time");
+        return tutorMapper.getWorkTimeById(openid);
     }
 
 
