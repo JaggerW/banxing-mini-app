@@ -142,6 +142,9 @@ public class OrderController {
     public SingleResult<WxPayOrderVO> createOrder(String openid,
                                                         @Validated @RequestBody OrderCreateRequest request,
                                                         HttpServletRequest httpServletRequest){
+
+        log.error("#####进入CREATE_CONTROLLER#######");
+
         if(ObjectUtils.isEmpty(request)) {
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请求体为空！"));
         }

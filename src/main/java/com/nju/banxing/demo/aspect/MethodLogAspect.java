@@ -2,6 +2,7 @@ package com.nju.banxing.demo.aspect;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.logs.MethodErrorInfo;
 import com.nju.banxing.demo.common.logs.MethodLogInfo;
 import com.nju.banxing.demo.util.NetworkUtil;
@@ -16,6 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -36,6 +38,21 @@ public class MethodLogAspect {
     @Pointcut("@annotation(com.nju.banxing.demo.annotation.MethodLog)")
     public void methodLog(){}
 
+    @Before("methodLog()")
+    public void doBefore(JoinPoint joinPoint) throws Exception {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+
+        log.info("================================START=====================================");
+        log.info("Description    :{}",getAspectLogDescription(joinPoint));
+        log.info("URL            :{}",request.getRequestURL().toString());
+        log.info("HTTP Method    : {}", request.getMethod());
+        log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
+        log.info("IP             : {}", NetworkUtil.getIpAddress(request));
+        log.info("Request Args   : {}", JSON.toJSONString(getRequestParamsByJoinPoint(joinPoint)));
+
+    }
+
     /**
      * 定义环绕体
      * @param proceedingJoinPoint
@@ -47,9 +64,12 @@ public class MethodLogAspect {
         long start = System.currentTimeMillis();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
+
         Object result = proceedingJoinPoint.proceed();
+
         MethodLogInfo requestInfo = new MethodLogInfo();
-        requestInfo.setIp(request.getRemoteAddr());
+        String ipAddress = NetworkUtil.getIpAddress(request);
+        requestInfo.setIp(ipAddress);
         requestInfo.setUrl(request.getRequestURL().toString());
         requestInfo.setHttpMethod(request.getMethod());
         requestInfo.setClassMethod(String.format("%s.%s", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
@@ -59,6 +79,8 @@ public class MethodLogAspect {
         requestInfo.setTimeCost(System.currentTimeMillis() - start);
         log.info("===============METHOD INFO================= : {} =====================================",
                 JSON.toJSONString(requestInfo));
+
+        log.info("================================END=====================================");
 
         return result;
     }
@@ -123,6 +145,33 @@ public class MethodLogAspect {
         }
 
         return requestParams;
+    }
+
+    /**
+     * 获取切面注解的描述
+     *
+     * @param joinPoint 切点
+     * @return 描述信息
+     * @throws Exception
+     */
+    public String getAspectLogDescription(JoinPoint joinPoint)
+            throws Exception {
+        String targetName = joinPoint.getTarget().getClass().getName();
+        String methodName = joinPoint.getSignature().getName();
+        Object[] arguments = joinPoint.getArgs();
+        Class targetClass = Class.forName(targetName);
+        Method[] methods = targetClass.getMethods();
+        StringBuilder description = new StringBuilder("");
+        for (Method method : methods) {
+            if (method.getName().equals(methodName)) {
+                Class[] clazzs = method.getParameterTypes();
+                if (clazzs.length == arguments.length) {
+                    description.append(method.getAnnotation(MethodLog.class).value());
+                    break;
+                }
+            }
+        }
+        return description.toString();
     }
 
 
