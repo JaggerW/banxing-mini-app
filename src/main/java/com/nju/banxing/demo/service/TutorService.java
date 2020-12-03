@@ -52,6 +52,8 @@ public class TutorService {
         tutorDO.setKeyword(request.getCurrentUniversity() + request.getCurrentProfession());
         tutorDO.setCreator(openid);
         tutorDO.setModifier(openid);
+        // TODO forTEST
+        tutorDO.setStatus(1);
 
         String nickName = userMapper.getNickNameById(openid);
         tutorDO.setNickName(nickName);

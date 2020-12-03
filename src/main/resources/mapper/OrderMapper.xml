@@ -13,7 +13,7 @@
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
-    <select id="getStatusAndVersionByCode" resultMap="map">
+    <select id="getStatusAndVersionByCode">
         select
         order_status as status
         version as version

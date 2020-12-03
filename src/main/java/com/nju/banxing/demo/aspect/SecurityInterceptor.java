@@ -1,9 +1,12 @@
 package com.nju.banxing.demo.aspect;
 
+import com.alibaba.fastjson.JSON;
+import com.nju.banxing.demo.common.logs.MethodErrorInfo;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.service.UserService;
+import com.nju.banxing.demo.util.NetworkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,13 @@ public class SecurityInterceptor implements HandlerInterceptor {
             log.debug(token);
             return true;
         }else {
+            String ipAddress = NetworkUtil.getIpAddress(request);
+            MethodErrorInfo requestErrorInfo = new MethodErrorInfo();
+            requestErrorInfo.setIp(ipAddress);
+            requestErrorInfo.setUrl(request.getRequestURL().toString());
+            requestErrorInfo.setHttpMethod(request.getMethod());
+            requestErrorInfo.setRequestParams(request.getParameterMap());
+            log.error("=============== Interceptor Request Info - NULL_TOKEN   : {} ===============", JSON.toJSONString(requestErrorInfo));
             throw new GlobalException(CodeMsg.NULL_TOKEN);
         }
     }

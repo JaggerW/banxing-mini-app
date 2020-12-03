@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.common.logs.MethodErrorInfo;
 import com.nju.banxing.demo.common.logs.MethodLogInfo;
+import com.nju.banxing.demo.util.NetworkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -72,7 +73,8 @@ public class MethodLogAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         MethodErrorInfo requestErrorInfo = new MethodErrorInfo();
-        requestErrorInfo.setIp(request.getRemoteAddr());
+        String ipAddress = NetworkUtil.getIpAddress(request);
+        requestErrorInfo.setIp(ipAddress);
         requestErrorInfo.setUrl(request.getRequestURL().toString());
         requestErrorInfo.setHttpMethod(request.getMethod());
         requestErrorInfo.setClassMethod(String.format("%s.%s", joinPoint.getSignature().getDeclaringTypeName(),
