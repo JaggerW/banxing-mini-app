@@ -179,7 +179,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("update_info")
+    @PostMapping("/update_info")
     @MethodLog("更新用户信息")
     public SingleResult<Boolean> updateUserInfo(String openid, @Validated @RequestBody UserRegisterRequest registerRequest){
 

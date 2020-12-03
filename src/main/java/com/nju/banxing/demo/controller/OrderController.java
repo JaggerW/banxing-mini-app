@@ -70,7 +70,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("to_reserve")
+    @GetMapping("/to_reserve")
     @MethodLog("打开预约界面")
     public SingleResult<ReserveVO> toReserve(@RequestParam(value = "tutorId") String tutorId,
                                              @RequestParam(value = "dayKey") Integer day){
@@ -85,7 +85,7 @@ public class OrderController {
 
     }
 
-    @GetMapping("get_day")
+    @GetMapping("/get_day")
     @MethodLog("获取未来十四天可选日期")
     public PagedResult<WorkTimeVO> getDay(@RequestParam(value = "tutorId") String tutorId){
         if(StringUtils.isEmpty(tutorId)){
@@ -137,7 +137,7 @@ public class OrderController {
 
     // TODO 下单支付拆分
 
-    @PostMapping("create")
+    @PostMapping("/create")
     @MethodLog("用户下单")
     public SingleResult<WxPayOrderVO> createOrder(String openid,
                                                         @Validated @RequestBody OrderCreateRequest request,

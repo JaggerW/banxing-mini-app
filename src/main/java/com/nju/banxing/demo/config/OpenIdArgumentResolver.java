@@ -31,8 +31,6 @@ public class OpenIdArgumentResolver implements HandlerMethodArgumentResolver {
         return AppContantConfig.OPEN_ID_PARAM_NAME.equals(parameterName);
     }
 
-    // TODO openid没有注入
-    // TODO locattime时间格式化
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
