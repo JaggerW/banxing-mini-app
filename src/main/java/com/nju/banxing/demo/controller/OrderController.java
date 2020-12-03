@@ -340,13 +340,14 @@ public class OrderController {
     }
 
     private void checkParam(OrderCreateRequest request){
+        log.info("OrderCreateRequest : {}",request.toString());
         LocalTime calEndTime = request.getReserveStartTime().plusMinutes(request.getConsultationTime());
-        if(calEndTime.equals(request.getReserveEndTime())){
+        if(!calEndTime.equals(request.getReserveEndTime())){
             deleteRedis(request.getDupKey());
             throw new GlobalException(CodeMsg.ERROR_RESERVE_TIME);
         }
         BigDecimal calTotalCost = request.getConsultationCost().multiply(new BigDecimal(request.getConsultationTime() / 10));
-        if(calTotalCost.equals(request.getTotalCost())){
+        if(!calTotalCost.equals(request.getTotalCost())){
             deleteRedis(request.getDupKey());
             throw new GlobalException(CodeMsg.ERROR_RESERVE_COST);
         }

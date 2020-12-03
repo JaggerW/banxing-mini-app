@@ -2,6 +2,7 @@ package com.nju.banxing.demo.exception;
 
 import com.nju.banxing.demo.common.SingleResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -23,7 +24,9 @@ public class GlobalExceptionHandle {
     @ExceptionHandler(value=Exception.class)
     public SingleResult<String> exceptionHandler(Exception e){
         e.printStackTrace();
-        log.error(e.getMessage());
+        if(StringUtils.isNotEmpty(e.getMessage())){
+            log.error(e.getMessage());
+        }
         if(e instanceof GlobalException) {
             GlobalException ex = (GlobalException)e;
             log.error(ex.getCodeMsg().getMsg());
