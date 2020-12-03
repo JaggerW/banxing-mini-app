@@ -11,6 +11,7 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
+import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
@@ -27,6 +28,7 @@ import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
 import com.nju.banxing.demo.vo.ReserveVO;
 import com.nju.banxing.demo.vo.WorkTimeVO;
+import com.nju.banxing.demo.vo.WxPayOrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -137,7 +139,7 @@ public class OrderController {
 
     @PostMapping("create")
     @MethodLog("用户下单")
-    public SingleResult<WxPayMpOrderResult> createOrder(String openid,
+    public SingleResult<WxPayOrderVO> createOrder(String openid,
                                                         @Validated @RequestBody OrderCreateRequest request,
                                                         HttpServletRequest httpServletRequest){
         if(ObjectUtils.isEmpty(request)) {
@@ -159,7 +161,7 @@ public class OrderController {
         try {
             // 发起微信支付
             WxPayOrderRequest orderRequest = buildOrderRequest(openid,request,orderCode ,httpServletRequest);
-            WxPayMpOrderResult payOrder = weixinService.createPayOrder(orderRequest);
+            WxPayOrderVO payOrder = weixinService.createPayOrder(orderRequest);
 
             // 订单初始化
             boolean b = orderService.initOrder(openid, orderCode, request);
@@ -213,13 +215,22 @@ public class OrderController {
 
                     // 支付成功
                     boolean successPay = orderService.successPay(result, status, version);
-                    // 乐观锁递归调用
+                    // 乐观锁递归调用 TODO dangerous
                     if(!successPay){
                         return parseOrderNotifyResult(xmlData);
                     }else {
                         // TODO 短信通知导师
+                        String verCode = "123456";
                         String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+                        // 阿里云发送短信
                         AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+                        aliyunSmsVO.setPhoneNumber(mobile);
+                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
+                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
+
+                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+                        template.setCode(verCode);
+                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
                         aliyunService.sendSMS(aliyunSmsVO);
 
                     }

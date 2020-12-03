@@ -22,6 +22,7 @@ import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.WxPayOrderRequest;
 import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.vo.WxPayOrderVO;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.ObjectUtils;
@@ -141,7 +142,7 @@ public class WeixinService {
      * 微信支付统一下单
      * @throws WxPayException
      */
-    public WxPayMpOrderResult createPayOrder(WxPayOrderRequest orderRequest) throws WxPayException {
+    public WxPayOrderVO createPayOrder(WxPayOrderRequest orderRequest) throws WxPayException {
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
         WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
 
@@ -157,7 +158,13 @@ public class WeixinService {
         request.setTimeStart(DateUtil.now().format(DateUtil.wxPayFormatter));
         request.setTimeExpire(DateUtil.now().plusMinutes(30).format(DateUtil.wxPayFormatter));
 
-        return wxPayService.createOrder(request);
+        WxPayMpOrderResult result = wxPayService.createOrder(request);
+        WxPayOrderVO vo = new WxPayOrderVO();
+        vo.setNonceStr(result.getNonceStr());
+        vo.setPackageValue(result.getPackageValue());
+        vo.setPaySign(result.getPaySign());
+        vo.setTimeStamp(result.getTimeStamp());
+        return vo;
 
     }
 
