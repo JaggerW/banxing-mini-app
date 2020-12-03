@@ -49,7 +49,7 @@ public class MethodLogAspect {
         log.info("HTTP Method    : {}", request.getMethod());
         log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         log.info("IP             : {}", NetworkUtil.getIpAddress(request));
-        log.info("Request Args   : {}", JSON.toJSONString(getRequestParamsByJoinPoint(joinPoint)));
+        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
 
     }
 
@@ -74,7 +74,7 @@ public class MethodLogAspect {
         requestInfo.setHttpMethod(request.getMethod());
         requestInfo.setClassMethod(String.format("%s.%s", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
                 proceedingJoinPoint.getSignature().getName()));
-        requestInfo.setRequestParams(getRequestParamsByProceedingJoinPoint(proceedingJoinPoint));
+//        requestInfo.setRequestParams(getRequestParamsByProceedingJoinPoint(proceedingJoinPoint));
         requestInfo.setResult(result);
         requestInfo.setTimeCost(System.currentTimeMillis() - start);
         log.info("===============METHOD INFO================= : {} =====================================",
@@ -101,7 +101,7 @@ public class MethodLogAspect {
         requestErrorInfo.setHttpMethod(request.getMethod());
         requestErrorInfo.setClassMethod(String.format("%s.%s", joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName()));
-        requestErrorInfo.setRequestParams(getRequestParamsByJoinPoint(joinPoint));
+//        requestErrorInfo.setRequestParams(getRequestParamsByJoinPoint(joinPoint));
         requestErrorInfo.setExceptionMsg(e.getMessage());
         log.error("=============== Error Request Info   : {} ===============", JSON.toJSONString(requestErrorInfo));
     }

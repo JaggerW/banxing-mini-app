@@ -23,6 +23,7 @@ public class GlobalExceptionHandle {
     @ExceptionHandler(value=Exception.class)
     public SingleResult<String> exceptionHandler(Exception e){
         e.printStackTrace();
+        log.error(e.getMessage());
         if(e instanceof GlobalException) {
             GlobalException ex = (GlobalException)e;
             log.error(ex.getCodeMsg().getMsg());
