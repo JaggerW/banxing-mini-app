@@ -163,6 +163,7 @@ public class WeixinService {
         vo.setNonceStr(result.getNonceStr());
         vo.setPackageValue(result.getPackageValue());
         vo.setPaySign(result.getPaySign());
+        vo.setSignType(result.getSignType());
         vo.setTimeStamp(result.getTimeStamp());
         return vo;
 

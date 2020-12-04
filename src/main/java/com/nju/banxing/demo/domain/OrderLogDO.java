@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("order_log")
+@TableName("banxing_order_log")
 public class OrderLogDO implements Serializable {
 
     private static final long serialVersionUID = 1L;

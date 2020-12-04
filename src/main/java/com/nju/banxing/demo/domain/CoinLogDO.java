@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("coin_log")
+@TableName("banxing_coin_log")
 public class CoinLogDO implements Serializable {
 
     private static final long serialVersionUID = 1L;

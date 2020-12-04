@@ -3,7 +3,7 @@
 <mapper namespace="com.nju.banxing.demo.domain.mapper.TutorMapper">
 
     <select id="getWorkTimeById" resultType="java.lang.String" parameterType="java.lang.String">
-        select work_time from tutor where id = #{openid, jdbcType = VARCHAR}
+        select work_time from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
     </select>
 
 </mapper>

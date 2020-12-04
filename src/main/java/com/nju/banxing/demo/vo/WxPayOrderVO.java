@@ -18,8 +18,8 @@ public class WxPayOrderVO implements Serializable {
 
     private String timeStamp;
     private String nonceStr;
-    @JSONField(name = "package")
     private String packageValue;
+    private String signType = "MD5";
     private String paySign;
     private String orderCode;
 

@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
  * @since 2020-11-11
  */
 @Data
-@TableName("user")
+@TableName("banxing_user")
 public class UserDO implements Serializable {
 
     private static final long serialVersionUID = 1L;

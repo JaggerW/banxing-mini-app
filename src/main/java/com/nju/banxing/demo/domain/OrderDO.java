@@ -25,7 +25,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("order")
+@TableName("banxing_order")
 public class OrderDO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -80,6 +80,11 @@ public class OrderDO implements Serializable {
      * 咨询时长
      */
     private Integer consultationTime;
+
+    /**
+     * 咨询内容描述
+     */
+    private String consultationContent;
 
     /**
      * 会议原始链接

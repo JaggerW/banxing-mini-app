@@ -3,7 +3,7 @@
 <mapper namespace="com.nju.banxing.demo.domain.mapper.UserMapper">
 
     <update id="updateUserLog" parameterType="java.lang.String">
-        update user
+        update banxing_user
         <set>
             login_count = login_count + 1,
             latest_login_time = now(),
@@ -14,11 +14,11 @@
     </update>
 
     <select id="getNickNameById" parameterType="java.lang.String" resultType="java.lang.String">
-        select nick_name from user where id = #{openid, jdbcType = VARCHAR}
+        select nick_name from banxing_user where id = #{openid, jdbcType = VARCHAR}
     </select>
 
     <select id="getMobileById" parameterType="java.lang.String" resultType="java.lang.String">
-        select mobile from user where id = #{openid, jdbcType = VARCHAR}
+        select mobile from banxing_user where id = #{openid, jdbcType = VARCHAR}
     </select>
 
 </mapper>

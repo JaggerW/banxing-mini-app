@@ -53,10 +53,13 @@ public class OrderService {
 
     @Transactional
     public boolean initOrder(String openid, String orderCode, OrderCreateRequest request) {
+        log.debug("====ready to insert order");
+
         OrderDO orderDO = new OrderDO();
         orderDO.setConsultationCost(request.getConsultationCost());
         orderDO.setConsultationTime(request.getConsultationTime());
         orderDO.setConsultationType(request.getConsultationType());
+        orderDO.setConsultationContent(request.getConsultationContent());
         orderDO.setId(orderCode);
         orderDO.setCreator(openid);
         orderDO.setModifier(openid);
@@ -78,11 +81,15 @@ public class OrderService {
         orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
         orderLogDO.setProcessContent("订单建立");
 
+        log.debug(orderDO.toString());
+
         // 订单信息落库
         int orderInsert = orderMapper.insert(orderDO);
 
         // 订单流水落库
         int orderLogInsert = orderLogMapper.insert(orderLogDO);
+
+        log.debug("==== end the insert order");
 
         return orderInsert > 0 && orderLogInsert > 0;
 
@@ -118,6 +125,9 @@ public class OrderService {
 
     @Transactional
     public boolean successPay(WxPayOrderNotifyResult result, Integer orderStatus, Integer version) {
+
+        log.debug("===订单支付成功，开始更新数据===");
+
         String orderCode = result.getOutTradeNo();
         String openid = result.getOpenid();
         if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
@@ -173,8 +183,12 @@ public class OrderService {
             coinLogDO.setModifier(openid);
             int insertCoinLog = coinService.insertLog(coinLogDO);
 
+            log.debug("===订单支付成功，更新成功===");
+
             return updateOrder > 0 && insertOrderLog > 0 && updateCoin > 0 && insertCoinLog > 0;
         }
+        log.debug("===订单支付成功，没有符合条件的数据要更新===");
+
         return true;
     }
 

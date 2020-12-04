@@ -3,26 +3,26 @@
 <mapper namespace="com.nju.banxing.demo.domain.mapper.OrderMapper">
 
 
-    <select id="getStatusByIdAndCode" resultType="java.lang.Integer">
-        select order_status from order
+    <select id="getStatusByCode" resultType="java.lang.Integer">
+        select order_status from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
     <select id="getTutorIdByCode" resultType="java.lang.String">
-        select tutor_id from order
+        select tutor_id from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
-    <select id="getStatusAndVersionByCode">
+    <select id="getStatusAndVersionByCode" resultType="java.util.Map">
         select
-        order_status as status
+        order_status as status,
         version as version
-        from order
+        from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
     <select id="getTotalCostByCode" resultType="java.math.BigDecimal">
-        select total_cost from order
+        select total_cost from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 

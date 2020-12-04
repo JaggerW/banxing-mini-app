@@ -165,6 +165,9 @@ public class OrderController {
             // 发起微信支付
             WxPayOrderRequest orderRequest = buildOrderRequest(openid,request,orderCode ,httpServletRequest);
             WxPayOrderVO payOrder = weixinService.createPayOrder(orderRequest);
+            payOrder.setOrderCode(orderCode);
+
+            log.info(payOrder.toString());
 
             // 订单初始化
             boolean b = orderService.initOrder(openid, orderCode, request);
@@ -188,11 +191,13 @@ public class OrderController {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
             log.info("===== 微信支付回调数据： {} =====",JSON.toJSONString(result));
-
+            log.debug("====begin check pay result====");
             checkPayResult(result);
-
+            log.debug("====end check pay result====");
             // 判断是否已处理过
+            log.debug("===get the map");
             Map<String, Integer> map = orderService.getStatusAndVersionByCode(result.getOutTradeNo());
+            log.debug("===the map is : {}",map.toString());
             if(ObjectUtils.isEmpty(map)){
                 return WxPayNotifyResponse.fail("不存在该订单数据");
             }
@@ -201,11 +206,14 @@ public class OrderController {
             if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(status) ||
                     OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status)){
 
+                log.debug("=== get in");
+
                 if(OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status) && "FAIL".equals(result.getResultCode())){
                     // 已处理过
                     return WxPayNotifyResponse.success("成功");
                 }
 
+                log.debug("===判断金额");
                 // 验证金额是否一致防止伪造通知
                 boolean b = checkPayCost(result);
                 if(!b){
@@ -213,38 +221,39 @@ public class OrderController {
                     return WxPayNotifyResponse.fail("支付金额校验错误");
                 }
 
+                log.debug("===Ready to process");
                 // 处理
                 if("SUCCESS".equals(result.getResultCode())){
 
                     // 支付成功
                     boolean successPay = orderService.successPay(result, status, version);
                     // 乐观锁递归调用 TODO dangerous
-                    if(!successPay){
-                        return parseOrderNotifyResult(xmlData);
-                    }else {
-                        // TODO 短信通知导师
-                        String verCode = "123456";
-                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
-                        // 阿里云发送短信
-                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-                        aliyunSmsVO.setPhoneNumber(mobile);
-                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
-                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
-
-                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
-                        template.setCode(verCode);
-                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
-                        aliyunService.sendSMS(aliyunSmsVO);
-
-                    }
+//                    if(!successPay){
+//                        return parseOrderNotifyResult(xmlData);
+//                    }else {
+//                        // TODO 短信通知导师
+//                        String verCode = "123456";
+//                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+//                        // 阿里云发送短信
+//                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+//                        aliyunSmsVO.setPhoneNumber(mobile);
+//                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
+//                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
+//
+//                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+//                        template.setCode(verCode);
+//                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
+//                        aliyunService.sendSMS(aliyunSmsVO);
+//
+//                    }
                 }else {
 
                     // 支付失败
                     boolean failPay = orderService.failPay(result, status, version);
                     // 乐观锁递归调用
-                    if(!failPay){
-                        return parseOrderNotifyResult(xmlData);
-                    }
+//                    if(!failPay){
+//                        return parseOrderNotifyResult(xmlData);
+//                    }
                 }
             }
             return WxPayNotifyResponse.success("成功");
@@ -374,12 +383,15 @@ public class OrderController {
     }
 
     private void checkPayResult(WxPayOrderNotifyResult result){
-        if(!result.getReturnMsg().isEmpty()){
+        log.debug("=== get in check result");
+        if(StringUtils.isNotEmpty(result.getReturnMsg())){
+            log.debug("===returnMsg is not empty");
             log.error(result.getReturnMsg());
             throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_SIGN);
         }
 
         if("FAIL".equals(result.getReturnCode())){
+            log.debug("===returnCode is fail");
             throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_COM);
         }
     }

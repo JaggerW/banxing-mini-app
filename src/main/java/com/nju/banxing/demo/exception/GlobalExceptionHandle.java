@@ -24,6 +24,7 @@ public class GlobalExceptionHandle {
     @ExceptionHandler(value=Exception.class)
     public SingleResult<String> exceptionHandler(Exception e){
         e.printStackTrace();
+        // TODO 打印异常栈到日志
         if(StringUtils.isNotEmpty(e.getMessage())){
             log.error(e.getMessage());
         }

@@ -96,6 +96,13 @@ public class MethodLogAspect {
      */
     @AfterThrowing(pointcut = "methodLog()", throwing = "e")
     public void doAfterThrow(JoinPoint joinPoint, RuntimeException e) {
+        e.printStackTrace();
+        log.error("===e.toString()===");
+        log.error(e.toString());
+        log.error("===e.getMessage()===");
+        log.error(e.getMessage());
+        log.error("===e.getLocalizedMessage()");
+        log.error(e.getLocalizedMessage());
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         MethodErrorInfo requestErrorInfo = new MethodErrorInfo();
