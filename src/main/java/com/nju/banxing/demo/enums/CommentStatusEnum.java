@@ -6,6 +6,8 @@ package com.nju.banxing.demo.enums;
  * @Date: 2020/11/27
  */
 public enum CommentStatusEnum {
+
+    NULL(-1,"无状态"),
     TO_COMMENT(0,"待评价"),
     COMMENTED(1, "已评价"),
     AUTO_COMMENTED(2,"已自动评价");

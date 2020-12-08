@@ -23,7 +23,9 @@ import org.springframework.expression.spel.ast.OpNE;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,22 +54,24 @@ public class OrderService {
     private WxMaConfig wxMaConfig;
 
     @Transactional
-    public boolean initOrder(String openid, String orderCode, OrderCreateRequest request) {
+    public boolean initOrder(String openid, String orderCode, BigDecimal totalCost, OrderCreateRequest request) {
         log.debug("====ready to insert order");
 
         OrderDO orderDO = new OrderDO();
-        orderDO.setConsultationCost(request.getConsultationCost());
-        orderDO.setConsultationTime(request.getConsultationTime());
+        orderDO.setConsultationCost(totalCost);
+        orderDO.setConsultationTime(request.getConsultationTimeCount());
         orderDO.setConsultationType(request.getConsultationType());
         orderDO.setConsultationContent(request.getConsultationContent());
+        orderDO.setResumeUrl(request.getResumeUrl());
         orderDO.setId(orderCode);
         orderDO.setCreator(openid);
         orderDO.setModifier(openid);
         orderDO.setOrderStatus(OrderStatusEnum.ORDER_TO_PAY.getCode());
         orderDO.setReserveDate(DateUtil.toLocalDate(request.getReserveDateTimeStamp()));
-        orderDO.setReserveStartTime(request.getReserveStartTime());
-        orderDO.setReserveEndTime(request.getReserveEndTime());
-        orderDO.setTotalCost(request.getTotalCost());
+        LocalTime reserveStartTime = request.getReserveStartTime();
+        orderDO.setReserveStartTime(reserveStartTime);
+        orderDO.setReserveEndTime(reserveStartTime.plusMinutes(10 * request.getConsultationTimeCount()));
+        orderDO.setTotalCost(totalCost);
         orderDO.setTutorId(request.getTutorId());
         orderDO.setUserId(openid);
         orderDO.setVersion(1);

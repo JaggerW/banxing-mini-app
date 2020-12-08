@@ -6,4 +6,8 @@
         select work_time from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
     </select>
 
+    <select id="getConsultationCost" resultType="java.math.BigDecimal" parameterType="java.lang.String">
+        select consultation_cost from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
 </mapper>

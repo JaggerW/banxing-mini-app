@@ -87,6 +87,11 @@ public class OrderDO implements Serializable {
     private String consultationContent;
 
     /**
+     * 简历URL
+     */
+    private String resumeUrl;
+
+    /**
      * 会议原始链接
      */
     private String conferenceLink;
@@ -107,9 +112,14 @@ public class OrderDO implements Serializable {
     private Integer orderStatus;
 
     /**
-     * 导师确认状态：0，未处理；1，已同意；2，已拒绝
+     * 导师确认状态：-1，无状态；0，未处理；1，已同意；2，已拒绝
      */
     private Integer tutorStatus;
+
+    /**
+     * 导师回复时间
+     */
+    private LocalDateTime replyTime;
 
     /**
      * 拒绝理由
@@ -117,7 +127,7 @@ public class OrderDO implements Serializable {
     private String rejectReason;
 
     /**
-     * 评论状态：0，未评论；1，已评论；2，已过期自动评论
+     * 评论状态：-1，无状态；0，未评论；1，已评论；2，已过期自动评论
      */
     private Integer commentStatus;
 

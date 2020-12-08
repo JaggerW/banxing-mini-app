@@ -39,7 +39,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -135,15 +137,11 @@ public class OrderController {
         return PagedResult.success(list,1,list.size(),list.size(),1);
     }
 
-    // TODO 下单支付拆分
-
     @PostMapping("/create")
     @MethodLog("用户下单")
     public SingleResult<WxPayOrderVO> createOrder(String openid,
                                                         @Validated @RequestBody OrderCreateRequest request,
                                                         HttpServletRequest httpServletRequest){
-
-        log.error("#####进入CREATE_CONTROLLER#######");
 
         if(ObjectUtils.isEmpty(request)) {
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请求体为空！"));
@@ -161,16 +159,21 @@ public class OrderController {
         // 生成订单号
         String orderCode = UUIDUtil.getOrderCode();
 
+        // 生成总费用
+        String tutorId = request.getTutorId();
+        BigDecimal consultationCost = tutorService.getConsultationCost(tutorId);
+        BigDecimal totalCost = consultationCost.multiply(new BigDecimal(request.getConsultationTimeCount()));
+
         try {
             // 发起微信支付
-            WxPayOrderRequest orderRequest = buildOrderRequest(openid,request,orderCode ,httpServletRequest);
+            WxPayOrderRequest orderRequest = buildOrderRequest(openid, request, orderCode, totalCost, httpServletRequest);
             WxPayOrderVO payOrder = weixinService.createPayOrder(orderRequest);
             payOrder.setOrderCode(orderCode);
 
             log.info(payOrder.toString());
 
             // 订单初始化
-            boolean b = orderService.initOrder(openid, orderCode, request);
+            boolean b = orderService.initOrder(openid, orderCode, totalCost, request);
             if(b){
                 return SingleResult.success(payOrder);
             }else {
@@ -190,14 +193,9 @@ public class OrderController {
     public String parseOrderNotifyResult(@RequestBody String xmlData) {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
-            log.info("===== 微信支付回调数据： {} =====",JSON.toJSONString(result));
-            log.debug("====begin check pay result====");
             checkPayResult(result);
-            log.debug("====end check pay result====");
             // 判断是否已处理过
-            log.debug("===get the map");
             Map<String, Integer> map = orderService.getStatusAndVersionByCode(result.getOutTradeNo());
-            log.debug("===the map is : {}",map.toString());
             if(ObjectUtils.isEmpty(map)){
                 return WxPayNotifyResponse.fail("不存在该订单数据");
             }
@@ -206,14 +204,11 @@ public class OrderController {
             if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(status) ||
                     OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status)){
 
-                log.debug("=== get in");
-
                 if(OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status) && "FAIL".equals(result.getResultCode())){
                     // 已处理过
                     return WxPayNotifyResponse.success("成功");
                 }
 
-                log.debug("===判断金额");
                 // 验证金额是否一致防止伪造通知
                 boolean b = checkPayCost(result);
                 if(!b){
@@ -221,39 +216,40 @@ public class OrderController {
                     return WxPayNotifyResponse.fail("支付金额校验错误");
                 }
 
-                log.debug("===Ready to process");
                 // 处理
                 if("SUCCESS".equals(result.getResultCode())){
+                    for (int i = 0; i < 10; i++) {
+                        // 支付成功
+                        // 乐观锁
+                        boolean successPay = orderService.successPay(result, status, version);
+                        if(successPay){
+                            // TODO 短信通知导师，需要企业申请
+                            String verCode = "123456";
+                            String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+                            // 阿里云发送短信
+                            AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+                            aliyunSmsVO.setPhoneNumber(mobile);
+                            aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
+                            aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
 
-                    // 支付成功
-                    boolean successPay = orderService.successPay(result, status, version);
-                    // 乐观锁递归调用 TODO dangerous
-//                    if(!successPay){
-//                        return parseOrderNotifyResult(xmlData);
-//                    }else {
-//                        // TODO 短信通知导师
-//                        String verCode = "123456";
-//                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
-//                        // 阿里云发送短信
-//                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-//                        aliyunSmsVO.setPhoneNumber(mobile);
-//                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
-//                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
-//
-//                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
-//                        template.setCode(verCode);
-//                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
-//                        aliyunService.sendSMS(aliyunSmsVO);
-//
-//                    }
+                            LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+                            template.setCode(verCode);
+                            aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
+                            aliyunService.sendSMS(aliyunSmsVO);
+                            break;
+                        }
+                    }
+
                 }else {
 
                     // 支付失败
-                    boolean failPay = orderService.failPay(result, status, version);
-                    // 乐观锁递归调用
-//                    if(!failPay){
-//                        return parseOrderNotifyResult(xmlData);
-//                    }
+                    // 乐观锁
+                    for (int i = 0; i < 10; i++) {
+                        boolean failPay = orderService.failPay(result, status, version);
+                        if(failPay){
+                            break;
+                        }
+                    }
                 }
             }
             return WxPayNotifyResponse.success("成功");
@@ -334,7 +330,7 @@ public class OrderController {
         return reserveVO;
     }
 
-    private WxPayOrderRequest buildOrderRequest(String openid, OrderCreateRequest createRequest, String outTradeNo, HttpServletRequest httpServletRequest){
+    private WxPayOrderRequest buildOrderRequest(String openid, OrderCreateRequest createRequest, String outTradeNo, BigDecimal totalCost, HttpServletRequest httpServletRequest){
         WxPayOrderRequest request = new WxPayOrderRequest();
         request.setBody("预约支付测试");
         request.setDetail("预约支付测试详情");
@@ -343,32 +339,33 @@ public class OrderController {
         request.setOpenid(openid);
         request.setOutTradeNo(outTradeNo);
         request.setTradeType("JSAPI");
-        request.setTotalTee(MathUtil.bigYuan2Fee(createRequest.getTotalCost()));
+        request.setTotalTee(MathUtil.bigYuan2Fee(totalCost));
         request.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/order/notify");
         return request;
     }
 
     private void checkParam(OrderCreateRequest request){
         log.info("OrderCreateRequest : {}",request.toString());
-        LocalTime calEndTime = request.getReserveStartTime().plusMinutes(request.getConsultationTime());
-        if(!calEndTime.equals(request.getReserveEndTime())){
-            deleteRedis(request.getDupKey());
+
+        LocalDate reserveDate = DateUtil.toLocalDate(request.getReserveDateTimeStamp());
+        LocalDate nowDate = DateUtil.now().toLocalDate();
+        if (!reserveDate.isAfter(nowDate)){
             throw new GlobalException(CodeMsg.ERROR_RESERVE_TIME);
         }
-        BigDecimal calTotalCost = request.getConsultationCost().multiply(new BigDecimal(request.getConsultationTime() / 10));
-        if(!calTotalCost.equals(request.getTotalCost())){
-            deleteRedis(request.getDupKey());
-            throw new GlobalException(CodeMsg.ERROR_RESERVE_COST);
-        }
+
+        LocalTime calEndTime = request.getReserveStartTime().plusMinutes(10 * request.getConsultationTimeCount());
+
         String tutorId = request.getTutorId();
         String workTimeById = tutorService.getWorkTimeById(tutorId);
         if(StringUtils.isEmpty(workTimeById)){
             throw new GlobalException(CodeMsg.NULL_TUTOR);
         }
+
+        int dayKey = reserveDate.getDayOfWeek().getValue();
         List<WorkTimeVO> workTimeVOS = JSON.parseArray(workTimeById, WorkTimeVO.class);
         for(WorkTimeVO workTime : workTimeVOS){
-            if(workTime.getKey().equals(request.getDayKey())){
-                boolean included = DateUtil.isIncluded(request.getReserveStartTime(), request.getReserveEndTime(), workTime.getStartTime(), workTime.getEndTime());
+            if(workTime.getKey().equals(dayKey)){
+                boolean included = DateUtil.isIncluded(request.getReserveStartTime(), calEndTime, workTime.getStartTime(), workTime.getEndTime());
                 if(!included){
                     deleteRedis(request.getDupKey());
                     throw new GlobalException(CodeMsg.OUT_OF_TIME_RANGE);
@@ -383,15 +380,13 @@ public class OrderController {
     }
 
     private void checkPayResult(WxPayOrderNotifyResult result){
-        log.debug("=== get in check result");
         if(StringUtils.isNotEmpty(result.getReturnMsg())){
-            log.debug("===returnMsg is not empty");
             log.error(result.getReturnMsg());
             throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_SIGN);
         }
 
         if("FAIL".equals(result.getReturnCode())){
-            log.debug("===returnCode is fail");
+            log.error("returnCode is fail");
             throw new GlobalException(CodeMsg.FAIL_PAY_ERROR_COM);
         }
     }

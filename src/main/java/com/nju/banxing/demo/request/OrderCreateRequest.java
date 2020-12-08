@@ -21,9 +21,6 @@ public class OrderCreateRequest implements Serializable {
     @NotNull(message = "dupKey不能为空")
     private String dupKey;
 
-    @NotNull(message = "dayKey不能为空")
-    private Integer dayKey;
-
     @NotNull(message = "tutorId不能为空")
     private String tutorId;
 
@@ -37,27 +34,11 @@ public class OrderCreateRequest implements Serializable {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime reserveStartTime;
 
-    @NotNull(message = "结束时间不能为空")
-    @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime reserveEndTime;
-
     /**
-     * 咨询时长
+     * 咨询时长(totalTime = consultationTimeCount * 10)
      */
     @NotNull(message = "咨询时长不能为空")
-    private Integer consultationTime;
-
-    /**
-     * 咨询单价
-     */
-    @NotNull(message = "咨询单价不能为空")
-    private BigDecimal consultationCost;
-
-    /**
-     * 总费用
-     */
-    @NotNull(message = "咨询总费用不能为空")
-    private BigDecimal totalCost;
+    private Integer consultationTimeCount;
 
     @NotNull(message = "问题描述不能为空")
     private String consultationContent;

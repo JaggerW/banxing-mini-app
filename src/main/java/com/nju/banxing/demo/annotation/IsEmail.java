@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.annotation;
 
+import com.nju.banxing.demo.validator.IsEmailValidator;
 import com.nju.banxing.demo.validator.IsMobileValidator;
 
 import javax.validation.Constraint;
@@ -15,7 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(
-        validatedBy = {IsMobileValidator.class}
+        validatedBy = {IsEmailValidator.class}
 )
 public @interface IsEmail {
     // email是否可以为空，默认是不能为空

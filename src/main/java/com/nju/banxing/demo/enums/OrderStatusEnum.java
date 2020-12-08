@@ -31,13 +31,13 @@ public enum OrderStatusEnum {
         @Override
         public OrderStatusEnum getNext(boolean successFlag) {
             if(successFlag){
-                return TUTOR_ACCEPT;
+                return ORDER_PROCESSING;
             }else {
-                return TUTOR_REFUSE;
+                return APPLY_REFUND;
             }
         }
     },
-    TUTOR_ACCEPT(40,"导师已确认"){
+    ORDER_PROCESSING(40,"订单进行中"){
         @Override
         public OrderStatusEnum getNext(boolean successFlag) {
             return ORDER_COMPLETE;
@@ -63,7 +63,7 @@ public enum OrderStatusEnum {
             return null;
         }
     },
-    TUTOR_REFUSE(140,"导师已拒绝"){
+    APPLY_REFUND(140,"申请退款中"){
         @Override
         public OrderStatusEnum getNext(boolean successFlag) {
             return ORDER_REFUNDED;

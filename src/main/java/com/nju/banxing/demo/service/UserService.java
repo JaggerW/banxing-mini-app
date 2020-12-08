@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
+import com.nju.banxing.demo.domain.ReadDO;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
@@ -32,6 +33,9 @@ public class UserService {
 
     @Autowired
     private TutorMapper tutorMapper;
+
+    @Autowired
+    private ReadService readService;
 
     @Autowired
     private RedisService redisService;
@@ -66,6 +70,7 @@ public class UserService {
      * @param info
      * @return
      */
+    @Transactional
     public boolean insertUser(String openid, UserRegisterRequest request, WxUserInfo info) {
 
         UserDO userDO = new UserDO();
@@ -94,21 +99,10 @@ public class UserService {
         userDO.setCreator(openid);
         userDO.setModifier(openid);
 
-//        Date curDate = DateUtil.getCurrentDate();
-//        userDO.setAdminFlag(false);
-//        userDO.setCreateTime(curDate);
-//        userDO.setCreator(openid);
-//        userDO.setEmailPermission(true);
-//        userDO.setLatestLoginTime(curDate);
-//        userDO.setLoginCount(1L);
-//        userDO.setModifier(openid);
-//        userDO.setModifyTime(curDate);
-//        userDO.setRegisterTime(curDate);
-//        userDO.setSmsPermission(true);
-//        userDO.setTutorFlag(false);
-//        userDO.setExtension(null);
+        ReadDO readDO = new ReadDO();
+        readDO.setId(openid);
 
-        return userMapper.insert(userDO) > 0;
+        return userMapper.insert(userDO) > 0 && readService.insert(readDO) > 0;
     }
 
     /**

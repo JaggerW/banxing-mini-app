@@ -4,6 +4,8 @@ import com.nju.banxing.demo.domain.TutorDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * 导师表 Mapper 接口
@@ -15,4 +17,6 @@ import org.apache.ibatis.annotations.Param;
 public interface TutorMapper extends BaseMapper<TutorDO> {
 
     String getWorkTimeById(@Param("openid") String openid);
+
+    BigDecimal getConsultationCost(@Param("openid") String openid);
 }

@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
-import com.nju.banxing.demo.enums.TutorApplyStatusEnum;
+import com.nju.banxing.demo.enums.TutorReplyStatusEnum;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -97,7 +98,7 @@ public class TutorService {
 
         Page<TutorDO> page = new Page<>(pageIndex, pageSize);
         LambdaQueryWrapper<TutorDO> queryWrapper = new QueryWrapper<TutorDO>().lambda()
-                .eq(TutorDO::getStatus, TutorApplyStatusEnum.VERIFY_PASS.getCode())
+                .eq(TutorDO::getStatus, TutorReplyStatusEnum.VERIFY_PASS.getCode())
                 .eq(TutorDO::getConsultationType, type)
                 .and(StringUtils.isNotEmpty(keyword),
                         qw -> qw.like(TutorDO::getNickName, keyword).or()
@@ -109,6 +110,10 @@ public class TutorService {
 
     public TutorDO getById(String tutorId){
         return tutorMapper.selectById(tutorId);
+    }
+
+    public BigDecimal getConsultationCost(String tutorId){
+        return tutorMapper.getConsultationCost(tutorId);
     }
 
 }
