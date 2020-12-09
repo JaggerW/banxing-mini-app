@@ -147,6 +147,8 @@ public class UserController {
             return SingleResult.error(CodeMsg.ERROR_VER_CODE);
         }
 
+        // TODO 判断用户重复
+
         // 获取用户加密数据 (try-catch:sessionKey过期->重新登陆)
         try {
             WxUserInfo userInfo = weixinService.getUserInfo(sessionKey, registerRequest.getSignature(),

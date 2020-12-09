@@ -44,6 +44,10 @@ public class UserService {
         return userMapper.selectById(openid);
     }
 
+    public boolean deleteUser(String openid){
+        return userMapper.deleteById(openid) > 0;
+    }
+
     public UserDO getByToken(String token) {
         String openid = getOpenidByToken(token);
         if (!StringUtils.isEmpty(openid)) {
@@ -132,18 +136,12 @@ public class UserService {
 
     @Transactional
     public boolean updateUserInfo(String openid, UserRegisterRequest registerRequest){
-        // 设置咨询类型，可多选
-        int consultationType = 0;
-        for (int type : registerRequest.getConsultationTypeList()) {
-            consultationType |= type;
-        }
         int update = userMapper.update(null,
                 new UpdateWrapper<UserDO>().lambda()
                         .eq(UserDO::getId, openid)
                         .set(UserDO::getNickName, registerRequest.getNickName())
                         .set(UserDO::getEmail, registerRequest.getEmail())
                         .set(UserDO::getMobile, registerRequest.getMobile())
-                        .set(UserDO::getConsultationType, consultationType)
                         .set(UserDO::getModifyTime, DateUtil.now())
                         .set(UserDO::getModifier,openid));
 

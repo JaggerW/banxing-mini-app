@@ -31,8 +31,6 @@ import java.util.Map;
 @Slf4j
 public class MethodLogAspect {
 
-    // TODO 入参打印有问题
-    // TODO 异常栈打印有问题
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
@@ -53,7 +51,7 @@ public class MethodLogAspect {
         log.info("HTTP Method    : {}", request.getMethod());
         log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         log.info("IP             : {}", NetworkUtil.getIpAddress(request));
-//        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
+        log.info("Request Args   : {}", JSON.toJSONString(getRequestParamsByJoinPoint(joinPoint)));
 
     }
 
@@ -78,7 +76,7 @@ public class MethodLogAspect {
         requestInfo.setHttpMethod(request.getMethod());
         requestInfo.setClassMethod(String.format("%s.%s", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
                 proceedingJoinPoint.getSignature().getName()));
-//        requestInfo.setRequestParams(getRequestParamsByProceedingJoinPoint(proceedingJoinPoint));
+        requestInfo.setRequestParams(getRequestParamsByProceedingJoinPoint(proceedingJoinPoint));
         requestInfo.setResult(result);
         requestInfo.setTimeCost(System.currentTimeMillis() - start);
         log.info("===============METHOD INFO================= : {} =====================================",
@@ -96,13 +94,7 @@ public class MethodLogAspect {
      */
     @AfterThrowing(pointcut = "methodLog()", throwing = "e")
     public void doAfterThrow(JoinPoint joinPoint, RuntimeException e) {
-        e.printStackTrace();
-        log.error("===e.toString()===");
-        log.error(e.toString());
-        log.error("===e.getMessage()===");
-        log.error(e.getMessage());
-        log.error("===e.getLocalizedMessage()");
-        log.error(e.getLocalizedMessage());
+        log.error("=====doAfterThrow: ",e);
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         MethodErrorInfo requestErrorInfo = new MethodErrorInfo();
@@ -112,7 +104,7 @@ public class MethodLogAspect {
         requestErrorInfo.setHttpMethod(request.getMethod());
         requestErrorInfo.setClassMethod(String.format("%s.%s", joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName()));
-//        requestErrorInfo.setRequestParams(getRequestParamsByJoinPoint(joinPoint));
+        requestErrorInfo.setRequestParams(getRequestParamsByJoinPoint(joinPoint));
         requestErrorInfo.setExceptionMsg(e.getMessage());
         log.error("=============== Error Request Info   : {} ===============", JSON.toJSONString(requestErrorInfo));
     }

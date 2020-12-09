@@ -1,7 +1,11 @@
 package com.nju.banxing.demo.controller;
 
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.util.DateUtil;
 import com.sun.media.sound.SoftTuning;
+import jdk.internal.org.objectweb.asm.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import sun.font.Decoration;
 
 import java.awt.*;
@@ -17,16 +21,10 @@ import java.util.Map;
  * @Description: test
  * @Date: 2020/11/4
  */
+@Slf4j
 public class Demo{
     public static void main(String[] args) {
 
-        LocalDateTime nextMonday = DateUtil.getNextMonday();
-        LocalDate localDate = nextMonday.toLocalDate();
-        System.out.println(localDate);
-        System.out.println(nextMonday);
-        System.out.println(DateUtil.toTimeStamp(nextMonday));
-        System.out.println(DateUtil.toLocalDate(DateUtil.toTimeStamp(nextMonday)));
-        System.out.println(DateUtil.toLocalDateTime(DateUtil.toTimeStamp(nextMonday)));
 
     }
 }

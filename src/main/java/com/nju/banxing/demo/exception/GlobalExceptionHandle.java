@@ -23,11 +23,7 @@ import java.util.List;
 public class GlobalExceptionHandle {
     @ExceptionHandler(value=Exception.class)
     public SingleResult<String> exceptionHandler(Exception e){
-        e.printStackTrace();
-        // TODO 打印异常栈到日志
-        if(StringUtils.isNotEmpty(e.getMessage())){
-            log.error(e.getMessage());
-        }
+        log.error("=====统一异常处理：",e);
         if(e instanceof GlobalException) {
             GlobalException ex = (GlobalException)e;
             log.error(ex.getCodeMsg().getMsg());
