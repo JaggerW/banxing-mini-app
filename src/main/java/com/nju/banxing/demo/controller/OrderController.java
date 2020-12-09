@@ -173,7 +173,7 @@ public class OrderController {
             log.info(payOrder.toString());
 
             // 订单初始化
-            boolean b = orderService.initOrder(openid, orderCode, totalCost, request);
+            boolean b = orderService.initOrder(openid, orderCode,consultationCost, totalCost, request);
             if(b){
                 return SingleResult.success(payOrder);
             }else {

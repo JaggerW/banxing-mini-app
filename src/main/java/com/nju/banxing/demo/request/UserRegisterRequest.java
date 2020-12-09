@@ -40,8 +40,4 @@ public class UserRegisterRequest implements Serializable {
     @NotNull(message = "请输入验证码")
     private String verCode;
 
-    // 咨询方向(可多选)
-    @NotNull(message = "请选择您要咨询得方向（可多选）")
-    private List<Integer> consultationTypeList;
-
 }

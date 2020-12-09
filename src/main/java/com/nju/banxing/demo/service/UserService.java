@@ -88,13 +88,6 @@ public class UserService {
         userDO.setMobile(request.getMobile());
         userDO.setEmail(request.getEmail());
 
-        // 设置咨询类型，可多选
-        int consultationType = 0;
-        for (int type : request.getConsultationTypeList()) {
-            consultationType |= type;
-        }
-        userDO.setConsultationType(consultationType);
-
         // 默认值
         userDO.setCreator(openid);
         userDO.setModifier(openid);

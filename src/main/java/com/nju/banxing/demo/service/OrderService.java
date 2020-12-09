@@ -54,11 +54,11 @@ public class OrderService {
     private WxMaConfig wxMaConfig;
 
     @Transactional
-    public boolean initOrder(String openid, String orderCode, BigDecimal totalCost, OrderCreateRequest request) {
+    public boolean initOrder(String openid, String orderCode, BigDecimal consultationCost, BigDecimal totalCost, OrderCreateRequest request) {
         log.debug("====ready to insert order");
 
         OrderDO orderDO = new OrderDO();
-        orderDO.setConsultationCost(totalCost);
+        orderDO.setConsultationCost(consultationCost);
         orderDO.setConsultationTime(request.getConsultationTimeCount());
         orderDO.setConsultationType(request.getConsultationType());
         orderDO.setConsultationContent(request.getConsultationContent());

@@ -201,7 +201,7 @@
 
     <!-- springProfile多环境日志输出，据不同环境（prod:生产环境，test:测试环境，dev:开发环境）来定义不同的日志输出-->
     <springProfile name="pre">
-        <root level="TRACE">
+        <root level="INFO">
             <appender-ref ref="FILEERROR"/>
             <!--            <appender-ref ref="FILEWARN"/>-->
             <appender-ref ref="FILEINFO"/>

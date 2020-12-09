@@ -46,11 +46,6 @@ public class UserDO implements Serializable {
     private String email;
 
     /**
-     * 咨询类型：0001，保研；0010，考研
-     */
-    private Integer consultationType;
-
-    /**
      * 头像
      */
     private String avatarUrl;
