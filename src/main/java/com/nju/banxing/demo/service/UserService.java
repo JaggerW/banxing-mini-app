@@ -163,6 +163,6 @@ public class UserService {
     }
 
     public String getMobileById(String openid){
-        return userMapper.getNickNameById(openid);
+        return userMapper.getMobileById(openid);
     }
 }

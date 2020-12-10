@@ -40,6 +40,7 @@ public class AliyunService {
      * @return
      */
     public void sendSMS(AliyunSmsVO param){
+        log.info("==== BEGIN SEND SMS : ");
         DefaultProfile defaultProfile = DefaultProfile.getProfile(
                 AppContantConfig.ALIYUN_REGION_ID,aliyunConfig.getId(),aliyunConfig.getSecret());
         IAcsClient client = new DefaultAcsClient(defaultProfile);
@@ -61,6 +62,7 @@ public class AliyunService {
             log.info(response.getData());
         } catch (ClientException e) {
             e.printStackTrace();
+            log.error("阿里云短信发送异常");
             throw new GlobalException(CodeMsg.SMS_ERROR);
         }
     }

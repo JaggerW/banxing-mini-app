@@ -101,6 +101,7 @@ public class WeixinService {
      * @return
      */
     public boolean sendWxMessage(String userOpenid, String templateId, String page, List<WxMaSubscribeMessage.Data> dataList){
+        log.info("===== BEGIN SEND WX MESSAGE");
         final WxMaService wxMaService = WxMaServiceFactory.getWxMaService();
         WxMaSubscribeMessage message = new WxMaSubscribeMessage();
         message.setData(dataList);
@@ -143,6 +144,7 @@ public class WeixinService {
      * @throws WxPayException
      */
     public WxPayOrderVO createPayOrder(WxPayOrderRequest orderRequest) throws WxPayException {
+        log.info("===== BEGIN WX CREATE PAY ORDER");
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
         WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
 
@@ -170,6 +172,8 @@ public class WeixinService {
     }
 
     public WxPayOrderNotifyResult notifyOrderResult(String xml) throws WxPayException {
+        log.info("===== BEGIN RESOLVE PAY ORDER NOTIFY RESULT");
+
         WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
 
         return wxPayService.parseOrderNotifyResult(xml);
