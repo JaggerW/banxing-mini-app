@@ -74,7 +74,7 @@ public class WeixinService {
      * @return
      * @throws Exception
      */
-    public WxUserInfo getUserInfo(String sessionKey, String signature, String rawData, String encryptedData, String iv) throws Exception{
+    public WxUserInfo getUserInfo(String sessionKey, String signature, String rawData, String encryptedData, String iv) {
         log.info("获取微信用户信息,sessionKey:{},signature:{},rawData:{},encryptedData:{},iv:{}",
                 sessionKey,signature,rawData,encryptedData,iv);
         final WxMaService wxMaService = WxMaServiceFactory.getWxMaService();

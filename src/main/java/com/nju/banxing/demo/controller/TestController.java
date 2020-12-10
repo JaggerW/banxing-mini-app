@@ -28,4 +28,12 @@ public class TestController {
         return SingleResult.success(b);
     }
 
+    @PostMapping("/test")
+    @MethodLog("测试")
+    public SingleResult<Boolean> test(){
+        int i = 0;
+        System.out.println(1/i);
+        return SingleResult.success(true);
+    }
+
 }

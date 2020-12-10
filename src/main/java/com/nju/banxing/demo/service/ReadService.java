@@ -16,8 +16,12 @@ public class ReadService {
     @Autowired
     private ReadMapper readMapper;
 
-    public int insert(ReadDO readDO){
-        return readMapper.insert(readDO);
+    public boolean insert(ReadDO readDO){
+        return readMapper.insert(readDO) > 0;
+    }
+
+    public boolean delete(String openid){
+        return readMapper.deleteById(openid) > 0;
     }
 
 }

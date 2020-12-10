@@ -147,27 +147,18 @@ public class UserController {
             return SingleResult.error(CodeMsg.ERROR_VER_CODE);
         }
 
-        // TODO 判断用户重复
+        Boolean existUser = userService.existUser(openid);
+        if(existUser){
+            return SingleResult.error(CodeMsg.DUP_USER);
+        }
 
         // 获取用户加密数据 (try-catch:sessionKey过期->重新登陆)
-        try {
-            WxUserInfo userInfo = weixinService.getUserInfo(sessionKey, registerRequest.getSignature(),
-                    registerRequest.getRawData(), registerRequest.getEncryptedData(), registerRequest.getIv());
+        WxUserInfo userInfo = weixinService.getUserInfo(sessionKey, registerRequest.getSignature(),
+                registerRequest.getRawData(), registerRequest.getEncryptedData(), registerRequest.getIv());
 
-            // 插入数据库
-            boolean flag = userService.insertUser(openid, registerRequest, userInfo);
-            return flag ? SingleResult.success(true) : SingleResult.error(CodeMsg.FAIL_REGISTER);
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (e instanceof GlobalException) {
-                GlobalException ge = (GlobalException) e;
-                CodeMsg cm = ge.getCodeMsg();
-                log.error(cm.getMsg());
-                return SingleResult.error(cm);
-            } else {
-                return SingleResult.error(CodeMsg.SERVER_ERROR);
-            }
-        }
+        // 插入数据库
+        boolean flag = userService.insertUser(openid, registerRequest, userInfo);
+        return flag ? SingleResult.success(true) : SingleResult.error(CodeMsg.FAIL_REGISTER);
     }
 
     @MethodLog("获取当前用户信息")

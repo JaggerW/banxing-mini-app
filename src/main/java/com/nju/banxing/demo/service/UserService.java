@@ -14,6 +14,7 @@ import com.nju.banxing.demo.request.UserRegisterRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.vo.UserInfoVO;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.cmp.OOBCertHash;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,8 +45,9 @@ public class UserService {
         return userMapper.selectById(openid);
     }
 
+    @Transactional
     public boolean deleteUser(String openid){
-        return userMapper.deleteById(openid) > 0;
+        return userMapper.deleteById(openid) > 0 && readService.delete(openid);
     }
 
     public UserDO getByToken(String token) {
@@ -96,10 +98,11 @@ public class UserService {
         userDO.setCreator(openid);
         userDO.setModifier(openid);
 
+        // 插入已读记录表
         ReadDO readDO = new ReadDO();
         readDO.setId(openid);
 
-        return userMapper.insert(userDO) > 0 && readService.insert(readDO) > 0;
+        return userMapper.insert(userDO) > 0 && readService.insert(readDO);
     }
 
     /**

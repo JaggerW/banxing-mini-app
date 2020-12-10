@@ -177,7 +177,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%black(console-) %red(%d{yyyy-MM-dd HH:mm:ss.SSS})  %green([%thread]) %highlight(%-5level) %boldMagenta(%logger) Line:%-3L - %cyan(%msg%n)</pattern>
-            <!--<charset>GBK</charset>-->
+<!--            <charset>GBK</charset>-->
         </encoder>
     </appender>
     <!--
@@ -205,16 +205,16 @@
             <appender-ref ref="FILEERROR"/>
             <!--            <appender-ref ref="FILEWARN"/>-->
             <appender-ref ref="FILEINFO"/>
-            <!--            <appender-ref ref="STDOUT"/>-->
+<!--                        <appender-ref ref="CONSOLE"/>-->
         </root>
     </springProfile>
 
 
     <springProfile name="daily">
-        <root level="TRACE">
+        <root level="INFO">
             <!--            <appender-ref ref="FILEERROR"/>-->
             <!--            <appender-ref ref="FILEWARN"/>-->
-            <appender-ref ref="FILEINFO"/>
+<!--            <appender-ref ref="FILEINFO"/>-->
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>

@@ -30,10 +30,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
     private UserService userService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//        // TODO for dev
-//        return true;
-
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         String path = request.getServletPath();
         if (ignore(path)) {
@@ -45,6 +42,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
             log.debug(token);
             return true;
         }else {
+            log.error("===不存在token");
             String ipAddress = NetworkUtil.getIpAddress(request);
             MethodErrorInfo requestErrorInfo = new MethodErrorInfo();
             requestErrorInfo.setIp(ipAddress);
