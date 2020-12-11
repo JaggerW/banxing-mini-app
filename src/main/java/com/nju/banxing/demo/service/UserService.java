@@ -139,7 +139,7 @@ public class UserService {
 
     @Transactional
     public boolean updateUserInfo(String openid, UserRegisterRequest registerRequest){
-        int update = userMapper.update(null,
+        int userUpdate = userMapper.update(null,
                 new UpdateWrapper<UserDO>().lambda()
                         .eq(UserDO::getId, openid)
                         .set(UserDO::getNickName, registerRequest.getNickName())
@@ -148,14 +148,14 @@ public class UserService {
                         .set(UserDO::getModifyTime, DateUtil.now())
                         .set(UserDO::getModifier,openid));
 
-        tutorMapper.update(null,
+        int tutorUpdate = tutorMapper.update(null,
                 new UpdateWrapper<TutorDO>().lambda()
                         .eq(TutorDO::getId, openid)
                         .set(TutorDO::getNickName, registerRequest.getNickName())
                         .set(TutorDO::getModifyTime, DateUtil.now())
                         .set(TutorDO::getCreator, openid));
 
-        return update>0;
+        return userUpdate>0&&tutorUpdate>0;
     }
 
     public String getNickNameById(String openid){

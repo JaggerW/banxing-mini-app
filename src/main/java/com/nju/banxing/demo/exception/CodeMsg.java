@@ -35,6 +35,7 @@ public class CodeMsg {
     public static final CodeMsg NULL_TUTOR = new CodeMsg(107,"该导师不存在");
     public static final CodeMsg FAIL_UPDATE = new CodeMsg(108,"提交失败，请重新进行更改");
     public static final CodeMsg DUP_USER = new CodeMsg(109,"用户已存在，不可重复注册");
+    public static final CodeMsg FAIL_UPDATE_TUTOR = new CodeMsg(110,"导师信息更新失败");
 
     // 服务端 订单
     public static final CodeMsg ERROR_ORDER = new CodeMsg(500, "下单失败");

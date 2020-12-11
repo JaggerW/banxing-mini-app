@@ -3,13 +3,18 @@ package com.nju.banxing.demo.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.enums.TutorReplyStatusEnum;
+import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.request.TutorReapplyRequest;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
+import com.nju.banxing.demo.request.TutorUpdateRequest;
+import com.nju.banxing.demo.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -53,13 +58,49 @@ public class TutorService {
         tutorDO.setKeyword(request.getCurrentUniversity() + request.getCurrentProfession());
         tutorDO.setCreator(openid);
         tutorDO.setModifier(openid);
-        // TODO forTEST
-        tutorDO.setStatus(1);
-
+        tutorDO.setStatus(TutorStatusEnum.TO_CONFIRM.getCode());
         String nickName = userMapper.getNickNameById(openid);
         tutorDO.setNickName(nickName);
 
         return tutorMapper.insert(tutorDO) > 0;
+    }
+
+    /**
+     * 重新提交审核信息
+     * @param openid
+     * @param request
+     * @return
+     */
+    public boolean reapply(String openid, TutorReapplyRequest request){
+        int update = tutorMapper.update(null,
+                new UpdateWrapper<TutorDO>().lambda()
+                        .eq(TutorDO::getId, openid)
+                        .set(TutorDO::getCurrentUniversity, request.getCurrentUniversity())
+                        .set(TutorDO::getCurrentProfession, request.getCurrentProfession())
+                        .set(TutorDO::getKeyword,request.getCurrentUniversity()+request.getCurrentProfession())
+                        .set(TutorDO::getStudentCardHome, request.getStudentCardHome())
+                        .set(TutorDO::getStudentCardInfo, request.getStudentCardInfo())
+                        .set(TutorDO::getStudentCardRegister, request.getStudentCardRegister())
+                        .set(TutorDO::getStatus,TutorStatusEnum.TO_CONFIRM.getCode())
+                        .set(TutorDO::getModifyTime, DateUtil.now())
+                        .set(TutorDO::getModifier, openid));
+        return update>0;
+    }
+
+    /**
+     * 更新导师基本信息
+     * @param openid
+     * @param request
+     * @return
+     */
+    public boolean update(String openid, TutorUpdateRequest request){
+        TutorDO tutorDO = new TutorDO();
+        BeanUtils.copyProperties(request, tutorDO);
+        tutorDO.setId(openid);
+        tutorDO.setWorkTime(JSON.toJSONString(request.getWorkTimeList()));
+        tutorDO.setModifier(openid);
+        return tutorMapper.updateById(tutorDO) > 0;
+
     }
 
     /**
