@@ -1,22 +1,24 @@
 package com.nju.banxing.demo.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
-import com.nju.banxing.demo.request.BaseTutorInfo;
-import com.nju.banxing.demo.request.TutorReapplyRequest;
-import com.nju.banxing.demo.request.TutorRegisterRequest;
-import com.nju.banxing.demo.request.TutorUpdateRequest;
+import com.nju.banxing.demo.request.*;
 import com.nju.banxing.demo.service.AliyunService;
+import com.nju.banxing.demo.service.OrderService;
 import com.nju.banxing.demo.service.TutorService;
+import com.nju.banxing.demo.service.UserService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
+import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
 import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -29,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: jaggerw
@@ -46,6 +49,36 @@ public class TutorController {
 
     @Autowired
     private AliyunService aliyunService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/reserve_list")
+    @MethodLog("获取预约申请列表")
+    public PagedResult<ReserveOrderInfoVO> getReserveList(String openid,
+                                                          ReserveOrderListQuery query){
+        IPage<OrderDO> orderList = orderService.getOrderListByTutorIdAndTutorStatus(openid, query.getStatus(), query.getPageIndex(), query.getPageSize());
+        List<ReserveOrderInfoVO> data = buildReserveVO(orderList);
+        return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
+    }
+
+    private List<ReserveOrderInfoVO> buildReserveVO(IPage<OrderDO> orderList) {
+        return orderList.getRecords().stream().map(orderDO -> {
+            ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
+            vo.setConsultationContent(orderDO.getConsultationContent());
+            vo.setOrderCode(orderDO.getId());
+            vo.setReserveDate(orderDO.getReserveDate());
+            vo.setReserveStartTime(orderDO.getReserveStartTime());
+            vo.setReserveEndTime(orderDO.getReserveEndTime());
+            vo.setResumeUrl(orderDO.getResumeUrl());
+            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(orderDO.getReserveDate()));
+            vo.setNickName(userService.getNickNameById(orderDO.getUserId()));
+            return vo;
+        }).collect(Collectors.toList());
+    }
 
     @PostMapping("/register")
     @MethodLog("申请注册导师")

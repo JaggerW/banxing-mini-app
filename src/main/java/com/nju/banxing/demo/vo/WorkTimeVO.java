@@ -2,11 +2,12 @@ package com.nju.banxing.demo.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.nju.banxing.demo.common.TimePair;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -24,8 +25,8 @@ public class WorkTimeVO extends TimePair {
     private Long dateTimeStamp;
 
     @JsonFormat(pattern = "MM月dd日")
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime date;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate date;
 
     private Integer startTimeSecondOfDay;
     private Integer endTimeSecondOfDay;

@@ -1,7 +1,11 @@
 package com.nju.banxing.demo.service;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.config.WxMaConfig;
@@ -14,6 +18,7 @@ import com.nju.banxing.demo.domain.mapper.OrderMapper;
 import com.nju.banxing.demo.enums.CoinProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
+import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
@@ -143,7 +148,7 @@ public class OrderService {
 
             // 更新订单状态
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(true);
-            int updateOrder = updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
+            int updateOrder = updateOrder4SuccessPay(orderCode, nextOrderStatus.getCode(), version);
 
             // 插入订单流水
             OrderLogDO orderLogDO = new OrderLogDO();
@@ -160,6 +165,7 @@ public class OrderService {
             orderLogDO.setProcessContent("支付成功："+ JSON.toJSONString(successMap));
             int insertOrderLog = orderLogMapper.insert(orderLogDO);
 
+            // TODO 将资金表相关移至导师处理处
             // 更新用户资金表
             CoinDO coinDO = coinService.selectByOpenid(tutorId);
             if(null == coinDO){
@@ -196,6 +202,14 @@ public class OrderService {
         return true;
     }
 
+    public IPage<OrderDO> getOrderListByTutorIdAndTutorStatus(String tutorId, Integer tutorStatus, Long pageIndex, Long pageSize){
+        Page<OrderDO> page = new Page<>(pageIndex,pageSize);
+        LambdaQueryWrapper<OrderDO> queryWrapper = new QueryWrapper<OrderDO>().lambda()
+                .eq(OrderDO::getTutorId, tutorId)
+                .eq(OrderDO::getTutorStatus, tutorStatus);
+        return orderMapper.selectPage(page,queryWrapper);
+    }
+
     public String getTutorMobileByOrderCode(String orderCode){
         String tutorId = orderMapper.getTutorIdByCode(orderCode);
         return userService.getMobileById(tutorId);
@@ -219,6 +233,16 @@ public class OrderService {
                         .eq(OrderDO::getId,orderCode)
                         .eq(OrderDO::getVersion,version)
                         .set(OrderDO::getOrderStatus,orderStatus)
+                        .set(OrderDO::getVersion,version+1));
+    }
+
+    private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version){
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId,orderCode)
+                        .eq(OrderDO::getVersion,version)
+                        .set(OrderDO::getOrderStatus,orderStatus)
+                        .set(OrderDO::getTutorStatus, TutorStatusEnum.TO_CONFIRM.getCode())
                         .set(OrderDO::getVersion,version+1));
     }
 }

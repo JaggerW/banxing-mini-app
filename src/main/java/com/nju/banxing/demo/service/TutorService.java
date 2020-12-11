@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
-import com.nju.banxing.demo.enums.TutorReplyStatusEnum;
+import com.nju.banxing.demo.enums.TutorApplyStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.request.TutorReapplyRequest;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
@@ -58,7 +58,7 @@ public class TutorService {
         tutorDO.setKeyword(request.getCurrentUniversity() + request.getCurrentProfession());
         tutorDO.setCreator(openid);
         tutorDO.setModifier(openid);
-        tutorDO.setStatus(TutorStatusEnum.TO_CONFIRM.getCode());
+        tutorDO.setStatus(TutorApplyStatusEnum.TO_VERIFY.getCode());
         String nickName = userMapper.getNickNameById(openid);
         tutorDO.setNickName(nickName);
 
@@ -81,7 +81,7 @@ public class TutorService {
                         .set(TutorDO::getStudentCardHome, request.getStudentCardHome())
                         .set(TutorDO::getStudentCardInfo, request.getStudentCardInfo())
                         .set(TutorDO::getStudentCardRegister, request.getStudentCardRegister())
-                        .set(TutorDO::getStatus,TutorStatusEnum.TO_CONFIRM.getCode())
+                        .set(TutorDO::getStatus,TutorApplyStatusEnum.TO_VERIFY.getCode())
                         .set(TutorDO::getModifyTime, DateUtil.now())
                         .set(TutorDO::getModifier, openid));
         return update>0;
@@ -139,7 +139,7 @@ public class TutorService {
 
         Page<TutorDO> page = new Page<>(pageIndex, pageSize);
         LambdaQueryWrapper<TutorDO> queryWrapper = new QueryWrapper<TutorDO>().lambda()
-                .eq(TutorDO::getStatus, TutorReplyStatusEnum.VERIFY_PASS.getCode())
+                .eq(TutorDO::getStatus, TutorApplyStatusEnum.VERIFY_PASS.getCode())
                 .eq(TutorDO::getConsultationType, type)
                 .and(StringUtils.isNotEmpty(keyword),
                         qw -> qw.like(TutorDO::getNickName, keyword).or()

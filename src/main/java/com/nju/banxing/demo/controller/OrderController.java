@@ -128,8 +128,8 @@ public class OrderController {
                 workTimeVO.setStartTimeSecondOfDay(DateUtil.getSecond(startTime));
                 workTimeVO.setEndTimeSecondOfDay(DateUtil.getSecond(endTime));
                 workTimeVO.setKey(timePair.getKey());
-                workTimeVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime));
-                workTimeVO.setDate(dateTime);
+                workTimeVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime.toLocalDate()));
+                workTimeVO.setDate(dateTime.toLocalDate());
                 workTimeVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));
                 list.add(workTimeVO);
             }
@@ -328,8 +328,8 @@ public class OrderController {
         reserveVO.setEndTimeSecondOfDay(DateUtil.getSecond(entTime));
 
         LocalDateTime dateTime = DateUtil.getNextDayOfWeek(dayKey);
-        reserveVO.setDate(dateTime);
-        reserveVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime));
+        reserveVO.setDate(dateTime.toLocalDate());
+        reserveVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime.toLocalDate()));
 
         reserveVO.setKey(dayKey);
         reserveVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));

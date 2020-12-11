@@ -1,15 +1,14 @@
 package com.nju.banxing.demo.enums;
 
-import lombok.Getter;
 
 /**
  * @Author: jaggerw
  * @Description: 订单中导师回复状态
  * @Date: 2020/11/27
  */
-@Getter
 public enum TutorStatusEnum {
 
+    NULL(-1,"无状态"),
     TO_CONFIRM(0,"待确认"),
     ACCEPTED(1,"已接受"),
     REFUSED(2, "已拒绝"),
