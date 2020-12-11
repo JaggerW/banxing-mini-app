@@ -46,6 +46,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @Author: jaggerw
@@ -74,15 +76,14 @@ public class OrderController {
 
     @GetMapping("/to_reserve")
     @MethodLog("打开预约界面")
-    public SingleResult<ReserveVO> toReserve(@RequestParam(value = "tutorId") String tutorId,
-                                             @RequestParam(value = "dayKey") Integer day){
+    public SingleResult<ReserveVO> toReserve(@RequestParam(value = "tutorId") String tutorId){
 
         TutorDO tutorDO = tutorService.getById(tutorId);
         if(ObjectUtils.isEmpty(tutorDO)){
             return SingleResult.error(CodeMsg.NULL_TUTOR);
         }
 
-        ReserveVO reserveVO = buildReserveVO(tutorDO, day);
+        ReserveVO reserveVO = buildReserveVO(tutorDO);
         return SingleResult.success(reserveVO);
 
     }
@@ -262,7 +263,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/query_result")
+    @GetMapping("/query_status")
     @MethodLog("查询微信支付结果")
     public SingleResult<Integer> queryPay(@RequestParam(value = "orderCode") String orderCode){
 
@@ -294,7 +295,7 @@ public class OrderController {
         }
     }
 
-    private ReserveVO buildReserveVO(TutorDO tutorDO, Integer day){
+    private ReserveVO buildReserveVO(TutorDO tutorDO){
         ReserveVO reserveVO = new ReserveVO();
         reserveVO.setConsultationCost(tutorDO.getConsultationCost());
         reserveVO.setConsultationType(tutorDO.getConsultationType());
@@ -304,11 +305,17 @@ public class OrderController {
 
         // 设置时间
         String workTime = tutorDO.getWorkTime();
-        List<TimePair> timePairs = JSON.parseArray(workTime, TimePair.class);
+        log.info("==== RESOLVE WORK TIME FROM JSON_STRING");
+        Map<Integer, TimePair> timePairMap = JSON.parseArray(workTime, TimePair.class).stream().collect(Collectors.toMap(TimePair::getKey, Function.identity()));
+        log.info("==== WORK TIME MAP IS : " + timePairMap.toString());
         LocalTime startTime = LocalTime.of(0,0,0,0);
         LocalTime entTime = LocalTime.of(0,0,0,0);
-        for(TimePair timePair : timePairs){
-            if(day.equals(timePair.getKey())){
+        int dayKey = DateUtil.now().getDayOfWeek().getValue();
+        for (int i = 0; i < 7; i++) {
+            dayKey = (dayKey -1 + i)%7+1;
+            TimePair timePair = timePairMap.get(dayKey);
+            boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
+            if(!b){
                 startTime = timePair.getStartTime();
                 entTime = timePair.getEndTime();
                 break;
@@ -320,11 +327,11 @@ public class OrderController {
         reserveVO.setEndTime(entTime);
         reserveVO.setEndTimeSecondOfDay(DateUtil.getSecond(entTime));
 
-        LocalDateTime dateTime = DateUtil.getNextDayOfWeek(day);
+        LocalDateTime dateTime = DateUtil.getNextDayOfWeek(dayKey);
         reserveVO.setDate(dateTime);
         reserveVO.setDateTimeStamp(DateUtil.toTimeStamp(dateTime));
 
-        reserveVO.setKey(day);
+        reserveVO.setKey(dayKey);
         reserveVO.setDayOfWeek(DateUtil.getNameDayOfWeek(dateTime));
 
         return reserveVO;
