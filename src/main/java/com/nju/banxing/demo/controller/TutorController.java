@@ -65,21 +65,6 @@ public class TutorController {
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
     }
 
-    private List<ReserveOrderInfoVO> buildReserveVO(IPage<OrderDO> orderList) {
-        return orderList.getRecords().stream().map(orderDO -> {
-            ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
-            vo.setConsultationContent(orderDO.getConsultationContent());
-            vo.setOrderCode(orderDO.getId());
-            vo.setReserveDate(orderDO.getReserveDate());
-            vo.setReserveStartTime(orderDO.getReserveStartTime());
-            vo.setReserveEndTime(orderDO.getReserveEndTime());
-            vo.setResumeUrl(orderDO.getResumeUrl());
-            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(orderDO.getReserveDate()));
-            vo.setNickName(userService.getNickNameById(orderDO.getUserId()));
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
     @PostMapping("/register")
     @MethodLog("申请注册导师")
     public SingleResult<Boolean> register(String openid,
@@ -158,6 +143,21 @@ public class TutorController {
             e.printStackTrace();
             return SingleResult.error(CodeMsg.FAIL_UPLOAD);
         }
+    }
+
+    private List<ReserveOrderInfoVO> buildReserveVO(IPage<OrderDO> orderList) {
+        return orderList.getRecords().stream().map(orderDO -> {
+            ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
+            vo.setConsultationContent(orderDO.getConsultationContent());
+            vo.setOrderCode(orderDO.getId());
+            vo.setReserveDate(orderDO.getReserveDate());
+            vo.setReserveStartTime(orderDO.getReserveStartTime());
+            vo.setReserveEndTime(orderDO.getReserveEndTime());
+            vo.setResumeUrl(orderDO.getResumeUrl());
+            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(orderDO.getReserveDate()));
+            vo.setNickName(userService.getNickNameById(orderDO.getUserId()));
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     private void checkParam(BaseTutorInfo request){
