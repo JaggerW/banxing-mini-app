@@ -220,6 +220,10 @@ public class OrderService {
         return mapPage;
     }
 
+    public Map<String, Object> getOrderDetailByOrderCodeAndTutorId(String orderCode, String tutorId){
+        return orderMapper.getOrderDetailByOrderCodeAndTutorId(orderCode,tutorId);
+    }
+
     public String getTutorMobileByOrderCode(String orderCode) {
         String tutorId = orderMapper.getTutorIdByCode(orderCode);
         return userService.getMobileById(tutorId);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,9 +26,12 @@ public class ReserveOrderInfoVO implements Serializable {
     @JsonFormat(pattern = "MM月dd日")
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate reserveDate;
-    private Long reserveDateTimeStamp;
+
+    @JsonFormat(pattern = "HH:mm")
+    @JsonSerialize(using = LocalTimeSerializer.class)
     private LocalTime reserveStartTime;
+
+    @JsonFormat(pattern = "HH:mm")
+    @JsonSerialize(using = LocalTimeSerializer.class)
     private LocalTime reserveEndTime;
-    private String consultationContent;
-    private String resumeUrl;
 }

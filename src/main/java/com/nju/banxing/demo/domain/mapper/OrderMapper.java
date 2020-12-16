@@ -44,4 +44,8 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
                                                                   @Param("orderStatus") Integer orderStatus,
                                                                   @Param("offset") Long offset,
                                                                   @Param("pageSize") Long pageSize);
+
+    Map<String, Object> getOrderDetailByOrderCodeAndTutorId(@Param("orderCode") String orderCode,
+                                                            @Param("tutorId") String tutorId);
+
 }

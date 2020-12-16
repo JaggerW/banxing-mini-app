@@ -15,6 +15,7 @@ import com.nju.banxing.demo.service.OrderService;
 import com.nju.banxing.demo.service.TutorService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
+import com.nju.banxing.demo.vo.ReserveOrderDetailVO;
 import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -59,6 +60,15 @@ public class TutorController {
         IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<ReserveOrderInfoVO> data = buildReserveVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
+    }
+
+    @GetMapping("/reserve_detail")
+    @MethodLog("获取预约申请详情")
+    public SingleResult<ReserveOrderDetailVO> getReserveDetail(String openid,
+                                                               @RequestParam("orderCode") String orderCode){
+        Map<String, Object> voMap = orderService.getOrderDetailByOrderCodeAndTutorId(orderCode, openid);
+        ReserveOrderDetailVO detailVO = buildReserveDetail(voMap);
+        return SingleResult.success(detailVO);
     }
 
     @PostMapping("/register")
@@ -144,7 +154,6 @@ public class TutorController {
     private List<ReserveOrderInfoVO> buildReserveVO(IPage<Map<String, Object>> orderList) {
         return orderList.getRecords().stream().map(map -> {
             ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
-            vo.setConsultationContent((String) map.get("consultationContent"));
             vo.setOrderCode((String) map.get("orderCode"));
             Date reserveDate = (Date) map.get("reserveDate");
             Time startTime = (Time) map.get("startTime");
@@ -152,11 +161,26 @@ public class TutorController {
             vo.setReserveDate(reserveDate.toLocalDate());
             vo.setReserveStartTime(startTime.toLocalTime());
             vo.setReserveEndTime(endTime.toLocalTime());
-            vo.setResumeUrl((String) map.get("resumeUrl"));
-            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(reserveDate.toLocalDate()));
             vo.setNickName((String) map.get("userName"));
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    private ReserveOrderDetailVO buildReserveDetail(Map<String, Object> voMap){
+        ReserveOrderDetailVO vo = new ReserveOrderDetailVO();
+        vo.setConferenceLink((String) voMap.get("conferenceLink"));
+        vo.setConsultationContent((String) voMap.get("consultationContent"));
+        vo.setRejectReason((String) voMap.get("rejectReason"));
+        vo.setResumeUrl((String) voMap.get("resumeUrl"));
+        vo.setNickName((String) voMap.get("userName"));
+        vo.setOrderCode((String) voMap.get("orderCode"));
+        Date reserveDate = (Date) voMap.get("reserveDate");
+        Time startTime = (Time) voMap.get("startTime");
+        Time endTime = (Time) voMap.get("endTime");
+        vo.setReserveDate(reserveDate.toLocalDate());
+        vo.setReserveStartTime(startTime.toLocalTime());
+        vo.setReserveEndTime(endTime.toLocalTime());
+        return vo;
     }
 
     private void checkParam(BaseTutorInfo request){
