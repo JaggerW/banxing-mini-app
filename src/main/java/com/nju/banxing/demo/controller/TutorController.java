@@ -6,7 +6,6 @@ import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
-import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
@@ -14,12 +13,9 @@ import com.nju.banxing.demo.request.*;
 import com.nju.banxing.demo.service.AliyunService;
 import com.nju.banxing.demo.service.OrderService;
 import com.nju.banxing.demo.service.TutorService;
-import com.nju.banxing.demo.service.UserService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
-import com.nju.banxing.demo.vo.AliyunSmsVO;
 import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
-import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -28,10 +24,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.sql.Time;
+import java.sql.Date;
 
 /**
  * @Author: jaggerw
@@ -53,14 +52,11 @@ public class TutorController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private UserService userService;
-
     @GetMapping("/reserve_list")
     @MethodLog("获取预约申请列表")
     public PagedResult<ReserveOrderInfoVO> getReserveList(String openid,
                                                           ReserveOrderListQuery query){
-        IPage<OrderDO> orderList = orderService.getOrderListByTutorIdAndTutorStatus(openid, query.getStatus(), query.getPageIndex(), query.getPageSize());
+        IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<ReserveOrderInfoVO> data = buildReserveVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
     }
@@ -145,17 +141,20 @@ public class TutorController {
         }
     }
 
-    private List<ReserveOrderInfoVO> buildReserveVO(IPage<OrderDO> orderList) {
-        return orderList.getRecords().stream().map(orderDO -> {
+    private List<ReserveOrderInfoVO> buildReserveVO(IPage<Map<String, Object>> orderList) {
+        return orderList.getRecords().stream().map(map -> {
             ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
-            vo.setConsultationContent(orderDO.getConsultationContent());
-            vo.setOrderCode(orderDO.getId());
-            vo.setReserveDate(orderDO.getReserveDate());
-            vo.setReserveStartTime(orderDO.getReserveStartTime());
-            vo.setReserveEndTime(orderDO.getReserveEndTime());
-            vo.setResumeUrl(orderDO.getResumeUrl());
-            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(orderDO.getReserveDate()));
-            vo.setNickName(userService.getNickNameById(orderDO.getUserId()));
+            vo.setConsultationContent((String) map.get("consultationContent"));
+            vo.setOrderCode((String) map.get("orderCode"));
+            Date reserveDate = (Date) map.get("reserveDate");
+            Time startTime = (Time) map.get("startTime");
+            Time endTime = (Time) map.get("endTime");
+            vo.setReserveDate(reserveDate.toLocalDate());
+            vo.setReserveStartTime(startTime.toLocalTime());
+            vo.setReserveEndTime(endTime.toLocalTime());
+            vo.setResumeUrl((String) map.get("resumeUrl"));
+            vo.setReserveDateTimeStamp(DateUtil.toTimeStamp(reserveDate.toLocalDate()));
+            vo.setNickName((String) map.get("userName"));
             return vo;
         }).collect(Collectors.toList());
     }

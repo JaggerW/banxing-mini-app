@@ -1,11 +1,9 @@
 package com.nju.banxing.demo.util;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -67,6 +65,18 @@ public class DateUtil {
 
     public static LocalDate toLocalDate(long timeStamp){
         return Instant.ofEpochMilli(timeStamp).atZone(ZoneOffset.of("+8")).toLocalDate();
+    }
+
+    public static LocalDate toLocalDate(Date date){
+        return date.toInstant().atZone(ZoneOffset.of("+8")).toLocalDate();
+    }
+
+    public static LocalTime toLocalTime(Date date){
+        return date.toInstant().atZone(ZoneOffset.of("+8")).toLocalTime();
+    }
+
+    public static LocalDateTime toLocalDateTime(Date date){
+        return date.toInstant().atZone(ZoneOffset.of("+8")).toLocalDateTime();
     }
 
     public static LocalDateTime toLocalDateTime(long timeStamp){

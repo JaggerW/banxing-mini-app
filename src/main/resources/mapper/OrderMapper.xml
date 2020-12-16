@@ -26,4 +26,39 @@
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
+    <select id="getOrderCountByTutorIdAndProcessFlag" resultType="java.lang.Long">
+        select count(*) from banxing_order o
+        where o.tutor_id = #{tutorId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and o.order_status = #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.order_status > #{orderStatus, jdbcType = INTEGER}
+        </if>
+    </select>
+
+    <select id="getOrderListByTutorIdAndProcessFlag" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_date as reserveDate,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime,
+        o.consultation_content as consultationContent,
+        o.resume_url as resumeUrl,
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.user_id = u.id
+        where o.tutor_id = #{tutorId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and o.order_status = #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.order_status > #{orderStatus, jdbcType = INTEGER}
+        </if>
+        order by o.create_time asc, o.id asc
+        limit #{offset}, #{pageSize}
+    </select>
+
+
 </mapper>

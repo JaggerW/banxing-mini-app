@@ -32,6 +32,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -108,7 +109,7 @@ public class OrderService {
     public boolean failPay(WxPayOrderNotifyResult result, Integer orderStatus, Integer version) {
         String orderCode = result.getOutTradeNo();
         String openid = result.getOpenid();
-        if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)){
+        if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)) {
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
             int update = updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
 
@@ -121,10 +122,10 @@ public class OrderService {
             orderLogDO.setOrderCode(orderCode);
             orderLogDO.setProcessType(OrderProcessTypeEnum.FAIL.getCode());
             HashMap<Object, Object> errorMap = Maps.newHashMap();
-            errorMap.put("wxPayOrderCode",result.getTransactionId());
-            errorMap.put("errCode",result.getErrCode());
-            errorMap.put("errDesc",result.getErrCodeDes());
-            orderLogDO.setProcessContent("支付失败："+ JSON.toJSONString(errorMap));
+            errorMap.put("wxPayOrderCode", result.getTransactionId());
+            errorMap.put("errCode", result.getErrCode());
+            errorMap.put("errDesc", result.getErrCodeDes());
+            orderLogDO.setProcessContent("支付失败：" + JSON.toJSONString(errorMap));
             int insert = orderLogMapper.insert(orderLogDO);
 
             return update > 0 && insert > 0;
@@ -139,8 +140,8 @@ public class OrderService {
 
         String orderCode = result.getOutTradeNo();
         String openid = result.getOpenid();
-        if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
-                OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(orderStatus)){
+        if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
+                OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(orderStatus)) {
 
             // 获取订单数据
             OrderDO orderDO = orderMapper.selectById(orderCode);
@@ -160,15 +161,15 @@ public class OrderService {
             orderLogDO.setOrderCode(orderCode);
             orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
             HashMap<Object, Object> successMap = Maps.newHashMap();
-            successMap.put("wxPayOrderCode",result.getTransactionId());
-            successMap.put("totalFee",result.getTotalFee());
-            orderLogDO.setProcessContent("支付成功："+ JSON.toJSONString(successMap));
+            successMap.put("wxPayOrderCode", result.getTransactionId());
+            successMap.put("totalFee", result.getTotalFee());
+            orderLogDO.setProcessContent("支付成功：" + JSON.toJSONString(successMap));
             int insertOrderLog = orderLogMapper.insert(orderLogDO);
 
             // TODO 将资金表相关移至导师处理处
             // 更新用户资金表
             CoinDO coinDO = coinService.selectByOpenid(tutorId);
-            if(null == coinDO){
+            if (null == coinDO) {
                 coinService.insert(tutorId);
                 coinDO = coinService.selectByOpenid(tutorId);
             }
@@ -202,15 +203,24 @@ public class OrderService {
         return true;
     }
 
-    public IPage<OrderDO> getOrderListByTutorIdAndTutorStatus(String tutorId, Integer tutorStatus, Long pageIndex, Long pageSize){
-        Page<OrderDO> page = new Page<>(pageIndex,pageSize);
-        LambdaQueryWrapper<OrderDO> queryWrapper = new QueryWrapper<OrderDO>().lambda()
-                .eq(OrderDO::getTutorId, tutorId)
-                .eq(OrderDO::getTutorStatus, tutorStatus);
-        return orderMapper.selectPage(page,queryWrapper);
+    public IPage<Map<String, Object>> getOrderListByTutorIdAndProcessFlag(String tutorId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getOrderCountByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getOrderListByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), offset, pageSize);
+        Page<Map<String, Object>> mapPage = new Page<>();
+        mapPage.setRecords(orderList);
+        if(count == 0L){
+            mapPage.setPages(0);
+        }else {
+            mapPage.setPages(count % pageSize == 0 ? count / pageSize : count / pageIndex + 1);
+        }
+        mapPage.setSize(pageSize);
+        mapPage.setCurrent(pageIndex);
+        mapPage.setTotal(count);
+        return mapPage;
     }
 
-    public String getTutorMobileByOrderCode(String orderCode){
+    public String getTutorMobileByOrderCode(String orderCode) {
         String tutorId = orderMapper.getTutorIdByCode(orderCode);
         return userService.getMobileById(tutorId);
     }
@@ -219,30 +229,30 @@ public class OrderService {
         return orderMapper.getStatusByCode(orderCode);
     }
 
-    public Map<String,Integer> getStatusAndVersionByCode(String orderCode){
+    public Map<String, Integer> getStatusAndVersionByCode(String orderCode) {
         return orderMapper.getStatusAndVersionByCode(orderCode);
     }
 
-    public BigDecimal getTotalCostByCode(String orderCode){
+    public BigDecimal getTotalCostByCode(String orderCode) {
         return orderMapper.getTotalCostByCode(orderCode);
     }
 
-    public int updateOrderStatus(String orderCode, Integer orderStatus, Integer version){
+    public int updateOrderStatus(String orderCode, Integer orderStatus, Integer version) {
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
-                        .eq(OrderDO::getId,orderCode)
-                        .eq(OrderDO::getVersion,version)
-                        .set(OrderDO::getOrderStatus,orderStatus)
-                        .set(OrderDO::getVersion,version+1));
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getVersion, version + 1));
     }
 
-    private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version){
+    private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version) {
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
-                        .eq(OrderDO::getId,orderCode)
-                        .eq(OrderDO::getVersion,version)
-                        .set(OrderDO::getOrderStatus,orderStatus)
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.TO_CONFIRM.getCode())
-                        .set(OrderDO::getVersion,version+1));
+                        .set(OrderDO::getVersion, version + 1));
     }
 }

@@ -14,5 +14,6 @@ import lombok.EqualsAndHashCode;
 public class ReserveOrderListQuery extends BasePaged {
     private static final long serialVersionUID = -4896814636773097777L;
 
-    private Integer status;
+    // true, 未处理；false，已处理
+    private Boolean processFlag;
 }
