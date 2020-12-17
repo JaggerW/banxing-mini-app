@@ -29,10 +29,13 @@ public class SecurityInterceptor implements HandlerInterceptor {
     @Autowired
     private UserService userService;
 
+    // TODO 添加拦截器，过滤非banxing
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         String path = request.getServletPath();
+        log.info("===== Servlet Path : {} =====",path);
         if (ignore(path)) {
             return true;
         }
