@@ -1,32 +1,35 @@
 package com.nju.banxing.demo.controller;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.nju.banxing.demo.annotation.MethodLog;
+import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
+import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.*;
-import com.nju.banxing.demo.service.AliyunService;
-import com.nju.banxing.demo.service.OrderService;
-import com.nju.banxing.demo.service.TutorService;
+import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
+import com.nju.banxing.demo.util.WxMessageUtil;
 import com.nju.banxing.demo.vo.ReserveOrderDetailVO;
 import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
+import com.nju.banxing.demo.vo.WxMessageVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,6 +55,79 @@ public class TutorController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private WeixinService weixinService;
+
+    @PostMapping("/handle_order")
+    @MethodLog("导师提交预约申请处理结果")
+    public SingleResult<String> handleOrder(String openid,
+                                            @Validated @RequestBody TutorHandleOrderRequest request){
+        if(ObjectUtils.isEmpty(request)){
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("request不得为空"));
+        }
+        if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
+            // 同意
+            // 校验参数
+            WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
+            checkMesVO(wxMessageVO);
+
+            // 更新订单
+            boolean accept = tutorService.accept(openid, request);
+            if(accept){
+
+                // 通知学员
+                OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), openid);
+                String userId = orderDO.getUserId();
+                Integer consultationType = orderDO.getConsultationType();
+                String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
+                // 发送微信通知
+
+                // 处理成功
+                return SingleResult.success("提交成功，请按照约定的时间完成咨询服务");
+            }else {
+                throw new GlobalException(CodeMsg.SERVER_ERROR);
+            }
+
+        }else if (TutorStatusEnum.REFUSED.getCode().equals(request.getHandleType())){
+            // 拒绝
+            // 校验参数
+            String content = request.getContent();
+            if(StringUtils.isEmpty(content)){
+                return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请填写拒绝原因后点击提交"));
+            }
+            if(500 < content.length()){
+                return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("拒绝原因请不要超过500字"));
+            }
+
+            // 更新订单
+
+            // 处理成功
+
+            return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
+
+        }else {
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请选择同意或拒绝并填写相关信息后再点击提交"));
+        }
+    }
+
+    private void checkMesVO(WxMessageVO wxMessageVO) {
+        if(ObjectUtils.isEmpty(wxMessageVO)){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingId())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingTime())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+    }
 
     @GetMapping("/reserve_list")
     @MethodLog("获取预约申请列表")
@@ -172,7 +248,8 @@ public class TutorController {
         vo.setConsultationContent((String) voMap.get("consultationContent"));
         vo.setRejectReason((String) voMap.get("rejectReason"));
         vo.setResumeUrl((String) voMap.get("resumeUrl"));
-        vo.setNickName((String) voMap.get("userName"));
+        String userId = (String) voMap.get("userId");
+        vo.setNickName(userService.getNickNameById(userId));
         vo.setOrderCode((String) voMap.get("orderCode"));
         Date reserveDate = (Date) voMap.get("reserveDate");
         Time startTime = (Time) voMap.get("startTime");

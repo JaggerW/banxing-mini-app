@@ -12,6 +12,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -29,10 +31,12 @@ import java.util.Map;
 @Aspect
 @Component
 @Slf4j
-public class MethodLogAspect {
+public class MethodLogAspect implements Ordered {
 
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
+
+    private int order = 1;
 
     /**
      * 定义切点，有注解的地方
@@ -193,4 +197,8 @@ public class MethodLogAspect {
     }
 
 
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
 }

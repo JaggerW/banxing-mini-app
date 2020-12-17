@@ -3,11 +3,11 @@ package com.nju.banxing.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
-import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nju.banxing.demo.annotation.MethodLog;
+import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
@@ -17,6 +17,7 @@ import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
+import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.mw.redis.OrderRedisKeyPrefix;
 import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.request.WxPayOrderRequest;
@@ -39,7 +40,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -191,6 +191,7 @@ public class OrderController {
 
     @PostMapping("/notify")
     @MethodLog("微信支付回调方法")
+    @Retry
     public String parseOrderNotifyResult(@RequestBody String xmlData) {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
@@ -219,41 +220,40 @@ public class OrderController {
 
                 // 处理
                 if("SUCCESS".equals(result.getResultCode())){
-                    for (int i = 0; i < 10; i++) {
-                        // 支付成功
-                        // 乐观锁
-                        boolean successPay = orderService.successPay(result, status, version);
-                        if(successPay){
-                            // TODO 短信通知导师，需要企业申请
-                            String verCode = "123456";
-                            String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
-                            // 阿里云发送短信
-                            AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-                            aliyunSmsVO.setPhoneNumber(mobile);
-                            aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
-                            aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
+                    // 支付成功
+                    // 乐观锁
+                    boolean successPay = orderService.successPay(result, status, version);
+                    if(successPay){
+                        // TODO 短信通知导师，需要企业申请
+                        String verCode = "123456";
+                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+                        // 阿里云发送短信
+                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+                        aliyunSmsVO.setPhoneNumber(mobile);
+                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
+                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
 
-                            LoginVerSmsTemplate template = new LoginVerSmsTemplate();
-                            template.setCode(verCode);
-                            aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
-                            aliyunService.sendSMS(aliyunSmsVO);
-                            break;
-                        }
+                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+                        template.setCode(verCode);
+                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
+                        aliyunService.sendSMS(aliyunSmsVO);
+                    }else {
+                        // 失败重试
+                        throw new RetryException(CodeMsg.RETRY_ON_FAIL);
                     }
-
                 }else {
-
                     // 支付失败
                     // 乐观锁
-                    for (int i = 0; i < 10; i++) {
-                        boolean failPay = orderService.failPay(result, status, version);
-                        if(failPay){
-                            break;
-                        }
+                    boolean failPay = orderService.failPay(result, status, version);
+                    if(!failPay){
+                        // 失败重试
+                        throw new RetryException(CodeMsg.RETRY_ON_FAIL);
                     }
                 }
             }
             return WxPayNotifyResponse.success("成功");
+        } catch (RetryException e) {
+            throw e;
         } catch (WxPayException e) {
             e.printStackTrace();
             return WxPayNotifyResponse.fail("参数校验错误");

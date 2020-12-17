@@ -143,10 +143,6 @@ public class OrderService {
         if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
                 OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(orderStatus)) {
 
-            // 获取订单数据
-            OrderDO orderDO = orderMapper.selectById(orderCode);
-            String tutorId = orderDO.getTutorId();
-
             // 更新订单状态
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(true);
             int updateOrder = updateOrder4SuccessPay(orderCode, nextOrderStatus.getCode(), version);
@@ -167,36 +163,36 @@ public class OrderService {
             int insertOrderLog = orderLogMapper.insert(orderLogDO);
 
             // TODO 将资金表相关移至导师处理处
-            // 更新用户资金表
-            CoinDO coinDO = coinService.selectByOpenid(tutorId);
-            if (null == coinDO) {
-                coinService.insert(tutorId);
-                coinDO = coinService.selectByOpenid(tutorId);
-            }
-            BigDecimal occupyAmount = coinDO.getOccupyAmount();
-            BigDecimal add = occupyAmount.add(orderDO.getTotalCost());
-            coinDO.setOccupyAmount(add);
-            coinDO.setModifier(openid);
-            coinDO.setModifyTime(DateUtil.now());
-            int updateCoin = coinService.update(coinDO);
-
-            // 插入资金流水
-            CoinLogDO coinLogDO = new CoinLogDO();
-            coinLogDO.setId(UUIDUtil.getCoinLogCode());
-            coinLogDO.setTradeCode(result.getTransactionId());
-            coinLogDO.setOrderCode(result.getOutTradeNo());
-            coinLogDO.setCoinAmount(orderDO.getTotalCost());
-            coinLogDO.setSourceId(openid);
-            coinLogDO.setTargetId(tutorId);
-            coinLogDO.setMerchantCode(wxMaConfig.getMchid());
-            coinLogDO.setProcessType(CoinProcessTypeEnum.PAY.getCode());
-            coinLogDO.setCreator(openid);
-            coinLogDO.setModifier(openid);
-            int insertCoinLog = coinService.insertLog(coinLogDO);
+//            //更新用户资金表
+//            CoinDO coinDO = coinService.selectByOpenid(tutorId);
+//            if (null == coinDO) {
+//                coinService.insert(tutorId);
+//                coinDO = coinService.selectByOpenid(tutorId);
+//            }
+//            BigDecimal occupyAmount = coinDO.getOccupyAmount();
+//            BigDecimal add = occupyAmount.add(orderDO.getTotalCost());
+//            coinDO.setOccupyAmount(add);
+//            coinDO.setModifier(openid);
+//            coinDO.setModifyTime(DateUtil.now());
+//            int updateCoin = coinService.update(coinDO);
+//
+//            // 插入资金流水
+//            CoinLogDO coinLogDO = new CoinLogDO();
+//            coinLogDO.setId(UUIDUtil.getCoinLogCode());
+//            coinLogDO.setTradeCode(result.getTransactionId());
+//            coinLogDO.setOrderCode(result.getOutTradeNo());
+//            coinLogDO.setCoinAmount(orderDO.getTotalCost());
+//            coinLogDO.setSourceId(openid);
+//            coinLogDO.setTargetId(tutorId);
+//            coinLogDO.setMerchantCode(wxMaConfig.getMchid());
+//            coinLogDO.setProcessType(CoinProcessTypeEnum.PAY.getCode());
+//            coinLogDO.setCreator(openid);
+//            coinLogDO.setModifier(openid);
+//            int insertCoinLog = coinService.insertLog(coinLogDO);
 
             log.debug("===订单支付成功，更新成功===");
 
-            return updateOrder > 0 && insertOrderLog > 0 && updateCoin > 0 && insertCoinLog > 0;
+            return updateOrder > 0 && insertOrderLog > 0;
         }
         log.debug("===订单支付成功，没有符合条件的数据要更新===");
 
@@ -237,6 +233,10 @@ public class OrderService {
         return orderMapper.getStatusAndVersionByCode(orderCode);
     }
 
+    public String getUserIdByOrderCode(String orderCode){
+        return orderMapper.getUserIdByOrderCode(orderCode);
+    }
+
     public BigDecimal getTotalCostByCode(String orderCode) {
         return orderMapper.getTotalCostByCode(orderCode);
     }
@@ -248,6 +248,24 @@ public class OrderService {
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getVersion, version + 1));
+    }
+
+    public OrderDO getByOrderCodeAndTutorId(String orderCode, String tutorId){
+        return orderMapper.selectOne(
+                new QueryWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId,orderCode)
+                        .eq(OrderDO::getTutorId,tutorId));
+    }
+
+    public boolean updateOrder4Accept(String orderCode, Integer orderStatus, Integer version, String content){
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
+                        .set(OrderDO::getVersion, version + 1)
+                        .set(OrderDO::getConferenceLink, content)) > 0;
     }
 
     private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version) {

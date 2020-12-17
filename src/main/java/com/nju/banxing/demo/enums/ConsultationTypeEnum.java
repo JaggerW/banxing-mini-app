@@ -29,12 +29,15 @@ public enum ConsultationTypeEnum {
         return desc;
     }
 
-//    public static ConsultationTypeEnum getEnumByCode(int code){
-//        for(ConsultationTypeEnum typeEnum : values()){
-//            if(typeEnum.getCode() == code){
-//                return typeEnum;
-//            }
-//        }
-//        return null;
-//    }
+    public static ConsultationTypeEnum getEnumByCode(Integer code){
+        if(null == code){
+            return null;
+        }
+        for(ConsultationTypeEnum typeEnum : values()){
+            if(typeEnum.getCode().equals(code)){
+                return typeEnum;
+            }
+        }
+        return null;
+    }
 }

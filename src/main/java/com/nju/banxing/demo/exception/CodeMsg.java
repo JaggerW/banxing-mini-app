@@ -36,6 +36,7 @@ public class CodeMsg {
     public static final CodeMsg FAIL_UPDATE = new CodeMsg(108,"提交失败，请重新进行更改");
     public static final CodeMsg DUP_USER = new CodeMsg(109,"用户已存在，不可重复注册");
     public static final CodeMsg FAIL_UPDATE_TUTOR = new CodeMsg(110,"导师信息更新失败");
+    public static final CodeMsg ERROR_MEETING_MESSAGE = new CodeMsg(111,"请粘贴正确的腾讯会议生成链接后再点击提交");
 
     // 服务端 订单
     public static final CodeMsg ERROR_ORDER = new CodeMsg(500, "下单失败");
@@ -57,6 +58,9 @@ public class CodeMsg {
 
     // 工具类
     public static final CodeMsg ERROR_DATE = new CodeMsg(400, "获取日期错误");
+
+    // 其他
+    public static final CodeMsg RETRY_ON_FAIL = new CodeMsg(500, "尝试失败，需要retry");
 
 
     public CodeMsg fillArgs(Object ... args){

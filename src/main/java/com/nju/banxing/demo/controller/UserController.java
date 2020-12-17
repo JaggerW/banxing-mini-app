@@ -7,13 +7,9 @@ import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
 import com.nju.banxing.demo.common.wx.WxSessionInfo;
 import com.nju.banxing.demo.common.wx.WxUserInfo;
 import com.nju.banxing.demo.config.AppContantConfig;
-import com.nju.banxing.demo.domain.TestDO;
-import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.exception.CodeMsg;
-import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.mw.redis.SmsRedisKeyPrefix;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
-import com.nju.banxing.demo.request.TestRequest;
 import com.nju.banxing.demo.request.UserRegisterRequest;
 import com.nju.banxing.demo.service.AliyunService;
 import com.nju.banxing.demo.service.RedisService;
@@ -122,8 +118,8 @@ public class UserController {
         // 阿里云发送短信
         AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
         aliyunSmsVO.setPhoneNumber(mobile);
-        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_SIGN_NAME);
-        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_LOGIN_VERIFICATION_SMS_TEMPLATE_CODE);
+        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
+        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
 
         LoginVerSmsTemplate template = new LoginVerSmsTemplate();
         template.setCode(verCode);

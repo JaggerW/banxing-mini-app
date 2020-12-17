@@ -6,16 +6,23 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nju.banxing.demo.annotation.Retry;
+import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
+import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.enums.TutorApplyStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.RetryException;
+import com.nju.banxing.demo.request.TutorHandleOrderRequest;
 import com.nju.banxing.demo.request.TutorReapplyRequest;
 import com.nju.banxing.demo.request.TutorRegisterRequest;
 import com.nju.banxing.demo.request.TutorUpdateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +49,9 @@ public class TutorService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private OrderService orderService;
 
     /**
      * 申请导师
@@ -157,4 +167,20 @@ public class TutorService {
         return tutorMapper.getConsultationCost(tutorId);
     }
 
+    @Retry
+    public boolean accept(String openid, TutorHandleOrderRequest request) {
+
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), openid);
+        // 已付款状态
+        if(ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())){
+            Integer version = orderDO.getVersion();
+            OrderStatusEnum nextStatus = OrderStatusEnum.ORDER_PAID.getNext(true);
+            boolean accept = orderService.updateOrder4Accept(orderDO.getId(), nextStatus.getCode(), version, request.getContent());
+            if(!accept){
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
+            return true;
+        }
+        return false;
+    }
 }

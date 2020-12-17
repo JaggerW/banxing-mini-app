@@ -13,6 +13,11 @@
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
+    <select id="getUserIdByOrderCode" resultType="java.lang.String">
+        select user_id from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+    </select>
+
     <select id="getStatusAndVersionByCode" resultType="java.util.Map">
         select
         order_status as status,
@@ -60,20 +65,18 @@
 
     <select id="getOrderDetailByOrderCodeAndTutorId" resultType="java.util.Map">
         select
-        o.id as orderCode,
-        o.reserve_date as reserveDate,
-        o.reserve_start_time as reserveStartTime,
-        o.reserve_end_time as reserveEndTime,
-        o.consultation_content as consultationContent,
-        o.resume_url as resumeUrl,
-        o.reject_reason as rejectReason,
-        o.conference_link as conferenceLink,
-        u.nick_name as userName
-        from banxing_order o
-        left join banxing_user u
-        on o.user_id = u.id
-        where o.id = #{orderCode, jdbcType = VARCHAR}
-        and o.tutor_id = #{tutorId, jdbcType = VARCHAR}
+        id as orderCode,
+        reserve_date as reserveDate,
+        reserve_start_time as reserveStartTime,
+        reserve_end_time as reserveEndTime,
+        consultation_content as consultationContent,
+        resume_url as resumeUrl,
+        reject_reason as rejectReason,
+        conference_link as conferenceLink,
+        user_id as userId
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+        and tutor_id = #{tutorId, jdbcType = VARCHAR}
     </select>
 
 

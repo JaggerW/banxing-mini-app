@@ -22,6 +22,8 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     String getTutorIdByCode(@Param("orderCode") String orderCode);
 
+    String getUserIdByOrderCode(@Param("orderCode") String orderCode);
+
     Map<String, Integer> getStatusAndVersionByCode(@Param("orderCode") String orderCode);
 
     BigDecimal getTotalCostByCode(@Param("orderCode") String orderCode);
