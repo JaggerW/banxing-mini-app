@@ -70,6 +70,11 @@ public class UUIDUtil {
         return "OC" + timeStr + getVerCode();
     }
 
+    public static String getOrderRefundCode() {
+        long timeStr = System.currentTimeMillis();
+        return "ORC" + timeStr + getVerCode();
+    }
+
     public static String getOrderLogCode() {
         long timeStr = System.currentTimeMillis();
         return "OL" + timeStr + getVerCode();

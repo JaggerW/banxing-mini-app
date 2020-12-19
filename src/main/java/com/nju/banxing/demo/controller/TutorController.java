@@ -2,6 +2,8 @@ package com.nju.banxing.demo.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.api.R;
+import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.PagedResult;
@@ -10,17 +12,20 @@ import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
+import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.*;
 import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.DateUtil;
+import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.util.WxMessageUtil;
 import com.nju.banxing.demo.vo.ReserveOrderDetailVO;
 import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
 import com.nju.banxing.demo.vo.WxMessageVO;
+import com.nju.banxing.demo.vo.WxRefundVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.action.GetLongAction;
 
 import java.util.List;
 import java.util.Map;
@@ -78,13 +84,8 @@ public class TutorController {
             // 更新订单
             boolean accept = tutorService.accept(openid, request);
             if(accept){
-
                 // 通知学员
-                OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), openid);
-                String userId = orderDO.getUserId();
-                Integer consultationType = orderDO.getConsultationType();
-                String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
-                // 发送微信通知
+                sendWxMes(request.getOrderCode(),openid);
 
                 // 处理成功
                 return SingleResult.success("提交成功，请按照约定的时间完成咨询服务");
@@ -92,26 +93,64 @@ public class TutorController {
                 throw new GlobalException(CodeMsg.SERVER_ERROR);
             }
 
-        }else if (TutorStatusEnum.REFUSED.getCode().equals(request.getHandleType())){
+        }
+        else if (TutorStatusEnum.REFUSED.getCode().equals(request.getHandleType())){
             // 拒绝
             // 校验参数
             String content = request.getContent();
-            if(StringUtils.isEmpty(content)){
-                return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请填写拒绝原因后点击提交"));
+            checkRejectContent(content);
+            WxRefundRequest refundRequest = buildRefundRequest(openid, request);
+            try {
+                WxRefundVO wxRefundVO = weixinService.applyRefund(refundRequest);
+
+                // TODO 更新订单
+                boolean reject = tutorService.reject(openid, request);
+                if(reject){
+                    return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
+                }else {
+                    throw new GlobalException(CodeMsg.SERVER_ERROR);
+                }
+
+            } catch (WxPayException e) {
+                e.printStackTrace();
+                log.error("申请微信支付退款失败");
+                throw new GlobalException(CodeMsg.SERVER_ERROR);
             }
-            if(500 < content.length()){
-                return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("拒绝原因请不要超过500字"));
-            }
 
-            // 更新订单
-
-            // 处理成功
-
-            return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
-
-        }else {
-            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请选择同意或拒绝并填写相关信息后再点击提交"));
         }
+
+        return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请选择同意或拒绝并填写相关信息后再点击提交"));
+
+    }
+
+    private WxRefundRequest buildRefundRequest(String tutorId, TutorHandleOrderRequest request) {
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
+        if (ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())) {
+            // 已付款状态
+
+            WxRefundRequest refundRequest = new WxRefundRequest();
+            refundRequest.setNonceStr(UUIDUtil.getNonceStr());
+            refundRequest.setOrderCode(orderDO.getId());
+            refundRequest.setOrderRefundCode(UUIDUtil.getOrderRefundCode());
+            refundRequest.setRefundDesc("预约已被取消，将订单已付款退回");
+            int fee = MathUtil.bigYuan2Fee(orderDO.getTotalCost());
+            refundRequest.setTotalFee(fee);
+            refundRequest.setRefundFee(fee);
+            refundRequest.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/pay/refund_notify");
+            return refundRequest;
+        }
+
+        log.error("查无此单或该单状态有误！");
+        throw new GlobalException(CodeMsg.SERVER_ERROR);
+    }
+
+    private void sendWxMes(String orderCode, String openid) {
+        // TODO 发送微信小程序通知
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, openid);
+        String userId = orderDO.getUserId();
+        Integer consultationType = orderDO.getConsultationType();
+        String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
+
     }
 
     private void checkMesVO(WxMessageVO wxMessageVO) {
@@ -126,6 +165,15 @@ public class TutorController {
         }
         if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+    }
+
+    private void checkRejectContent(String content){
+        if(StringUtils.isEmpty(content)){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("请填写拒绝原因后点击提交"));
+        }
+        if(500 < content.length()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("拒绝原因请不要超过500字"));
         }
     }
 

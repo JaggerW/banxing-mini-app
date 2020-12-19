@@ -38,11 +38,6 @@ public class CoinLogDO implements Serializable {
     private String orderCode;
 
     /**
-     * 微信支付统一订单号
-     */
-    private String tradeCode;
-
-    /**
      * 原账号openid
      */
     private String sourceId;

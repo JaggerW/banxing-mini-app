@@ -51,7 +51,7 @@ public class AppContantConfig implements Serializable {
     // 不需要校验用户token的路径
     public static final String[] IGNORE_TOKEN_PATH = {"/user/login", "test",
             "/home/tutor_list","/home/comment_list","/home/tutor_detail",
-            "/order/notify"};
+            "/pay/order_notify","/pay/refund_notify"};
 
     public static final String SERVER_PATH_PREFIX = "https://www.codingboy.top/banxing";
 

@@ -162,34 +162,6 @@ public class OrderService {
             orderLogDO.setProcessContent("支付成功：" + JSON.toJSONString(successMap));
             int insertOrderLog = orderLogMapper.insert(orderLogDO);
 
-            // TODO 将资金表相关移至导师处理处
-//            //更新用户资金表
-//            CoinDO coinDO = coinService.selectByOpenid(tutorId);
-//            if (null == coinDO) {
-//                coinService.insert(tutorId);
-//                coinDO = coinService.selectByOpenid(tutorId);
-//            }
-//            BigDecimal occupyAmount = coinDO.getOccupyAmount();
-//            BigDecimal add = occupyAmount.add(orderDO.getTotalCost());
-//            coinDO.setOccupyAmount(add);
-//            coinDO.setModifier(openid);
-//            coinDO.setModifyTime(DateUtil.now());
-//            int updateCoin = coinService.update(coinDO);
-//
-//            // 插入资金流水
-//            CoinLogDO coinLogDO = new CoinLogDO();
-//            coinLogDO.setId(UUIDUtil.getCoinLogCode());
-//            coinLogDO.setTradeCode(result.getTransactionId());
-//            coinLogDO.setOrderCode(result.getOutTradeNo());
-//            coinLogDO.setCoinAmount(orderDO.getTotalCost());
-//            coinLogDO.setSourceId(openid);
-//            coinLogDO.setTargetId(tutorId);
-//            coinLogDO.setMerchantCode(wxMaConfig.getMchid());
-//            coinLogDO.setProcessType(CoinProcessTypeEnum.PAY.getCode());
-//            coinLogDO.setCreator(openid);
-//            coinLogDO.setModifier(openid);
-//            int insertCoinLog = coinService.insertLog(coinLogDO);
-
             log.debug("===订单支付成功，更新成功===");
 
             return updateOrder > 0 && insertOrderLog > 0;
@@ -266,6 +238,17 @@ public class OrderService {
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
                         .set(OrderDO::getVersion, version + 1)
                         .set(OrderDO::getConferenceLink, content)) > 0;
+    }
+
+    public boolean updateOrder4Reject(String orderCode, Integer orderStatus, Integer version, String content){
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getTutorStatus, TutorStatusEnum.REFUSED.getCode())
+                        .set(OrderDO::getVersion, version + 1)
+                        .set(OrderDO::getRejectReason, content)) > 0;
     }
 
     private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version) {

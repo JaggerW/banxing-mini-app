@@ -7,8 +7,9 @@ package com.nju.banxing.demo.enums;
  */
 public enum CoinProcessTypeEnum {
     PAY(1,"付款"),
-    REFUND(2,"退款"),
-    DRAW(3,"提款");
+    ENABLE(2,"可使用"),
+    REFUND(3,"退款"),
+    DRAW(4,"提款");
 
     private Integer code;
     private String desc;

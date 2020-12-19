@@ -6,10 +6,13 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSON;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
+import com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
+import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -21,8 +24,10 @@ import com.nju.banxing.demo.config.WxMaServiceFactory;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.WxPayOrderRequest;
+import com.nju.banxing.demo.request.WxRefundRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.vo.WxPayOrderVO;
+import com.nju.banxing.demo.vo.WxRefundVO;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.ObjectUtils;
@@ -171,6 +176,12 @@ public class WeixinService {
 
     }
 
+    /**
+     * 微信支付回调
+     * @param xml
+     * @return
+     * @throws WxPayException
+     */
     public WxPayOrderNotifyResult notifyOrderResult(String xml) throws WxPayException {
         log.info("===== BEGIN RESOLVE PAY ORDER NOTIFY RESULT");
 
@@ -179,6 +190,51 @@ public class WeixinService {
         return wxPayService.parseOrderNotifyResult(xml);
 
     }
+
+    /**
+     * 申请微信退款
+     * @param refundRequest
+     * @return
+     * @throws WxPayException
+     */
+    public WxRefundVO applyRefund(WxRefundRequest refundRequest) throws WxPayException {
+        log.info("===== BEGIN WX PAY APPLY REFUND");
+        WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
+
+        WxPayRefundRequest request = new WxPayRefundRequest();
+        request.setNonceStr(refundRequest.getNonceStr());
+        request.setNotifyUrl(refundRequest.getNotifyUrl());
+        request.setRefundDesc(refundRequest.getRefundDesc());
+        request.setOutTradeNo(refundRequest.getOrderCode());
+        request.setOutRefundNo(refundRequest.getOrderRefundCode());
+        request.setRefundFee(refundRequest.getRefundFee());
+        request.setTotalFee(refundRequest.getTotalFee());
+
+        WxPayRefundResult result = wxPayService.refund(request);
+
+        WxRefundVO vo = new WxRefundVO();
+        vo.setOrderCode(result.getOutTradeNo());
+        vo.setOrderRefundCode(result.getOutRefundNo());
+        vo.setTransactionId(result.getTransactionId());
+        vo.setRefundId(result.getRefundId());
+        vo.setRefundFee(result.getRefundFee());
+        return vo;
+    }
+
+    /**
+     * 微信退款回调
+     * @param xml
+     * @return
+     * @throws WxPayException
+     */
+    public WxPayRefundNotifyResult notifyRefundResult(String xml) throws WxPayException {
+        log.info("===== BEGIN RESOLVE ORDER REFUND NOTIFY RESULT");
+
+        WxPayService wxPayService = WxMaServiceFactory.getWxPayService();
+
+        return wxPayService.parseRefundNotifyResult(xml);
+    }
+
 
 
 }

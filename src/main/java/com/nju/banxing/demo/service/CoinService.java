@@ -28,20 +28,20 @@ public class CoinService {
         return coinMapper.selectById(openid);
     }
 
-    public int insert(String openid){
+    public boolean insert(String openid){
         CoinDO coinDO = new CoinDO();
         coinDO.setId(openid);
         coinDO.setCreator(openid);
         coinDO.setModifier(openid);
-        return coinMapper.insert(coinDO);
+        return coinMapper.insert(coinDO) > 0;
     }
 
-    public int update(CoinDO coinDO){
-        return coinMapper.updateById(coinDO);
+    public boolean update(CoinDO coinDO){
+        return coinMapper.updateById(coinDO) > 0;
     }
 
-    public int insertLog(CoinLogDO coinLogDO){
-        return coinLogMapper.insert(coinLogDO);
+    public boolean insertLog(CoinLogDO coinLogDO){
+        return coinLogMapper.insert(coinLogDO) > 0;
     }
 
 }
