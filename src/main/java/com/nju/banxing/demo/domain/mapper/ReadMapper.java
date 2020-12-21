@@ -13,4 +13,5 @@ import com.nju.banxing.demo.domain.ReadDO;
  */
 public interface ReadMapper extends BaseMapper<ReadDO> {
 
+    void updateById();
 }

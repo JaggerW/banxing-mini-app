@@ -1,11 +1,8 @@
 package com.nju.banxing.demo.controller;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
-import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
@@ -34,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sun.security.action.GetLongAction;
 
 import java.util.List;
 import java.util.Map;
@@ -103,8 +99,7 @@ public class TutorController {
             try {
                 WxRefundVO wxRefundVO = weixinService.applyRefund(refundRequest);
 
-                // TODO 更新订单
-                boolean reject = tutorService.reject(openid, request);
+                boolean reject = tutorService.reject(openid, request, wxRefundVO);
                 if(reject){
                     return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
                 }else {

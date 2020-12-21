@@ -3,9 +3,9 @@ package com.nju.banxing.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
+import com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
-import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
@@ -50,18 +50,12 @@ public class WxPayController {
 
     @PostMapping("/order_notify")
     @MethodLog("微信支付回调方法")
-    @Retry
     public String parseOrderNotifyResult(@RequestBody String xmlData) {
         try {
             WxPayOrderNotifyResult result = weixinService.notifyOrderResult(xmlData);
             checkPayResult(result);
             // 判断是否已处理过
-            Map<String, Integer> map = orderService.getStatusAndVersionByCode(result.getOutTradeNo());
-            if(ObjectUtils.isEmpty(map)){
-                return WxPayNotifyResponse.fail("不存在该订单数据");
-            }
-            Integer status = map.get("status");
-            Integer version = map.get("version");
+            Integer status = orderService.getStatusByCode(result.getOutTradeNo());
             if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(status) ||
                     OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(status)){
 
@@ -80,34 +74,24 @@ public class WxPayController {
                 // 处理
                 if("SUCCESS".equals(result.getResultCode())){
                     // 支付成功
-                    // 乐观锁
-                    boolean successPay = orderService.successPay(result, status, version);
-                    if(successPay){
-                        // TODO 短信通知导师，需要企业申请
-                        String verCode = "123456";
-                        String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
-                        // 阿里云发送短信
-                        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-                        aliyunSmsVO.setPhoneNumber(mobile);
-                        aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
-                        aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
+                    orderService.successPay(result);
 
-                        LoginVerSmsTemplate template = new LoginVerSmsTemplate();
-                        template.setCode(verCode);
-                        aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
-                        aliyunService.sendSMS(aliyunSmsVO);
-                    }else {
-                        // 失败重试
-                        throw new RetryException(CodeMsg.RETRY_ON_FAIL);
-                    }
+                    // TODO 短信通知导师，需要企业申请
+                    String verCode = "123456";
+                    String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+                    // 阿里云发送短信
+                    AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+                    aliyunSmsVO.setPhoneNumber(mobile);
+                    aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
+                    aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
+
+                    LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+                    template.setCode(verCode);
+                    aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
+                    aliyunService.sendSMS(aliyunSmsVO);
                 }else {
                     // 支付失败
-                    // 乐观锁
-                    boolean failPay = orderService.failPay(result, status, version);
-                    if(!failPay){
-                        // 失败重试
-                        throw new RetryException(CodeMsg.RETRY_ON_FAIL);
-                    }
+                    orderService.failPay(result);
                 }
             }
             return WxPayNotifyResponse.success("成功");
@@ -127,8 +111,31 @@ public class WxPayController {
     public String parseRefundNotifyResult(@RequestBody String xmlDate){
 
 
+        // 回调,查询退款是否成功
 
-        return null;
+        // 插入资金日志
+
+        // 更新订单，已退款
+        try {
+            WxPayRefundNotifyResult result = weixinService.notifyRefundResult(xmlDate);
+            if(ObjectUtils.isEmpty(result) || !"SUCCESS".equals(StringUtils.trimToEmpty(result.getReturnCode().toUpperCase()))){
+                log.error("微信退款申请回调结果为空！");
+                throw new WxPayException("回调返回体为空");
+            }
+            final String refundStatus = StringUtils.trimToEmpty(result.getReqInfo().getRefundStatus().toUpperCase());
+            if("SUCCESS".equals(refundStatus)){
+                // 退款成功
+
+            }
+            else if ("CHANGE".equals(refundStatus)){
+                // 退款异常
+            }
+
+            return WxPayNotifyResponse.success("成功");
+        } catch (WxPayException e) {
+            e.printStackTrace();
+            return WxPayNotifyResponse.fail("参数校验错误");
+        }
     }
 
     private void checkPayResult(WxPayOrderNotifyResult result){

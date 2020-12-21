@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.google.common.collect.Maps;
+import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.config.WxMaConfig;
 import com.nju.banxing.demo.domain.CoinDO;
 import com.nju.banxing.demo.domain.CoinLogDO;
@@ -19,10 +21,14 @@ import com.nju.banxing.demo.enums.CoinProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
+import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.spel.ast.OpNE;
 import org.springframework.stereotype.Service;
@@ -106,12 +112,22 @@ public class OrderService {
     }
 
     @Transactional
-    public boolean failPay(WxPayOrderNotifyResult result, Integer orderStatus, Integer version) {
+    @Retry
+    public boolean failPay(WxPayOrderNotifyResult result) {
         String orderCode = result.getOutTradeNo();
         String openid = result.getOpenid();
+        Map<String, Integer> map = getStatusAndVersionByCode(orderCode);
+        if(ObjectUtils.isEmpty(map)){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("不存在该订单数据"));
+        }
+        Integer orderStatus = map.get("status");
+        Integer version = map.get("version");
         if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)) {
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
             int update = updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
+            if(update != 1){
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
 
             OrderLogDO orderLogDO = new OrderLogDO();
             orderLogDO.setId(UUIDUtil.getOrderLogCode());
@@ -128,24 +144,36 @@ public class OrderService {
             orderLogDO.setProcessContent("支付失败：" + JSON.toJSONString(errorMap));
             int insert = orderLogMapper.insert(orderLogDO);
 
-            return update > 0 && insert > 0;
+            return insert > 0;
         }
         return true;
     }
 
     @Transactional
-    public boolean successPay(WxPayOrderNotifyResult result, Integer orderStatus, Integer version) {
+    @Retry
+    public boolean successPay(WxPayOrderNotifyResult result) {
 
         log.debug("===订单支付成功，开始更新数据===");
 
         String orderCode = result.getOutTradeNo();
         String openid = result.getOpenid();
+        Map<String, Integer> map = getStatusAndVersionByCode(orderCode);
+        if(ObjectUtils.isEmpty(map)){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("不存在该订单数据"));
+        }
+        Integer orderStatus = map.get("status");
+        Integer version = map.get("version");
+
         if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
                 OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(orderStatus)) {
 
             // 更新订单状态
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(true);
             int updateOrder = updateOrder4SuccessPay(orderCode, nextOrderStatus.getCode(), version);
+            if(updateOrder != 1){
+                log.error("更新订单状态失败");
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
 
             // 插入订单流水
             OrderLogDO orderLogDO = new OrderLogDO();
@@ -164,7 +192,7 @@ public class OrderService {
 
             log.debug("===订单支付成功，更新成功===");
 
-            return updateOrder > 0 && insertOrderLog > 0;
+            return insertOrderLog > 0;
         }
         log.debug("===订单支付成功，没有符合条件的数据要更新===");
 

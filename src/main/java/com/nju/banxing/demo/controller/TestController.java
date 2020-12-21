@@ -1,11 +1,15 @@
 package com.nju.banxing.demo.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.SingleResult;
+import com.nju.banxing.demo.domain.ReadDO;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
+import com.nju.banxing.demo.service.ReadService;
 import com.nju.banxing.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,9 @@ public class TestController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ReadService readService;
 
     @PostMapping("/delete_user")
     @MethodLog("删除用户")
@@ -56,6 +63,19 @@ public class TestController {
             log.info("已再controller中捕获异常");
         }
         return null;
+    }
+
+    @GetMapping("/trans_test")
+    @MethodLog("测试事务")
+    public SingleResult<Boolean> testTransaction(){
+        log.info("===== testTransaction =====");
+        ReadDO readDO = new ReadDO();
+        readDO.setId("testUser_001");
+        ReadDO updateReadDO = new ReadDO();
+        updateReadDO.setId("testUser_001");
+        updateReadDO.setExtension(JSON.toJSONString(readDO));
+
+        return SingleResult.success(true);
     }
 
 }

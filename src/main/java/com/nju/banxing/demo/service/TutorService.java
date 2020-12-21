@@ -6,18 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Maps;
 import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.config.WxMaConfig;
-import com.nju.banxing.demo.domain.CoinDO;
-import com.nju.banxing.demo.domain.CoinLogDO;
-import com.nju.banxing.demo.domain.OrderDO;
-import com.nju.banxing.demo.domain.TutorDO;
+import com.nju.banxing.demo.domain.*;
+import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
 import com.nju.banxing.demo.domain.mapper.TutorMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
-import com.nju.banxing.demo.enums.CoinProcessTypeEnum;
-import com.nju.banxing.demo.enums.OrderStatusEnum;
-import com.nju.banxing.demo.enums.TutorApplyStatusEnum;
-import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.enums.*;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.request.TutorHandleOrderRequest;
@@ -26,6 +22,7 @@ import com.nju.banxing.demo.request.TutorRegisterRequest;
 import com.nju.banxing.demo.request.TutorUpdateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
+import com.nju.banxing.demo.vo.WxRefundVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +53,9 @@ public class TutorService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private OrderLogMapper orderLogMapper;
 
     @Autowired
     private OrderService orderService;
@@ -191,6 +192,9 @@ public class TutorService {
             Integer version = orderDO.getVersion();
             OrderStatusEnum nextStatus = OrderStatusEnum.ORDER_PAID.getNext(true);
             boolean accept = orderService.updateOrder4Accept(orderDO.getId(), nextStatus.getCode(), version, request.getContent());
+            if(!accept){
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
 
             // 转入待提资金
             //更新用户资金表
@@ -219,17 +223,14 @@ public class TutorService {
             coinLogDO.setModifier(tutorId);
             boolean insertCoinLog = coinService.insertLog(coinLogDO);
 
-            if(!accept || !updateCoin || !insertCoinLog){
-                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
-            }
-            return true;
+            return updateCoin && insertCoinLog;
         }
         return false;
     }
 
     @Transactional
     @Retry
-    public boolean reject(String tutorId, TutorHandleOrderRequest request) {
+    public boolean reject(String tutorId, TutorHandleOrderRequest request, WxRefundVO wxRefundVO) {
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
         // 已付款状态
         if(ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())){
@@ -238,17 +239,29 @@ public class TutorService {
             Integer version = orderDO.getVersion();
             OrderStatusEnum nextStatus = OrderStatusEnum.ORDER_PAID.getNext(false);
             boolean reject = orderService.updateOrder4Reject(orderDO.getId(), nextStatus.getCode(), version, request.getContent());
+            if(!reject){
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
 
             // 更新订单流水+退单单号
+            OrderLogDO orderLogDO = new OrderLogDO();
+            orderLogDO.setId(UUIDUtil.getOrderLogCode());
+            orderLogDO.setCreator(tutorId);
+            orderLogDO.setModifier(tutorId);
+            orderLogDO.setPreStatus(orderDO.getOrderStatus());
+            orderLogDO.setAfterStatus(nextStatus.getCode());
+            orderLogDO.setOrderCode(orderDO.getId());
+            orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
+            HashMap<Object, Object> successMap = Maps.newHashMap();
+            successMap.put("wxOrderRefundCode", wxRefundVO.getOrderRefundCode());
+            successMap.put("wxRefundId",wxRefundVO.getRefundId());
+            successMap.put("wxRefundFee",wxRefundVO.getRefundFee());
+            orderLogDO.setProcessContent("申请退款：" + JSON.toJSONString(successMap));
+            int insertOrderLog = orderLogMapper.insert(orderLogDO);
+
+            return insertOrderLog > 0;
 
         }
-
-        // 回调,查询退款是否成功
-
-        // 插入资金日志
-
-        // 更新订单，已退款
-
         return false;
     }
 }
