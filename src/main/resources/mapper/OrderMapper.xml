@@ -79,5 +79,14 @@
         and tutor_id = #{tutorId, jdbcType = VARCHAR}
     </select>
 
+    <select id="getOrderConferenceInfoByOrderCode" resultType="java.util.Map">
+        select
+        reserve_date as reserveDate,
+        reserve_start_time as reserveStartTime,
+        reserve_end_time as reserveEndTime
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+    </select>
+
 
 </mapper>

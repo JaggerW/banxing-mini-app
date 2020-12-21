@@ -3,6 +3,9 @@ package com.nju.banxing.demo.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * @Author: jaggerw
@@ -17,4 +20,5 @@ public class WxMessageVO implements Serializable {
     private String meetingSecret;
     private String meetingUrl;
     private String meetingTime;
+    private LocalDateTime meetingStartTime;
 }

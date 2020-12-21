@@ -1,9 +1,15 @@
 package com.nju.banxing.demo.util;
 
 import com.google.common.collect.Lists;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.vo.WxMessageVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,6 +17,7 @@ import java.util.List;
  * @Description: 小程序通知工具类
  * @Date: 2020/11/9
  */
+@Slf4j
 public class WxMessageUtil {
 
     private static final String MEETING_TIME_KEY_POINT = "会议时间：";
@@ -24,21 +31,27 @@ public class WxMessageUtil {
      * @return
      */
     public static WxMessageVO parseMes(String meetingStr) {
-        if(StringUtils.isEmpty(meetingStr)){
-            return null;
+        try {
+            if(StringUtils.isEmpty(meetingStr)){
+                return null;
+            }
+            StringBuilder sb = new StringBuilder();
+            String[] split = meetingStr.split("\n");
+            for (String s : split) {
+                sb.append(s);
+            }
+            meetingStr = String.valueOf(sb);
+            WxMessageVO vo = new WxMessageVO();
+            vo.setMeetingTime(getMeetingTime(meetingStr));
+            vo.setMeetingId(getMeetingID(meetingStr));
+            vo.setMeetingSecret(getMeetingSecret(meetingStr));
+            vo.setMeetingUrl(getMeetingURL(meetingStr));
+            vo.setMeetingStartTime(getMeetingStartTime(vo.getMeetingTime()));
+            return vo;
+        }catch (Exception e){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
-        StringBuilder sb = new StringBuilder();
-        String[] split = meetingStr.split("\n");
-        for (String s : split) {
-            sb.append(s);
-        }
-        meetingStr = String.valueOf(sb);
-        WxMessageVO vo = new WxMessageVO();
-        vo.setMeetingTime(getMeetingTime(meetingStr));
-        vo.setMeetingId(getMeetingID(meetingStr));
-        vo.setMeetingSecret(getMeetingSecret(meetingStr));
-        vo.setMeetingUrl(getMeetingURL(meetingStr));
-        return vo;
+
     }
 
     private static String getMeetingTime(String str) {
@@ -54,6 +67,37 @@ public class WxMessageUtil {
             c = str.charAt(++index);
         }
         return String.valueOf(sb);
+    }
+
+    private static LocalDateTime getMeetingStartTime(String timeStr){
+
+        try {
+
+            String[] dateAndTime = timeStr.split(" ");
+            String date = dateAndTime[0];
+            String time = dateAndTime[1];
+            String[] dates = date.split("/");
+            String year = dates[0];
+            String month = dates[1];
+            if(month.length() == 1){
+                month = "0" + month;
+            }
+            String day = dates[2];
+            if(day.length() == 1){
+                day = "0" + day;
+            }
+            String[] times = time.split("-");
+            String startTime = times[0];
+            startTime = startTime + ":00";
+            String parseTime = year + "-" + month + "-" + day + " " + startTime;
+            return LocalDateTime.parse(parseTime, DateUtil.dtf);
+
+        } catch (Exception e){
+            log.error("时间解析错误，被解析时间字符串为：" + timeStr);
+            throw new GlobalException(CodeMsg.ERROR_PARSE_TIME);
+        }
+
+
     }
 
     private static String getMeetingURL(String str) {

@@ -32,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,8 +75,7 @@ public class TutorController {
         if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
             // 同意
             // 校验参数
-            WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
-            checkMesVO(wxMessageVO);
+            checkMesVO(request);
 
             // 更新订单
             boolean accept = tutorService.accept(openid, request);
@@ -148,18 +148,32 @@ public class TutorController {
 
     }
 
-    private void checkMesVO(WxMessageVO wxMessageVO) {
+    private void checkMesVO(TutorHandleOrderRequest request) {
+        WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
+
         if(ObjectUtils.isEmpty(wxMessageVO)){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
         if(StringUtils.isEmpty(wxMessageVO.getMeetingId())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
         if(StringUtils.isEmpty(wxMessageVO.getMeetingTime())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        try {
+            LocalDateTime meetingStartTime = wxMessageVO.getMeetingStartTime();
+            Map<String, Object> map = orderService.getOrderConferenceInfoByOrderCode(request.getOrderCode());
+            Date reserveDate = (Date) map.get("reserveDate");
+            Time startTime = (Time) map.get("startTime");
+            if (!meetingStartTime.toLocalDate().equals(reserveDate.toLocalDate())
+                    || !meetingStartTime.toLocalTime().equals(startTime.toLocalTime())){
+                throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
+            }
+        }catch (Exception e){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
         }
     }
 

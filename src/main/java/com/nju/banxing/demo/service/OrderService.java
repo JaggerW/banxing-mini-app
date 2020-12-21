@@ -133,6 +133,10 @@ public class OrderService {
         return orderMapper.getOrderDetailByOrderCodeAndTutorId(orderCode,tutorId);
     }
 
+    public Map<String, Object> getOrderConferenceInfoByOrderCode(String orderCode){
+        return orderMapper.getOrderConferenceInfoByOrderCode(orderCode);
+    }
+
     public String getTutorMobileByOrderCode(String orderCode) {
         String tutorId = orderMapper.getTutorIdByCode(orderCode);
         return userService.getMobileById(tutorId);

@@ -50,4 +50,5 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
     Map<String, Object> getOrderDetailByOrderCodeAndTutorId(@Param("orderCode") String orderCode,
                                                             @Param("tutorId") String tutorId);
 
+    Map<String, Object> getOrderConferenceInfoByOrderCode(@Param("orderCode") String orderCode);
 }
