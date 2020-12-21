@@ -17,10 +17,7 @@ import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
 import com.nju.banxing.demo.domain.mapper.OrderMapper;
-import com.nju.banxing.demo.enums.CoinProcessTypeEnum;
-import com.nju.banxing.demo.enums.OrderProcessTypeEnum;
-import com.nju.banxing.demo.enums.OrderStatusEnum;
-import com.nju.banxing.demo.enums.TutorStatusEnum;
+import com.nju.banxing.demo.enums.*;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
@@ -111,92 +108,8 @@ public class OrderService {
 
     }
 
-    @Transactional
-    @Retry
-    public boolean failPay(WxPayOrderNotifyResult result) {
-        String orderCode = result.getOutTradeNo();
-        String openid = result.getOpenid();
-        Map<String, Integer> map = getStatusAndVersionByCode(orderCode);
-        if(ObjectUtils.isEmpty(map)){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("不存在该订单数据"));
-        }
-        Integer orderStatus = map.get("status");
-        Integer version = map.get("version");
-        if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)) {
-            OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
-            int update = updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
-            if(update != 1){
-                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
-            }
-
-            OrderLogDO orderLogDO = new OrderLogDO();
-            orderLogDO.setId(UUIDUtil.getOrderLogCode());
-            orderLogDO.setCreator(openid);
-            orderLogDO.setModifier(openid);
-            orderLogDO.setPreStatus(orderStatus);
-            orderLogDO.setAfterStatus(nextOrderStatus.getCode());
-            orderLogDO.setOrderCode(orderCode);
-            orderLogDO.setProcessType(OrderProcessTypeEnum.FAIL.getCode());
-            HashMap<Object, Object> errorMap = Maps.newHashMap();
-            errorMap.put("wxPayOrderCode", result.getTransactionId());
-            errorMap.put("errCode", result.getErrCode());
-            errorMap.put("errDesc", result.getErrCodeDes());
-            orderLogDO.setProcessContent("支付失败：" + JSON.toJSONString(errorMap));
-            int insert = orderLogMapper.insert(orderLogDO);
-
-            return insert > 0;
-        }
-        return true;
-    }
-
-    @Transactional
-    @Retry
-    public boolean successPay(WxPayOrderNotifyResult result) {
-
-        log.debug("===订单支付成功，开始更新数据===");
-
-        String orderCode = result.getOutTradeNo();
-        String openid = result.getOpenid();
-        Map<String, Integer> map = getStatusAndVersionByCode(orderCode);
-        if(ObjectUtils.isEmpty(map)){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("不存在该订单数据"));
-        }
-        Integer orderStatus = map.get("status");
-        Integer version = map.get("version");
-
-        if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus) ||
-                OrderStatusEnum.ORDER_FAIL_PAY.getCode().equals(orderStatus)) {
-
-            // 更新订单状态
-            OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(true);
-            int updateOrder = updateOrder4SuccessPay(orderCode, nextOrderStatus.getCode(), version);
-            if(updateOrder != 1){
-                log.error("更新订单状态失败");
-                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
-            }
-
-            // 插入订单流水
-            OrderLogDO orderLogDO = new OrderLogDO();
-            orderLogDO.setId(UUIDUtil.getOrderLogCode());
-            orderLogDO.setCreator(openid);
-            orderLogDO.setModifier(openid);
-            orderLogDO.setPreStatus(orderStatus);
-            orderLogDO.setAfterStatus(nextOrderStatus.getCode());
-            orderLogDO.setOrderCode(orderCode);
-            orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
-            HashMap<Object, Object> successMap = Maps.newHashMap();
-            successMap.put("wxPayOrderCode", result.getTransactionId());
-            successMap.put("totalFee", result.getTotalFee());
-            orderLogDO.setProcessContent("支付成功：" + JSON.toJSONString(successMap));
-            int insertOrderLog = orderLogMapper.insert(orderLogDO);
-
-            log.debug("===订单支付成功，更新成功===");
-
-            return insertOrderLog > 0;
-        }
-        log.debug("===订单支付成功，没有符合条件的数据要更新===");
-
-        return true;
+    public boolean insertOrderLog(OrderLogDO orderLogDO){
+        return orderLogMapper.insert(orderLogDO) > 0;
     }
 
     public IPage<Map<String, Object>> getOrderListByTutorIdAndProcessFlag(String tutorId, Boolean processFlag, Long pageIndex, Long pageSize) {
@@ -241,13 +154,13 @@ public class OrderService {
         return orderMapper.getTotalCostByCode(orderCode);
     }
 
-    public int updateOrderStatus(String orderCode, Integer orderStatus, Integer version) {
+    public boolean updateOrderStatus(String orderCode, Integer orderStatus, Integer version) {
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getOrderStatus, orderStatus)
-                        .set(OrderDO::getVersion, version + 1));
+                        .set(OrderDO::getVersion, version + 1)) > 0;
     }
 
     public OrderDO getByOrderCodeAndTutorId(String orderCode, String tutorId){
@@ -255,6 +168,12 @@ public class OrderService {
                 new QueryWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId,orderCode)
                         .eq(OrderDO::getTutorId,tutorId));
+    }
+
+    public OrderDO getByOrderCode(String orderCode){
+        return orderMapper.selectOne(
+                new QueryWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId,orderCode));
     }
 
     public boolean updateOrder4Accept(String orderCode, Integer orderStatus, Integer version, String content){
@@ -279,13 +198,22 @@ public class OrderService {
                         .set(OrderDO::getRejectReason, content)) > 0;
     }
 
-    private int updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version) {
+    public boolean updateOrder4SuccessPay(String orderCode, Integer orderStatus, Integer version) {
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.TO_CONFIRM.getCode())
-                        .set(OrderDO::getVersion, version + 1));
+                        .set(OrderDO::getVersion, version + 1)) > 0;
+    }
+
+    public boolean updateOrder4FailRefund(String orderCode, Integer version) {
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getErrorFlag, OrderErrorFlag.UN_NORMAL.getCode())
+                        .set(OrderDO::getVersion, version + 1)) > 0;
     }
 }

@@ -139,7 +139,7 @@ public class OrderDO implements Serializable {
     /**
      * 异常标志位：0，正常；1，异常（退款失败）
      */
-    private Boolean errorFlag;
+    private Integer errorFlag;
 
     /**
      * 预留扩展字段

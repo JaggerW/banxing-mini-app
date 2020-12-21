@@ -8,13 +8,12 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.config.WxMaConfig;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
-import com.nju.banxing.demo.service.AliyunService;
-import com.nju.banxing.demo.service.OrderService;
-import com.nju.banxing.demo.service.WeixinService;
+import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 /**
  * @Author: jaggerw
@@ -47,6 +45,9 @@ public class WxPayController {
 
     @Autowired
     private AliyunService aliyunService;
+
+    @Autowired
+    private PayService payService;
 
     @PostMapping("/order_notify")
     @MethodLog("微信支付回调方法")
@@ -74,7 +75,7 @@ public class WxPayController {
                 // 处理
                 if("SUCCESS".equals(result.getResultCode())){
                     // 支付成功
-                    orderService.successPay(result);
+                    payService.successPay(result);
 
                     // TODO 短信通知导师，需要企业申请
                     String verCode = "123456";
@@ -91,7 +92,7 @@ public class WxPayController {
                     aliyunService.sendSMS(aliyunSmsVO);
                 }else {
                     // 支付失败
-                    orderService.failPay(result);
+                    payService.failPay(result);
                 }
             }
             return WxPayNotifyResponse.success("成功");
@@ -109,13 +110,6 @@ public class WxPayController {
     @PostMapping("/refund_notify")
     @MethodLog("微信退款回调方法")
     public String parseRefundNotifyResult(@RequestBody String xmlDate){
-
-
-        // 回调,查询退款是否成功
-
-        // 插入资金日志
-
-        // 更新订单，已退款
         try {
             WxPayRefundNotifyResult result = weixinService.notifyRefundResult(xmlDate);
             if(ObjectUtils.isEmpty(result) || !"SUCCESS".equals(StringUtils.trimToEmpty(result.getReturnCode().toUpperCase()))){
@@ -125,16 +119,20 @@ public class WxPayController {
             final String refundStatus = StringUtils.trimToEmpty(result.getReqInfo().getRefundStatus().toUpperCase());
             if("SUCCESS".equals(refundStatus)){
                 // 退款成功
-
+                payService.successRefund(result);
             }
             else if ("CHANGE".equals(refundStatus)){
                 // 退款异常
+                payService.failRefund(result);
             }
 
             return WxPayNotifyResponse.success("成功");
         } catch (WxPayException e) {
             e.printStackTrace();
             return WxPayNotifyResponse.fail("参数校验错误");
+        } catch (GlobalException e){
+            log.error(e.getCodeMsg().getMsg());
+            return WxPayNotifyResponse.fail("业务处理失败");
         }
     }
 
