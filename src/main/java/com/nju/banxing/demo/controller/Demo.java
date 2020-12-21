@@ -15,8 +15,5 @@ import java.time.LocalDateTime;
 @Slf4j
 public class Demo{
     public static void main(String[] args) {
-        String timeStr = "2020/1/1 21:16-22:14";
-        LocalDateTime meetingStartTime = WxMessageUtil.getMeetingStartTime(timeStr);
-        System.out.println(meetingStartTime);
     }
 }
