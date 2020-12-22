@@ -2,6 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nju.banxing.demo.domain.mapper.TutorMapper">
 
+    <select id="getStatusById" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select status from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
     <select id="getWorkTimeById" resultType="java.lang.String" parameterType="java.lang.String">
         select work_time from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
     </select>
@@ -9,5 +13,17 @@
     <select id="getConsultationCost" resultType="java.math.BigDecimal" parameterType="java.lang.String">
         select consultation_cost from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
     </select>
+
+    <select id="getApplyInfoById" resultType="java.util.Map">
+        select
+        current_university as currentUniversity,
+        current_profession as currentProfession,
+        student_card_home as studentCardHome,
+        student_card_info as studentCardInfo,
+        student_card_register as studentCardRegister
+        from banxing_tutor
+        where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
 
 </mapper>

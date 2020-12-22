@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
@@ -8,6 +9,7 @@ import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.OrderDO;
+import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
@@ -19,14 +21,12 @@ import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.util.WxMessageUtil;
-import com.nju.banxing.demo.vo.ReserveOrderDetailVO;
-import com.nju.banxing.demo.vo.ReserveOrderInfoVO;
-import com.nju.banxing.demo.vo.WxMessageVO;
-import com.nju.banxing.demo.vo.WxRefundVO;
+import com.nju.banxing.demo.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +63,31 @@ public class TutorController {
 
     @Autowired
     private WeixinService weixinService;
+
+    @GetMapping("/get_status")
+    @MethodLog("获取导师注册申请状态")
+    public SingleResult<Integer> getStatus(String openid){
+
+        int status = tutorService.getStatus(openid);
+        return SingleResult.success(status);
+
+    }
+
+    @GetMapping("/get_base_info")
+    @MethodLog("获取导师的基本信息")
+    public SingleResult<TutorBaseInfoVO> getBaseInfo(String openid){
+        TutorDO tutorDO = tutorService.getById(openid);
+        TutorBaseInfoVO tutorBaseInfoVO = buildTutorBaseInfoVO(tutorDO);
+        return SingleResult.success(tutorBaseInfoVO);
+    }
+
+    @GetMapping("/get_apply_info")
+    @MethodLog("获取导师的注册信息")
+    public SingleResult<TutorApplyInfoVO> getApplyInfo(String openid){
+        Map<String, Object> applyInfoById = tutorService.getApplyInfoById(openid);
+        TutorApplyInfoVO tutorApplyInfoVO = buildApplyInfoVO(applyInfoById);
+        return SingleResult.success(tutorApplyInfoVO);
+    }
 
     @PostMapping("/handle_order")
     @MethodLog("导师提交预约申请处理结果")
@@ -280,6 +305,27 @@ public class TutorController {
             e.printStackTrace();
             return SingleResult.error(CodeMsg.FAIL_UPLOAD);
         }
+    }
+
+
+
+    private TutorApplyInfoVO buildApplyInfoVO(Map<String, Object> map) {
+        TutorApplyInfoVO vo = new TutorApplyInfoVO();
+        vo.setCurrentProfession((String) map.get("currentProfession"));
+        vo.setCurrentUniversity((String) map.get("currentUniversity"));
+        vo.setStudentCardHome((String) map.get("studentCardHome"));
+        vo.setStudentCardInfo((String) map.get("studentCardInfo"));
+        vo.setStudentCardRegister((String) map.get("studentCardRegister"));
+        return vo;
+    }
+
+    private TutorBaseInfoVO buildTutorBaseInfoVO(TutorDO tutorDO) {
+        TutorBaseInfoVO vo = new TutorBaseInfoVO();
+        BeanUtils.copyProperties(tutorDO,vo);
+        String workTime = tutorDO.getWorkTime();
+        List<TimePair> timePairs = JSONArray.parseArray(workTime, TimePair.class);
+        vo.setWorkTimeList(timePairs);
+        return vo;
     }
 
     private List<ReserveOrderInfoVO> buildReserveVO(IPage<Map<String, Object>> orderList) {

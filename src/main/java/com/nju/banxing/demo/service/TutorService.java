@@ -66,6 +66,18 @@ public class TutorService {
     @Autowired
     private WxMaConfig wxMaConfig;
 
+    public int getStatus(String tutorId){
+        Integer statusById = tutorMapper.getStatusById(tutorId);
+        if(null == statusById){
+            statusById = -1;
+        }
+        return statusById;
+    }
+
+    public Map<String, Object> getApplyInfoById(String tutorId){
+        return tutorMapper.getApplyInfoById(tutorId);
+    }
+
     /**
      * 申请导师
      *

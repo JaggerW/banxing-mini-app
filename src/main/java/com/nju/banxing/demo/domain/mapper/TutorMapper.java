@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * <p>
@@ -15,6 +16,10 @@ import java.math.BigDecimal;
  * @since 2020-11-11
  */
 public interface TutorMapper extends BaseMapper<TutorDO> {
+
+    Map<String, Object> getApplyInfoById(@Param("openid") String tutorId);
+
+    Integer getStatusById(@Param("openid") String tutorId);
 
     String getWorkTimeById(@Param("openid") String openid);
 
