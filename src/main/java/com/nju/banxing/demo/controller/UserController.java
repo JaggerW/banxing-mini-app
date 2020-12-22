@@ -11,13 +11,11 @@ import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.mw.redis.SmsRedisKeyPrefix;
 import com.nju.banxing.demo.mw.redis.UserRedisKeyPrefix;
 import com.nju.banxing.demo.request.UserRegisterRequest;
-import com.nju.banxing.demo.service.AliyunService;
-import com.nju.banxing.demo.service.RedisService;
-import com.nju.banxing.demo.service.UserService;
-import com.nju.banxing.demo.service.WeixinService;
+import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.util.ValidatorUtil;
 import com.nju.banxing.demo.vo.AliyunSmsVO;
+import com.nju.banxing.demo.vo.UnreadVO;
 import com.nju.banxing.demo.vo.UserInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -48,6 +46,9 @@ public class UserController {
 
     @Autowired
     private AliyunService aliyunService;
+
+    @Autowired
+    private ReadService readService;
 
 
     @GetMapping(value = "/test")
@@ -166,6 +167,19 @@ public class UserController {
         }else{
             return SingleResult.success(userInfo);
         }
+    }
+
+    @GetMapping("/get_unread")
+    @MethodLog("获取各模块未读消息个数")
+    public SingleResult<UnreadVO> getUnreadInfo(String openid){
+        UnreadVO unreadVO = new UnreadVO();
+        long applyById = readService.getCountOfNewOrderApplyById(openid);
+        long commentById = readService.getCountOfNewOrderCommentById(openid);
+        long replyById = readService.getCountOfNewOrderReplyById(openid);
+        unreadVO.setOrderApply(applyById);
+        unreadVO.setOrderReply(replyById);
+        unreadVO.setOrderComment(commentById);
+        return SingleResult.success(unreadVO);
     }
 
     @PostMapping("/update_info")
