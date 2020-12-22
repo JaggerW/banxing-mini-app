@@ -52,19 +52,14 @@ public class OrderDO implements Serializable {
     private Integer consultationType;
 
     /**
-     * 预约时间
-     */
-    private LocalDate reserveDate;
-
-    /**
      * 咨询开始时间
      */
-    private LocalTime reserveStartTime;
+    private LocalDateTime reserveStartTime;
 
     /**
      * 咨询结束时间
      */
-    private LocalTime reserveEndTime;
+    private LocalDateTime reserveEndTime;
 
     /**
      * 咨询费用单价（/min）
@@ -92,19 +87,14 @@ public class OrderDO implements Serializable {
     private String resumeUrl;
 
     /**
+     * 腾讯会议URL
+     */
+    private String conferenceURL;
+
+    /**
      * 会议原始链接
      */
     private String conferenceLink;
-
-    /**
-     * 会议号
-     */
-    private String conferenceCode;
-
-    /**
-     * 会议密码
-     */
-    private String conferenceSecret;
 
     /**
      * 订单状态：默认10，初始化，暂不使用；20开始为正常态

@@ -1,40 +1,27 @@
 package com.nju.banxing.demo.service;
 
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
-import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
-import com.google.common.collect.Maps;
-import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.config.WxMaConfig;
-import com.nju.banxing.demo.domain.CoinDO;
-import com.nju.banxing.demo.domain.CoinLogDO;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
 import com.nju.banxing.demo.domain.mapper.OrderMapper;
 import com.nju.banxing.demo.enums.*;
-import com.nju.banxing.demo.exception.CodeMsg;
-import com.nju.banxing.demo.exception.GlobalException;
-import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.OpNE;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,14 +63,20 @@ public class OrderService {
         orderDO.setCreator(openid);
         orderDO.setModifier(openid);
         orderDO.setOrderStatus(OrderStatusEnum.ORDER_TO_PAY.getCode());
-        orderDO.setReserveDate(DateUtil.toLocalDate(request.getReserveDateTimeStamp()));
-        LocalTime reserveStartTime = request.getReserveStartTime();
+
+        LocalDate localDate = DateUtil.toLocalDate(request.getReserveDateTimeStamp());
+        LocalTime startTime = request.getReserveStartTime();
+        LocalDateTime reserveStartTime = LocalDateTime.of(localDate, startTime);
         orderDO.setReserveStartTime(reserveStartTime);
         orderDO.setReserveEndTime(reserveStartTime.plusMinutes(10 * request.getConsultationTimeCount()));
+
         orderDO.setTotalCost(totalCost);
         orderDO.setTutorId(request.getTutorId());
         orderDO.setUserId(openid);
         orderDO.setVersion(1);
+
+        // 订单信息落库
+        int orderInsert = orderMapper.insert(orderDO);
 
         OrderLogDO orderLogDO = new OrderLogDO();
         orderLogDO.setId(UUIDUtil.getOrderLogCode());
@@ -95,9 +88,6 @@ public class OrderService {
         orderLogDO.setProcessContent("订单建立");
 
         log.debug(orderDO.toString());
-
-        // 订单信息落库
-        int orderInsert = orderMapper.insert(orderDO);
 
         // 订单流水落库
         int orderLogInsert = orderLogMapper.insert(orderLogDO);
@@ -185,6 +175,7 @@ public class OrderService {
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getReplyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
                         .set(OrderDO::getVersion, version + 1)
@@ -196,6 +187,7 @@ public class OrderService {
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getReplyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.REFUSED.getCode())
                         .set(OrderDO::getVersion, version + 1)

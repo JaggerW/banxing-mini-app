@@ -45,7 +45,6 @@
     <select id="getOrderListByTutorIdAndProcessFlag" resultType="java.util.Map">
         select
         o.id as orderCode,
-        o.reserve_date as reserveDate,
         o.reserve_start_time as reserveStartTime,
         o.reserve_end_time as reserveEndTime,
         u.nick_name as userName
@@ -66,7 +65,6 @@
     <select id="getOrderDetailByOrderCodeAndTutorId" resultType="java.util.Map">
         select
         id as orderCode,
-        reserve_date as reserveDate,
         reserve_start_time as reserveStartTime,
         reserve_end_time as reserveEndTime,
         consultation_content as consultationContent,
@@ -81,7 +79,6 @@
 
     <select id="getOrderConferenceInfoByOrderCode" resultType="java.util.Map">
         select
-        reserve_date as reserveDate,
         reserve_start_time as reserveStartTime,
         reserve_end_time as reserveEndTime
         from banxing_order

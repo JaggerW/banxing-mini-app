@@ -32,7 +32,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -166,10 +168,9 @@ public class TutorController {
         try {
             LocalDateTime meetingStartTime = wxMessageVO.getMeetingStartTime();
             Map<String, Object> map = orderService.getOrderConferenceInfoByOrderCode(request.getOrderCode());
-            Date reserveDate = (Date) map.get("reserveDate");
-            Time startTime = (Time) map.get("startTime");
-            if (!meetingStartTime.toLocalDate().equals(reserveDate.toLocalDate())
-                    || !meetingStartTime.toLocalTime().equals(startTime.toLocalTime())){
+
+            Timestamp startTime = (Timestamp) map.get("reserveStartTime");
+            if (!meetingStartTime.equals(startTime.toLocalDateTime())){
                 throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
             }
         }catch (Exception e){
@@ -288,12 +289,13 @@ public class TutorController {
         return orderList.getRecords().stream().map(map -> {
             ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
             vo.setOrderCode((String) map.get("orderCode"));
-            Date reserveDate = (Date) map.get("reserveDate");
-            Time startTime = (Time) map.get("startTime");
-            Time endTime = (Time) map.get("endTime");
-            vo.setReserveDate(reserveDate.toLocalDate());
-            vo.setReserveStartTime(startTime.toLocalTime());
-            vo.setReserveEndTime(endTime.toLocalTime());
+
+            Timestamp startTime = (Timestamp) map.get("reserveStartTime");
+            Timestamp endTime = (Timestamp) map.get("reserveEndTime");
+            vo.setReserveDate(startTime.toLocalDateTime().toLocalDate());
+            vo.setReserveStartTime(startTime.toLocalDateTime().toLocalTime());
+            vo.setReserveEndTime(endTime.toLocalDateTime().toLocalTime());
+
             vo.setNickName((String) map.get("userName"));
             return vo;
         }).collect(Collectors.toList());
@@ -308,12 +310,12 @@ public class TutorController {
         String userId = (String) voMap.get("userId");
         vo.setNickName(userService.getNickNameById(userId));
         vo.setOrderCode((String) voMap.get("orderCode"));
-        Date reserveDate = (Date) voMap.get("reserveDate");
-        Time startTime = (Time) voMap.get("startTime");
-        Time endTime = (Time) voMap.get("endTime");
-        vo.setReserveDate(reserveDate.toLocalDate());
-        vo.setReserveStartTime(startTime.toLocalTime());
-        vo.setReserveEndTime(endTime.toLocalTime());
+
+        Timestamp startTime = (Timestamp) voMap.get("reserveStartTime");
+        Timestamp endTime = (Timestamp) voMap.get("reserveEndTime");
+        vo.setReserveDate(startTime.toLocalDateTime().toLocalDate());
+        vo.setReserveStartTime(startTime.toLocalDateTime().toLocalTime());
+        vo.setReserveEndTime(endTime.toLocalDateTime().toLocalTime());
         return vo;
     }
 

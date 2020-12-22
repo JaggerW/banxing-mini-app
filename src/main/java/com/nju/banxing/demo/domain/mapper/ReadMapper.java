@@ -2,6 +2,9 @@ package com.nju.banxing.demo.domain.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nju.banxing.demo.domain.ReadDO;
+import org.apache.ibatis.annotations.Param;
+
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -13,5 +16,10 @@ import com.nju.banxing.demo.domain.ReadDO;
  */
 public interface ReadMapper extends BaseMapper<ReadDO> {
 
-    void updateById();
+    long getCountOfNewOrderApplyById(@Param("openid") String userId);
+
+    long getCountOfNewOrderReplyById(@Param("openid") String userId);
+
+    long getCountOfNewOrderCommentById(@Param("openid") String userId,
+                                      @Param("status")Integer status);
 }
