@@ -182,7 +182,7 @@ public class TutorService {
 
     @Transactional
     @Retry
-    public boolean accept(String tutorId, TutorHandleOrderRequest request) {
+    public boolean accept(String tutorId, TutorHandleOrderRequest request, String meetingUrl) {
 
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
         // 已付款状态
@@ -191,7 +191,7 @@ public class TutorService {
             // 更新订单
             Integer version = orderDO.getVersion();
             OrderStatusEnum nextStatus = OrderStatusEnum.ORDER_PAID.getNext(true);
-            boolean accept = orderService.updateOrder4Accept(orderDO.getId(), nextStatus.getCode(), version, request.getContent());
+            boolean accept = orderService.updateOrder4Accept(orderDO.getId(), nextStatus.getCode(), version, request.getContent(), meetingUrl);
             if(!accept){
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }

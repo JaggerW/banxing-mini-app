@@ -170,7 +170,7 @@ public class OrderService {
                         .eq(OrderDO::getId,orderCode));
     }
 
-    public boolean updateOrder4Accept(String orderCode, Integer orderStatus, Integer version, String content){
+    public boolean updateOrder4Accept(String orderCode, Integer orderStatus, Integer version, String content, String meetingUrl){
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
@@ -179,6 +179,7 @@ public class OrderService {
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
                         .set(OrderDO::getVersion, version + 1)
+                        .set(OrderDO::getConferenceURL,meetingUrl)
                         .set(OrderDO::getConferenceLink, content)) > 0;
     }
 

@@ -34,12 +34,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.sql.Time;
-import java.sql.Date;
 
 /**
  * @Author: jaggerw
@@ -77,10 +74,11 @@ public class TutorController {
         if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
             // 同意
             // 校验参数
-            checkMesVO(request);
+            WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
+            checkMesVO(wxMessageVO ,request);
 
             // 更新订单
-            boolean accept = tutorService.accept(openid, request);
+            boolean accept = tutorService.accept(openid, request, wxMessageVO.getMeetingUrl());
             if(accept){
                 // 通知学员
                 sendWxMes(request.getOrderCode(),openid);
@@ -150,8 +148,7 @@ public class TutorController {
 
     }
 
-    private void checkMesVO(TutorHandleOrderRequest request) {
-        WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
+    private void checkMesVO(WxMessageVO wxMessageVO, TutorHandleOrderRequest request) {
 
         if(ObjectUtils.isEmpty(wxMessageVO)){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
