@@ -41,13 +41,7 @@ public class OrderService {
     private OrderLogMapper orderLogMapper;
 
     @Autowired
-    private CoinService coinService;
-
-    @Autowired
     private UserService userService;
-
-    @Autowired
-    private WxMaConfig wxMaConfig;
 
     @Transactional
     public boolean initOrder(String openid, String orderCode, BigDecimal consultationCost, BigDecimal totalCost, OrderCreateRequest request) {
@@ -74,6 +68,7 @@ public class OrderService {
         orderDO.setTutorId(request.getTutorId());
         orderDO.setUserId(openid);
         orderDO.setVersion(1);
+        orderDO.setRowStatus(RowStatusEnum.INVALID.getCode());
 
         // 订单信息落库
         int orderInsert = orderMapper.insert(orderDO);
@@ -83,6 +78,7 @@ public class OrderService {
         orderLogDO.setCreator(openid);
         orderLogDO.setModifier(openid);
         orderLogDO.setAfterStatus(OrderStatusEnum.ORDER_TO_PAY.getCode());
+        orderLogDO.setRowStatus(RowStatusEnum.INVALID.getCode());
         orderLogDO.setOrderCode(orderCode);
         orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
         orderLogDO.setProcessContent("订单建立");
@@ -104,8 +100,8 @@ public class OrderService {
 
     public IPage<Map<String, Object>> getOrderListByTutorIdAndProcessFlag(String tutorId, Boolean processFlag, Long pageIndex, Long pageSize) {
         Long offset = (pageIndex - 1) * pageSize;
-        Long count = orderMapper.getOrderCountByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode());
-        List<Map<String, Object>> orderList = orderMapper.getOrderListByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), offset, pageSize);
+        Long count = orderMapper.getOrderCountByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getOrderListByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
         Page<Map<String, Object>> mapPage = new Page<>();
         mapPage.setRecords(orderList);
         if(count == 0L){
@@ -120,11 +116,11 @@ public class OrderService {
     }
 
     public Map<String, Object> getOrderDetailByOrderCodeAndTutorId(String orderCode, String tutorId){
-        return orderMapper.getOrderDetailByOrderCodeAndTutorId(orderCode,tutorId);
+        return orderMapper.getOrderDetailByOrderCodeAndTutorId(orderCode,tutorId,RowStatusEnum.VALID.getCode());
     }
 
     public Map<String, Object> getOrderConferenceInfoByOrderCode(String orderCode){
-        return orderMapper.getOrderConferenceInfoByOrderCode(orderCode);
+        return orderMapper.getOrderConferenceInfoByOrderCode(orderCode,RowStatusEnum.VALID.getCode());
     }
 
     public String getTutorMobileByOrderCode(String orderCode) {
@@ -201,6 +197,7 @@ public class OrderService {
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getRowStatus,RowStatusEnum.VALID.getCode())
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.TO_CONFIRM.getCode())
                         .set(OrderDO::getVersion, version + 1)) > 0;
     }

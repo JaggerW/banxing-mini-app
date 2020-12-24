@@ -12,6 +12,7 @@ import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.enums.CoinProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderProcessTypeEnum;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
+import com.nju.banxing.demo.enums.RowStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
@@ -73,6 +74,7 @@ public class PayService {
             orderLogDO.setAfterStatus(nextOrderStatus.getCode());
             orderLogDO.setOrderCode(orderCode);
             orderLogDO.setProcessType(OrderProcessTypeEnum.FAIL.getCode());
+            orderLogDO.setRowStatus(RowStatusEnum.INVALID.getCode());
             HashMap<Object, Object> errorMap = Maps.newHashMap();
             errorMap.put("wxPayOrderCode", result.getTransactionId());
             errorMap.put("errCode", result.getErrCode());

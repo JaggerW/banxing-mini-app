@@ -132,6 +132,11 @@ public class OrderDO implements Serializable {
     private Integer errorFlag;
 
     /**
+     * 可见状态：0，可见；1，不可见或逻辑删除
+     */
+    private Integer rowStatus;
+
+    /**
      * 预留扩展字段
      */
     private String extension;

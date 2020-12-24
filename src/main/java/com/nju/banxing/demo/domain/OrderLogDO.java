@@ -55,6 +55,11 @@ public class OrderLogDO implements Serializable {
     private String processContent;
 
     /**
+     * 可见状态：1，不可见或逻辑删除；0，可见
+     */
+    private Integer rowStatus;
+
+    /**
      * 预留扩展字段
      */
     private String extension;

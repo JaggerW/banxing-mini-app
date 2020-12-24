@@ -30,7 +30,8 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     Long getOrderCountByTutorIdAndProcessFlag(@Param("tutorId") String tutorId,
                                               @Param("processFlag") Boolean processFlag,
-                                              @Param("orderStatus") Integer orderStatus);
+                                              @Param("orderStatus") Integer orderStatus,
+                                              @Param("rowStatus") Integer rowStatus);
 
     /**
      *
@@ -44,11 +45,14 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
     List<Map<String, Object>> getOrderListByTutorIdAndProcessFlag(@Param("tutorId") String tutorId,
                                                                   @Param("processFlag") Boolean processFlag,
                                                                   @Param("orderStatus") Integer orderStatus,
+                                                                  @Param("rowStatus") Integer rowStatus,
                                                                   @Param("offset") Long offset,
                                                                   @Param("pageSize") Long pageSize);
 
     Map<String, Object> getOrderDetailByOrderCodeAndTutorId(@Param("orderCode") String orderCode,
-                                                            @Param("tutorId") String tutorId);
+                                                            @Param("tutorId") String tutorId,
+                                                            @Param("rowStatus") Integer rowStatus);
 
-    Map<String, Object> getOrderConferenceInfoByOrderCode(@Param("orderCode") String orderCode);
+    Map<String, Object> getOrderConferenceInfoByOrderCode(@Param("orderCode") String orderCode,
+                                                          @Param("rowStatus") Integer rowStatus);
 }
