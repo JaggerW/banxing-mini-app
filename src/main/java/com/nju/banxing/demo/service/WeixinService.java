@@ -105,12 +105,12 @@ public class WeixinService {
      * 发送小程序通知
      * @return
      */
-    public boolean sendWxMessage(String userOpenid, String templateId, String page, List<WxMaSubscribeMessage.Data> dataList){
+    public boolean sendWxMessage(String targetUserId, String templateId, String page, List<WxMaSubscribeMessage.Data> dataList){
         log.info("===== BEGIN SEND WX MESSAGE");
         final WxMaService wxMaService = WxMaServiceFactory.getWxMaService();
         WxMaSubscribeMessage message = new WxMaSubscribeMessage();
         message.setData(dataList);
-        message.setToUser(userOpenid);
+        message.setToUser(targetUserId);
         message.setTemplateId(templateId);
         message.setPage(page);
 
@@ -124,21 +124,49 @@ public class WeixinService {
     }
 
     /**
-     * 给用户下发腾讯会议通知
+     * 预约成功通知
      * @param meetTitle
      * @param date
-     * @param teacherName
-     * @param meetNum
+     * @param meetID
+     * @param meetSecret
+     * @return
+     */
+    public List<WxMaSubscribeMessage.Data> getMeetingSuccessWxMessage(String meetTitle, String date, String meetID, String meetSecret){
+        Map<String,String> map = Maps.newHashMap();
+        map.put("thing23",meetTitle);
+        map.put("time24",date);
+        map.put("character_string25",meetID);
+        map.put("character_string26",meetSecret);
+        map.put("thing15","请按时登录腾讯会议进行咨询");
+        return map.entrySet().stream().map(
+                m -> new WxMaSubscribeMessage.Data(m.getKey(),m.getValue())
+        ).collect(Collectors.toList());
+    }
+
+    /**
+     * 预约取消通知
+     * @param rejectReason
+     * @return
+     */
+    public List<WxMaSubscribeMessage.Data> getMeetingRejectWxMessage(String rejectReason){
+        Map<String,String> map = Maps.newHashMap();
+        map.put("thing11",rejectReason);
+        map.put("thing4","订单已付款将于1-3日内按原路经退回");
+        return map.entrySet().stream().map(
+                m -> new WxMaSubscribeMessage.Data(m.getKey(),m.getValue())
+        ).collect(Collectors.toList());
+    }
+
+    /**
+     * 导师申请审核结果通知
+     * @param applyResult
      * @param tips
      * @return
      */
-    public List<WxMaSubscribeMessage.Data> getWxMeetMessage(String meetTitle, String date, String teacherName, String meetNum, String tips){
+    public List<WxMaSubscribeMessage.Data> getTutorApplyResultWxMessage(String applyResult, String tips){
         Map<String,String> map = Maps.newHashMap();
-        map.put("thing1",meetTitle);
-        map.put("time2",date);
-        map.put("thing3",teacherName);
-        map.put("character_string4",meetNum);
-        map.put("thing5",tips);
+        map.put("phrase2",applyResult);
+        map.put("thing3",tips);
         return map.entrySet().stream().map(
                 m -> new WxMaSubscribeMessage.Data(m.getKey(),m.getValue())
         ).collect(Collectors.toList());

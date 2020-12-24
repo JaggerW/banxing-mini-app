@@ -30,18 +30,18 @@ public class AppContantConfig implements Serializable {
     public final static String ALIYUN_OSS_URL_PREFIX = "https://codingboy.top/";
 
     // weixin msg
-    public final static String WX_MSG_MEETING_INFO_TEMPLATE_ID = "";
-    public final static String WX_MSG_MEETING_INFO_PAGE = "";
-    public final static String WX_MSG_MEETING_REJECT_TEMPLATE_ID = "";
+    public final static String WX_MSG_MEETING_SUCCESS_TEMPLATE_ID = "-KzAdRPopRCtVe-bd2maIwcoC-DGwtgzqHwH7Zhs4bk";
+    public final static String WX_MSG_MEETING_SUCCESS_PAGE = "";
+    public final static String WX_MSG_MEETING_REJECT_TEMPLATE_ID = "xpTRepIRyQYmr80mHvjWr0IbgIlF8YG7ZjAsLa7xhfo";
     public final static String WX_MSG_MEETING_REJECT_PAGE = "";
-    public final static String WX_MSG_TUTOR_APPLY_TEMPLATE_ID = "";
+    public final static String WX_MSG_TUTOR_APPLY_TEMPLATE_ID = "M0AQDZB4g9kxKeyYxItD5Fo1tAexqPXyNEu7zeQVsOE";
     public final static String WX_MSG_TUTOR_APPLY_PAGE = "";
 
 
     // redis expireTime
     public final static Integer USER_TOKEN_EXPIRE_TIME = 24*3600;
     public final static Integer VER_CODE_EXPIRE_TIME = 300;
-    public final static Integer DUP_KEY_EXPIRE_TIME = 1800;
+    public final static Integer DUP_KEY_EXPIRE_TIME = 300;
 
     // 用户token放入url传输中的参数名称
     public static final String USER_TOKEN_HEADER_NAME = "userToken";

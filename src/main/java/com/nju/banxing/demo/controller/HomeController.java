@@ -110,6 +110,8 @@ public class HomeController {
         return PagedResult.success(list,page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
     }
 
+
+
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){
         TutorDetailInfoVO vo = new TutorDetailInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);

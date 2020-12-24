@@ -172,6 +172,7 @@ public class OrderController {
                 return SingleResult.success(payOrder);
             }else {
                 log.error("数据库初始化订单失败");
+                deleteRedis(request.getDupKey());
                 return SingleResult.error(CodeMsg.ERROR_ORDER);
             }
         } catch (WxPayException e) {

@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.controller;
 
+import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -96,6 +97,12 @@ public class TutorController {
         if(ObjectUtils.isEmpty(request)){
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("request不得为空"));
         }
+        String userId = orderService.getUserIdByOrderCode(request.getOrderCode());
+        if(StringUtils.isEmpty(userId)){
+            log.error("查无此单！");
+            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("查无此单！"));
+        }
+
         if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
             // 同意
             // 校验参数
@@ -106,7 +113,7 @@ public class TutorController {
             boolean accept = tutorService.accept(openid, request, wxMessageVO.getMeetingUrl());
             if(accept){
                 // 通知学员
-                sendWxMes(request.getOrderCode(),openid);
+                sendSuccessWxMes(request.getOrderCode(),userId,wxMessageVO);
 
                 // 处理成功
                 return SingleResult.success("提交成功，请按照约定的时间完成咨询服务");
@@ -126,6 +133,9 @@ public class TutorController {
 
                 boolean reject = tutorService.reject(openid, request, wxRefundVO);
                 if(reject){
+                    // 通知学员
+                    sendRejectWxMes(userId,content);
+
                     return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
                 }else {
                     throw new GlobalException(CodeMsg.SERVER_ERROR);
@@ -143,76 +153,10 @@ public class TutorController {
 
     }
 
-    private WxRefundRequest buildRefundRequest(String tutorId, TutorHandleOrderRequest request) {
-        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
-        if (ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())) {
-            // 已付款状态
-
-            WxRefundRequest refundRequest = new WxRefundRequest();
-            refundRequest.setNonceStr(UUIDUtil.getNonceStr());
-            refundRequest.setOrderCode(orderDO.getId());
-            refundRequest.setOrderRefundCode(UUIDUtil.getOrderRefundCode());
-            refundRequest.setRefundDesc("预约已被取消，将订单已付款退回");
-            int fee = MathUtil.bigYuan2Fee(orderDO.getTotalCost());
-            refundRequest.setTotalFee(fee);
-            refundRequest.setRefundFee(fee);
-            refundRequest.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/pay/refund_notify");
-            return refundRequest;
-        }
-
-        log.error("查无此单或该单状态有误！");
-        throw new GlobalException(CodeMsg.SERVER_ERROR);
-    }
-
-    private void sendWxMes(String orderCode, String openid) {
-        // TODO 发送微信小程序通知
-        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, openid);
-        String userId = orderDO.getUserId();
-        Integer consultationType = orderDO.getConsultationType();
-        String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
-
-    }
-
-    private void checkMesVO(WxMessageVO wxMessageVO, TutorHandleOrderRequest request) {
-
-        if(ObjectUtils.isEmpty(wxMessageVO)){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
-        }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingId())){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
-        }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
-        }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingTime())){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
-        }
-        try {
-            LocalDateTime meetingStartTime = wxMessageVO.getMeetingStartTime();
-            Map<String, Object> map = orderService.getOrderConferenceInfoByOrderCode(request.getOrderCode());
-
-            Timestamp startTime = (Timestamp) map.get("reserveStartTime");
-            if (!meetingStartTime.equals(startTime.toLocalDateTime())){
-                throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
-            }
-        }catch (Exception e){
-            throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
-        }
-    }
-
-    private void checkRejectContent(String content){
-        if(StringUtils.isEmpty(content)){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("请填写拒绝原因后点击提交"));
-        }
-        if(500 < content.length()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("拒绝原因请不要超过500字"));
-        }
-    }
-
     @GetMapping("/reserve_list")
     @MethodLog("获取预约申请列表")
     public PagedResult<ReserveOrderInfoVO> getReserveList(String openid,
-                                                          ReserveOrderListQuery query){
+                                                          @RequestBody ReserveOrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<ReserveOrderInfoVO> data = buildReserveVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
@@ -308,6 +252,79 @@ public class TutorController {
     }
 
 
+    private WxRefundRequest buildRefundRequest(String tutorId, TutorHandleOrderRequest request) {
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
+        if (ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())) {
+            // 已付款状态
+
+            WxRefundRequest refundRequest = new WxRefundRequest();
+            refundRequest.setNonceStr(UUIDUtil.getNonceStr());
+            refundRequest.setOrderCode(orderDO.getId());
+            refundRequest.setOrderRefundCode(UUIDUtil.getOrderRefundCode());
+            refundRequest.setRefundDesc("预约已被取消，将订单已付款退回");
+            int fee = MathUtil.bigYuan2Fee(orderDO.getTotalCost());
+            refundRequest.setTotalFee(fee);
+            refundRequest.setRefundFee(fee);
+            refundRequest.setNotifyUrl(AppContantConfig.SERVER_PATH_PREFIX + "/pay/refund_notify");
+            return refundRequest;
+        }
+
+        log.error("查无此单或该单状态有误！");
+        throw new GlobalException(CodeMsg.SERVER_ERROR);
+    }
+
+    private void sendSuccessWxMes(String orderCode, String openid, WxMessageVO wxMessageVO) {
+
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, openid);
+        String userId = orderDO.getUserId();
+        Integer consultationType = orderDO.getConsultationType();
+        String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
+
+        List<WxMaSubscribeMessage.Data> dataList = weixinService.getMeetingSuccessWxMessage(typeName, wxMessageVO.getMeetingTime(), wxMessageVO.getMeetingId(), wxMessageVO.getMeetingSecret());
+        weixinService.sendWxMessage(userId,AppContantConfig.WX_MSG_MEETING_SUCCESS_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_SUCCESS_PAGE,dataList);
+
+    }
+
+    private void sendRejectWxMes(String openid, String reason){
+        List<WxMaSubscribeMessage.Data> dataList = weixinService.getMeetingRejectWxMessage(reason);
+        weixinService.sendWxMessage(openid,AppContantConfig.WX_MSG_MEETING_REJECT_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_REJECT_PAGE,dataList);
+    }
+
+    private void checkMesVO(WxMessageVO wxMessageVO, TutorHandleOrderRequest request) {
+
+        if(ObjectUtils.isEmpty(wxMessageVO)){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingId())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        if(StringUtils.isEmpty(wxMessageVO.getMeetingTime())){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
+        }
+        try {
+            LocalDateTime meetingStartTime = wxMessageVO.getMeetingStartTime();
+            Map<String, Object> map = orderService.getOrderConferenceInfoByOrderCode(request.getOrderCode());
+
+            Timestamp startTime = (Timestamp) map.get("reserveStartTime");
+            if (!meetingStartTime.equals(startTime.toLocalDateTime())){
+                throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
+            }
+        }catch (Exception e){
+            throw new GlobalException(CodeMsg.ERROR_MEETING_TIME);
+        }
+    }
+
+    private void checkRejectContent(String content){
+        if(StringUtils.isEmpty(content)){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("请填写拒绝原因后点击提交"));
+        }
+        if(500 < content.length()){
+            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("拒绝原因请不要超过500字"));
+        }
+    }
 
     private TutorApplyInfoVO buildApplyInfoVO(Map<String, Object> map) {
         TutorApplyInfoVO vo = new TutorApplyInfoVO();
