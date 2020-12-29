@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.action.GetLongAction;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -55,9 +56,6 @@ public class TutorController {
 
     @Autowired
     private OrderService orderService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private WeixinService weixinService;
@@ -96,8 +94,7 @@ public class TutorController {
         }
         String userId = orderService.getUserIdByOrderCode(request.getOrderCode());
         if(StringUtils.isEmpty(userId)){
-            log.error("查无此单！");
-            return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("查无此单！"));
+            throw new GlobalException(CodeMsg.NULL_ORDER);
         }
 
         if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
