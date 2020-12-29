@@ -2,10 +2,8 @@ package com.nju.banxing.demo.controller;
 
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import com.alibaba.fastjson.JSONArray;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
-import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
@@ -21,7 +19,7 @@ import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.MathUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
-import com.nju.banxing.demo.util.WxMessageUtil;
+import com.nju.banxing.demo.util.TXMeetingUtil;
 import com.nju.banxing.demo.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -37,7 +35,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author: jaggerw
@@ -106,14 +103,14 @@ public class TutorController {
         if(TutorStatusEnum.ACCEPTED.getCode().equals(request.getHandleType())){
             // 同意
             // 校验参数
-            WxMessageVO wxMessageVO = WxMessageUtil.parseMes(request.getContent());
-            checkMesVO(wxMessageVO ,request);
+            TXMeetingInfoVO TXMeetingInfoVO = TXMeetingUtil.parseMes(request.getContent());
+            checkMesVO(TXMeetingInfoVO,request);
 
             // 更新订单
-            boolean accept = tutorService.accept(openid, request, wxMessageVO.getMeetingUrl());
+            boolean accept = tutorService.accept(openid, request, TXMeetingInfoVO.getMeetingUrl());
             if(accept){
                 // 通知学员
-                sendSuccessWxMes(request.getOrderCode(),userId,wxMessageVO);
+                sendSuccessWxMes(request.getOrderCode(),userId, TXMeetingInfoVO);
 
                 // 处理成功
                 return SingleResult.success("提交成功，请按照约定的时间完成咨询服务");
@@ -151,24 +148,6 @@ public class TutorController {
 
         return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("请选择同意或拒绝并填写相关信息后再点击提交"));
 
-    }
-
-    @GetMapping("/reserve_list")
-    @MethodLog("获取预约申请列表")
-    public PagedResult<ReserveOrderInfoVO> getReserveList(String openid,
-                                                          @RequestBody ReserveOrderListQuery query){
-        IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
-        List<ReserveOrderInfoVO> data = buildReserveVO(orderList);
-        return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
-    }
-
-    @GetMapping("/reserve_detail")
-    @MethodLog("获取预约申请详情")
-    public SingleResult<ReserveOrderDetailVO> getReserveDetail(String openid,
-                                                               @RequestParam("orderCode") String orderCode){
-        Map<String, Object> voMap = orderService.getOrderDetailByOrderCodeAndTutorId(orderCode, openid);
-        ReserveOrderDetailVO detailVO = buildReserveDetail(voMap);
-        return SingleResult.success(detailVO);
     }
 
     @PostMapping("/register")
@@ -273,14 +252,14 @@ public class TutorController {
         throw new GlobalException(CodeMsg.SERVER_ERROR);
     }
 
-    private void sendSuccessWxMes(String orderCode, String openid, WxMessageVO wxMessageVO) {
+    private void sendSuccessWxMes(String orderCode, String openid, TXMeetingInfoVO TXMeetingInfoVO) {
 
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, openid);
         String userId = orderDO.getUserId();
         Integer consultationType = orderDO.getConsultationType();
         String typeName = ConsultationTypeEnum.getEnumByCode(consultationType).getName();
 
-        List<WxMaSubscribeMessage.Data> dataList = weixinService.getMeetingSuccessWxMessage(typeName, wxMessageVO.getMeetingTime(), wxMessageVO.getMeetingId(), wxMessageVO.getMeetingSecret());
+        List<WxMaSubscribeMessage.Data> dataList = weixinService.getMeetingSuccessWxMessage(typeName, TXMeetingInfoVO.getMeetingTime(), TXMeetingInfoVO.getMeetingId(), TXMeetingInfoVO.getMeetingSecret());
         weixinService.sendWxMessage(userId,AppContantConfig.WX_MSG_MEETING_SUCCESS_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_SUCCESS_PAGE,dataList);
 
     }
@@ -290,22 +269,22 @@ public class TutorController {
         weixinService.sendWxMessage(openid,AppContantConfig.WX_MSG_MEETING_REJECT_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_REJECT_PAGE,dataList);
     }
 
-    private void checkMesVO(WxMessageVO wxMessageVO, TutorHandleOrderRequest request) {
+    private void checkMesVO(TXMeetingInfoVO TXMeetingInfoVO, TutorHandleOrderRequest request) {
 
-        if(ObjectUtils.isEmpty(wxMessageVO)){
+        if(ObjectUtils.isEmpty(TXMeetingInfoVO)){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingId())){
+        if(StringUtils.isEmpty(TXMeetingInfoVO.getMeetingId())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingUrl())){
+        if(StringUtils.isEmpty(TXMeetingInfoVO.getMeetingUrl())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
-        if(StringUtils.isEmpty(wxMessageVO.getMeetingTime())){
+        if(StringUtils.isEmpty(TXMeetingInfoVO.getMeetingTime())){
             throw new GlobalException(CodeMsg.ERROR_MEETING_MESSAGE);
         }
         try {
-            LocalDateTime meetingStartTime = wxMessageVO.getMeetingStartTime();
+            LocalDateTime meetingStartTime = TXMeetingInfoVO.getMeetingStartTime();
             Map<String, Object> map = orderService.getOrderConferenceInfoByOrderCode(request.getOrderCode());
 
             Timestamp startTime = (Timestamp) map.get("reserveStartTime");
@@ -342,40 +321,6 @@ public class TutorController {
         String workTime = tutorDO.getWorkTime();
         List<TimePair> timePairs = JSONArray.parseArray(workTime, TimePair.class);
         vo.setWorkTimeList(timePairs);
-        return vo;
-    }
-
-    private List<ReserveOrderInfoVO> buildReserveVO(IPage<Map<String, Object>> orderList) {
-        return orderList.getRecords().stream().map(map -> {
-            ReserveOrderInfoVO vo = new ReserveOrderInfoVO();
-            vo.setOrderCode((String) map.get("orderCode"));
-
-            Timestamp startTime = (Timestamp) map.get("reserveStartTime");
-            Timestamp endTime = (Timestamp) map.get("reserveEndTime");
-            vo.setReserveDate(startTime.toLocalDateTime().toLocalDate());
-            vo.setReserveStartTime(startTime.toLocalDateTime().toLocalTime());
-            vo.setReserveEndTime(endTime.toLocalDateTime().toLocalTime());
-
-            vo.setNickName((String) map.get("userName"));
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
-    private ReserveOrderDetailVO buildReserveDetail(Map<String, Object> voMap){
-        ReserveOrderDetailVO vo = new ReserveOrderDetailVO();
-        vo.setConferenceLink((String) voMap.get("conferenceLink"));
-        vo.setConsultationContent((String) voMap.get("consultationContent"));
-        vo.setRejectReason((String) voMap.get("rejectReason"));
-        vo.setResumeUrl((String) voMap.get("resumeUrl"));
-        String userId = (String) voMap.get("userId");
-        vo.setNickName(userService.getNickNameById(userId));
-        vo.setOrderCode((String) voMap.get("orderCode"));
-
-        Timestamp startTime = (Timestamp) voMap.get("reserveStartTime");
-        Timestamp endTime = (Timestamp) voMap.get("reserveEndTime");
-        vo.setReserveDate(startTime.toLocalDateTime().toLocalDate());
-        vo.setReserveStartTime(startTime.toLocalDateTime().toLocalTime());
-        vo.setReserveEndTime(endTime.toLocalDateTime().toLocalTime());
         return vo;
     }
 

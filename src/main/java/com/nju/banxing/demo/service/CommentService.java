@@ -36,4 +36,8 @@ public class CommentService {
                 .eq(CommentDO::getId, tutorId)
                 .eq(CommentDO::getConsultationType, type));
     }
+
+    public Map<String, Object> getCommentInfoByOrderCode(String orderCode){
+        return commentMapper.getCommentInfoByOrderCode(orderCode);
+    }
 }

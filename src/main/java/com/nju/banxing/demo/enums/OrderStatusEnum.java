@@ -63,7 +63,7 @@ public enum OrderStatusEnum {
             return null;
         }
     },
-    APPLY_REFUND(140,"申请退款中"){
+    APPLY_REFUND(90,"申请退款中"){
         @Override
         public OrderStatusEnum getNext(boolean successFlag) {
             return ORDER_REFUNDED;

@@ -17,7 +17,7 @@ import java.time.LocalTime;
  * @Date: 2020/12/11
  */
 @Data
-public class ReserveOrderInfoVO implements Serializable {
+public class OrderListInfoVO implements Serializable {
     private static final long serialVersionUID = -6287907901155756527L;
 
     private String nickName;

@@ -45,6 +45,78 @@
         </if>
     </select>
 
+    <select id="getOrderCountByUserIdAndProcessFlag" resultType="java.lang.Long">
+        select count(*) from banxing_order
+        where user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getCommentOrderCountByUserIdAndProcessFlag" resultType="java.lang.Long">
+        select count(*) from banxing_order
+        where user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and comment_status = #{commentStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and comment_status > #{commentStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getReplyOrderCountByUserIdAndProcessFlag" resultType="java.lang.Long">
+        select count(*) from banxing_order
+        where user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and tutor_status > #{tutorStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getScheduleCountByUserId" resultType="java.lang.Long">
+        select count(*) from banxing_order
+        where user_id = #{userId, jdbcType = VARCHAR}
+        and tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        <if test="processFlag != null and processFlag">
+            and order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getScheduleCountByTutorId" resultType="java.lang.Long">
+        select count(*) from banxing_order
+        where tutor_id = #{tutorId, jdbcType = VARCHAR}
+        and tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        <if test="processFlag != null and processFlag">
+            and order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
     <select id="getOrderListByTutorIdAndProcessFlag" resultType="java.util.Map">
         select
         o.id as orderCode,
@@ -62,13 +134,133 @@
             and o.order_status > #{orderStatus, jdbcType = INTEGER}
         </if>
         <if test="rowStatus != null">
-            and row_status = #{rowStatus, jdbcType = TINYINT}
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
         </if>
-        order by o.create_time asc, o.id asc
+        order by o.create_time desc, o.id desc
         limit #{offset}, #{pageSize}
     </select>
 
-    <select id="getOrderDetailByOrderCodeAndTutorId" resultType="java.util.Map">
+    <select id="getOrderListByUserIdAndProcessFlag" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime,
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.tutor_id = u.id
+        where o.user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and o.order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+        order by o.create_time desc, o.id desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="getReplyOrderListByUserIdAndProcessFlag" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime,
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.tutor_id = u.id
+        where o.user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and o.comment_status = #{commentStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.comment_status > #{commentStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+        order by o.create_time desc, o.id desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="getReplyOrderListByUserIdAndProcessFlag" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime,
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.tutor_id = u.id
+        where o.user_id = #{userId, jdbcType = VARCHAR}
+        <if test="processFlag != null and processFlag">
+            and o.tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.tutor_status > #{tutorStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+        order by o.create_time desc, o.id desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="getScheduleListByUserId" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime,
+        o.conference_link as conferenceLink,
+        o.conference_url as conferenceUrl,
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.tutor_id = u.id
+        where o.user_id = #{userId, jdbcType = VARCHAR}
+        and o.tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        <if test="processFlag != null and processFlag">
+            and o.order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+        order by o.create_time desc , o.id desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="getScheduleListByTutorId" resultType="java.util.Map">
+        select
+        o.id as orderCode,
+        o.reserve_start_time as reserveStartTime,
+        o.reserve_end_time as reserveEndTime
+        u.nick_name as userName
+        from banxing_order o
+        left join banxing_user u
+        on o.user_id = u.id
+        where o.tutor_id = #{tutorId, jdbcType = VARCHAR}
+        and o.tutor_status = #{tutorStatus, jdbcType = INTEGER}
+        <if test="processFlag != null and processFlag">
+            and o.order_status <![CDATA[<]]> #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="processFlag != null and !processFlag">
+            and o.order_status >= #{orderStatus, jdbcType = INTEGER}
+        </if>
+        <if test="rowStatus != null">
+            and o.row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+        order by o.create_time desc , o.id desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+
+    <select id="getReserveOrderDetailByOrderCodeAndTutorId" resultType="java.util.Map">
         select
         id as orderCode,
         reserve_start_time as reserveStartTime,
@@ -81,6 +273,50 @@
         from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}
         and tutor_id = #{tutorId, jdbcType = VARCHAR}
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getCommentOrderDetailByOrderCodeAndUserId" resultType="java.util.Map">
+        select
+        id as orderCode,
+        reserve_start_time as reserveStartTime,
+        reserve_end_time as reserveEndTime,
+        tutor_id as tutorId
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+        and user_id = #{userId, jdbcType = VARCHAR}
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getScheduleDetailByOrderCodeAndTutorId" resultType="java.util.Map">
+        select
+        id as orderCode,
+        reserve_start_time as reserveStartTime,
+        reserve_end_time as reserveEndTime,
+        user_id as userId
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+        and tutor_id = #{tutorId, jdbcType = VARCHAR}
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
+    <select id="getReplyOrderDetailByOrderCodeAndUserId" resultType="java.util.Map">
+        select
+        id as orderCode,
+        reserve_start_time as reserveStartTime,
+        reserve_end_time as reserveEndTime,
+        reject_reason as rejectReason,
+        conference_link as conferenceLink,
+        tutor_id as tutorId
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+        and user_id = #{userId, jdbcType = VARCHAR}
         <if test="rowStatus != null">
             and row_status = #{rowStatus, jdbcType = TINYINT}
         </if>

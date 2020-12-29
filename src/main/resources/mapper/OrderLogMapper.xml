@@ -2,4 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nju.banxing.demo.domain.mapper.OrderLogMapper">
 
+    <select id="getOrderStatusByOrderCode" resultType="java.lang.Integer">
+        select after_status from banxing_order_log
+        where order_code = #{orderCode, jdbcType = VARCHAR}
+        <if test="rowStatus != null">
+            and row_status = #{rowStatus, jdbcType = TINYINT}
+        </if>
+    </select>
+
 </mapper>

@@ -1,16 +1,12 @@
 package com.nju.banxing.demo.util;
 
-import com.google.common.collect.Lists;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
-import com.nju.banxing.demo.vo.WxMessageVO;
+import com.nju.banxing.demo.vo.TXMeetingInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @Author: jaggerw
@@ -18,7 +14,7 @@ import java.util.List;
  * @Date: 2020/11/9
  */
 @Slf4j
-public class WxMessageUtil {
+public class TXMeetingUtil {
 
     private static final String MEETING_TIME_KEY_POINT = "会议时间：";
     private static final String MEETING_URL_KEY_POINT = "会议列表：";
@@ -30,7 +26,7 @@ public class WxMessageUtil {
      * @param meetingStr
      * @return
      */
-    public static WxMessageVO parseMes(String meetingStr) {
+    public static TXMeetingInfoVO parseMes(String meetingStr) {
         try {
             if(StringUtils.isEmpty(meetingStr)){
                 return null;
@@ -41,7 +37,7 @@ public class WxMessageUtil {
                 sb.append(s);
             }
             meetingStr = String.valueOf(sb);
-            WxMessageVO vo = new WxMessageVO();
+            TXMeetingInfoVO vo = new TXMeetingInfoVO();
             vo.setMeetingTime(getMeetingTime(meetingStr));
             vo.setMeetingId(getMeetingID(meetingStr));
             vo.setMeetingSecret(getMeetingSecret(meetingStr));

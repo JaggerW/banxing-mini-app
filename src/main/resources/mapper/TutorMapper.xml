@@ -25,5 +25,14 @@
         where id = #{openid, jdbcType = VARCHAR}
     </select>
 
+    <select id="getTutorInfoById" resultType="java.util.Map">
+        select
+        nick_name as nickName,
+        current_university as currentUniversity,
+        current_profession as currentProfession
+        from banxing_tutor
+        where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
 
 </mapper>

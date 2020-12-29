@@ -19,6 +19,8 @@ public interface TutorMapper extends BaseMapper<TutorDO> {
 
     Map<String, Object> getApplyInfoById(@Param("openid") String tutorId);
 
+    Map<String, Object> getTutorInfoById(@Param("openid") String tutorId);
+
     Integer getStatusById(@Param("openid") String tutorId);
 
     String getWorkTimeById(@Param("openid") String openid);

@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ReserveOrderDetailVO extends ReserveOrderInfoVO {
+public class ReserveOrderDetailVO extends OrderListInfoVO {
     private static final long serialVersionUID = 6266251909338393967L;
 
     private String consultationContent;

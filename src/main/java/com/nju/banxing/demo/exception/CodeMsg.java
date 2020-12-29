@@ -45,6 +45,7 @@ public class CodeMsg {
     public static final CodeMsg ERROR_RESERVE_TIME = new CodeMsg(502,"预约时间错误");
     public static final CodeMsg ERROR_RESERVE_COST = new CodeMsg(503,"咨询费用错误");
     public static final CodeMsg OUT_OF_TIME_RANGE = new CodeMsg(504,"咨询时间不可超出导师当前可工作范围");
+    public static final CodeMsg NULL_ORDER = new CodeMsg(505, "查无此单");
 
     // 微信
     public static final CodeMsg WX_ERROR_CHECK_USER_INFO = new CodeMsg(200,"用户信息校验失败");

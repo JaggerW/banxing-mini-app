@@ -13,7 +13,7 @@ import java.time.LocalTime;
  * @Date: 2020/12/17
  */
 @Data
-public class WxMessageVO implements Serializable {
+public class TXMeetingInfoVO implements Serializable {
     private static final long serialVersionUID = -536210020942988051L;
 
     private String meetingId;

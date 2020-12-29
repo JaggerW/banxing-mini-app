@@ -78,6 +78,10 @@ public class TutorService {
         return tutorMapper.getApplyInfoById(tutorId);
     }
 
+    public Map<String, Object> getTutorInfoById(String tutorId){
+        return tutorMapper.getTutorInfoById(tutorId);
+    }
+
     /**
      * 申请导师
      *

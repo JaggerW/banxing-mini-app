@@ -11,9 +11,10 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ReserveOrderListQuery extends BasePaged {
+public class OrderListQuery extends BasePaged {
     private static final long serialVersionUID = -4896814636773097777L;
 
-    // true, 未处理；false，已处理
-    private Boolean processFlag;
+    // true, 未处理 or 进行中 or 已同意 or 未评价；
+    // false，已处理 or 已结束 or 已拒绝 or 已评价；
+    private Boolean processFlag = true;
 }

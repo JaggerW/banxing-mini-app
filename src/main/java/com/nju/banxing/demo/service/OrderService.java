@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.nju.banxing.demo.config.WxMaConfig;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
@@ -102,6 +101,45 @@ public class OrderService {
         Long offset = (pageIndex - 1) * pageSize;
         Long count = orderMapper.getOrderCountByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), RowStatusEnum.VALID.getCode());
         List<Map<String, Object>> orderList = orderMapper.getOrderListByTutorIdAndProcessFlag(tutorId, processFlag, OrderStatusEnum.ORDER_PAID.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    public IPage<Map<String, Object>> getOrderListByUserIdAndProcessFlag(String userId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getOrderCountByUserIdAndProcessFlag(userId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getOrderListByUserIdAndProcessFlag(userId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    public IPage<Map<String, Object>> getCommentListByUserIdAndProcessFlag(String userId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getOrderCountByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getOrderListByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    public IPage<Map<String, Object>> getReplyOrderListByUserIdAndProcessFlag(String userId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getReplyOrderCountByUserIdAndProcessFlag(userId, processFlag, TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getReplyOrderListByUserIdAndProcessFlag(userId, processFlag, TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    public IPage<Map<String, Object>> getScheduleListByUserId(String userId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getScheduleCountByUserId(userId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getScheduleListByUserId(userId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    public IPage<Map<String, Object>> getScheduleListByTutorId(String tutorId, Boolean processFlag, Long pageIndex, Long pageSize) {
+        Long offset = (pageIndex - 1) * pageSize;
+        Long count = orderMapper.getScheduleCountByTutorId(tutorId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getScheduleListByTutorId(tutorId, processFlag, OrderStatusEnum.ORDER_CLOSED.getCode(), TutorStatusEnum.ACCEPTED.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        return buildIPage(pageIndex,pageSize,count,orderList);
+    }
+
+    private IPage<Map<String, Object>> buildIPage(Long pageIndex, Long pageSize, Long count, List<Map<String, Object>> orderList){
         Page<Map<String, Object>> mapPage = new Page<>();
         mapPage.setRecords(orderList);
         if(count == 0L){
@@ -115,8 +153,20 @@ public class OrderService {
         return mapPage;
     }
 
-    public Map<String, Object> getOrderDetailByOrderCodeAndTutorId(String orderCode, String tutorId){
-        return orderMapper.getOrderDetailByOrderCodeAndTutorId(orderCode,tutorId,RowStatusEnum.VALID.getCode());
+    public Map<String, Object> getReserveOrderDetailByOrderCodeAndTutorId(String orderCode, String tutorId){
+        return orderMapper.getReserveOrderDetailByOrderCodeAndTutorId(orderCode,tutorId,RowStatusEnum.VALID.getCode());
+    }
+
+    public Map<String, Object> getCommentOrderDetailByOrderCodeAndUserId(String orderCode, String userId){
+        return orderMapper.getCommentOrderDetailByOrderCodeAndUserId(orderCode,userId,RowStatusEnum.VALID.getCode());
+    }
+
+    public Map<String, Object> getScheduleDetailByOrderCodeAndTutorId(String orderCode, String userId){
+        return orderMapper.getScheduleDetailByOrderCodeAndTutorId(orderCode,userId,RowStatusEnum.VALID.getCode());
+    }
+
+    public Map<String, Object> getReplyOrderDetailByOrderCodeAndUserId(String orderCode, String userId){
+        return orderMapper.getReplyOrderDetailByOrderCodeAndUserId(orderCode,userId,RowStatusEnum.VALID.getCode());
     }
 
     public Map<String, Object> getOrderConferenceInfoByOrderCode(String orderCode){
@@ -164,6 +214,10 @@ public class OrderService {
         return orderMapper.selectOne(
                 new QueryWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId,orderCode));
+    }
+
+    public List<Integer> getOrderLogStatusByOrderCode(String orderCode){
+        return orderLogMapper.getOrderStatusByOrderCode(orderCode, RowStatusEnum.VALID.getCode());
     }
 
     public boolean updateOrder4Accept(String orderCode, Integer orderStatus, Integer version, String content, String meetingUrl){
