@@ -49,7 +49,7 @@ public class WxPayController {
     @Autowired
     private PayService payService;
 
-    // TODO 用户取消支付回调
+    // TODO 用户取消支付回调？
 
     @PostMapping("/order_notify")
     @MethodLog("微信支付回调方法")

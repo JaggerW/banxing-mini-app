@@ -13,4 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping("/admin")
 public class AdminController {
+
+    // TODO 权限管理
+
+    // TODO 审核导师资格
+
+    // TODO 客服
 }

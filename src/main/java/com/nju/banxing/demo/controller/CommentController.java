@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class CommentController {
 
-    // 获取评论列表
 
-    // 获取评论详情
-
-    // 发表评论
+    // TODO 发表评论，更新评分
 
 }
