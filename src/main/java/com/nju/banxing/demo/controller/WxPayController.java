@@ -6,6 +6,7 @@ import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
+import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.sms.LoginVerSmsTemplate;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.config.WxMaConfig;
@@ -20,10 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -49,9 +47,17 @@ public class WxPayController {
     @Autowired
     private PayService payService;
 
-    // TODO 用户取消支付回调？
-
     // TODO 提现
+
+    @PostMapping("/cancel")
+    @MethodLog("取消微信支付")
+    public SingleResult<Boolean> cancelPay(String openid,
+                                           @RequestParam(value = "orderCode") String orderCode){
+
+        boolean b = payService.cancelPay(orderCode, openid);
+        return SingleResult.success(b);
+
+    }
 
     @PostMapping("/order_notify")
     @MethodLog("微信支付回调方法")

@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @Author: jaggerw
@@ -46,6 +45,38 @@ public class PayService {
     @Autowired
     private CoinService coinService;
 
+    @Transactional
+    @Retry
+    public boolean cancelPay(String orderCode, String openid){
+        Map<String, Integer> map = orderService.getStatusAndVersionByCode(orderCode);
+        if(ObjectUtils.isEmpty(map)){
+            throw new GlobalException(CodeMsg.NULL_ORDER);
+        }
+        Integer orderStatus = map.get("status");
+        Integer version = map.get("version");
+        if(OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)){
+            // 付款中
+            OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
+            boolean update = orderService.updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
+            if(update){
+                throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+            }
+
+            OrderLogDO orderLogDO = new OrderLogDO();
+            orderLogDO.setId(UUIDUtil.getOrderLogCode());
+            orderLogDO.setCreator(openid);
+            orderLogDO.setModifier(openid);
+            orderLogDO.setPreStatus(orderStatus);
+            orderLogDO.setAfterStatus(nextOrderStatus.getCode());
+            orderLogDO.setOrderCode(orderCode);
+            orderLogDO.setProcessType(OrderProcessTypeEnum.FAIL.getCode());
+            orderLogDO.setRowStatus(RowStatusEnum.INVALID.getCode());
+            orderLogDO.setProcessContent("下单失败：用户取消微信支付");
+
+            return orderService.insertOrderLog(orderLogDO);
+        }
+        return true;
+    }
 
     @Transactional
     @Retry
@@ -54,8 +85,7 @@ public class PayService {
         String openid = result.getOpenid();
         Map<String, Integer> map = orderService.getStatusAndVersionByCode(orderCode);
         if(ObjectUtils.isEmpty(map)){
-            log.error("不存在该订单数据");
-            return true;
+            throw new GlobalException(CodeMsg.NULL_ORDER);
         }
         Integer orderStatus = map.get("status");
         Integer version = map.get("version");
