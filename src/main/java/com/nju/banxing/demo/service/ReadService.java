@@ -25,29 +25,25 @@ public class ReadService {
         return readMapper.insert(readDO) > 0;
     }
 
-    public boolean update(ReadDO readDO){
-        return readMapper.updateById(readDO) > 0;
+    public boolean updateOrderApplyTimeByTutorId(String tutorId){
+        return readMapper.update(null,
+                new UpdateWrapper<ReadDO>().lambda()
+                        .eq(ReadDO::getId,tutorId)
+                        .set(ReadDO::getOrderApply, DateUtil.now())) > 0;
     }
 
-    public boolean updateOrderApplyTimeById(LocalDateTime localDateTime, String userId){
+    public boolean updateOrderReplyTimeByUserId(String userId){
         return readMapper.update(null,
                 new UpdateWrapper<ReadDO>().lambda()
                         .eq(ReadDO::getId,userId)
-                        .set(ReadDO::getOrderApply, localDateTime)) > 0;
+                        .set(ReadDO::getOrderReply, DateUtil.now())) > 0;
     }
 
-    public boolean updateOrderReplyTimeById(LocalDateTime localDateTime, String userId){
+    public boolean updateOrderCommentTimeByUserId(String userId){
         return readMapper.update(null,
                 new UpdateWrapper<ReadDO>().lambda()
                         .eq(ReadDO::getId,userId)
-                        .set(ReadDO::getOrderReply, localDateTime)) > 0;
-    }
-
-    public boolean updateOrderCommentTimeById(LocalDateTime localDateTime, String userId){
-        return readMapper.update(null,
-                new UpdateWrapper<ReadDO>().lambda()
-                        .eq(ReadDO::getId,userId)
-                        .set(ReadDO::getOrderComment, localDateTime)) > 0;
+                        .set(ReadDO::getOrderComment, DateUtil.now())) > 0;
     }
 
     public long getCountOfNewOrderApplyById(String userId){

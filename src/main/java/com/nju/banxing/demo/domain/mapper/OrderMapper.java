@@ -3,6 +3,7 @@ package com.nju.banxing.demo.domain.mapper;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +22,8 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
     Integer getStatusByCode(@Param("orderCode") String orderCode);
 
     String getTutorIdByCode(@Param("orderCode") String orderCode);
+
+    Map<String, Object> getTutorInfoByOrderCode(@Param("orderCode") String orderCode);
 
     String getUserIdByOrderCode(@Param("orderCode") String orderCode);
 

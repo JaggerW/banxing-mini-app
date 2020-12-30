@@ -13,6 +13,14 @@
         where id = #{orderCode, jdbcType = VARCHAR}
     </select>
 
+    <select id="getTutorInfoByOrderCode" resultType="java.util.Map">
+        select
+        tutor_id as tutorId,
+        consultation_type as consultationType
+        from banxing_order
+        where id = #{orderCode, jdbcType = VARCHAR}
+    </select>
+
     <select id="getUserIdByOrderCode" resultType="java.lang.String">
         select user_id from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}

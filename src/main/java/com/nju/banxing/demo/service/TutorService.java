@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jws.soap.SOAPBinding;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,10 @@ public class TutorService {
 
     public Map<String, Object> getTutorInfoById(String tutorId){
         return tutorMapper.getTutorInfoById(tutorId);
+    }
+
+    public boolean updateCommentScore(String tutorId, Float score){
+        return tutorMapper.updateCommentScore(tutorId, score) > 0;
     }
 
     /**
@@ -164,7 +169,6 @@ public class TutorService {
     public String getWorkTimeById(String openid){
         return tutorMapper.getWorkTimeById(openid);
     }
-
 
     /**
      * 查询

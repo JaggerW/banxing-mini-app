@@ -21,4 +21,12 @@
         select mobile from banxing_user where id = #{openid, jdbcType = VARCHAR}
     </select>
 
+    <select id="getNickNameAndAvaById" resultType="java.util.Map">
+        select
+        nick_name as nickName,
+        avatar_url as avatarUrl
+        from banxing_user
+        where id = #{openid, jdbcType = VARCHAR}
+    </select>
+
 </mapper>

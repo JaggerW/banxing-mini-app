@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nju.banxing.demo.domain.mapper.TutorMapper">
 
+    <update id="updateCommentScore">
+        update banxing_tutor
+        set comment_score = comment_score + #{score, jdbcType = FLOAT}
+        where id = #{openid, jdbcType = VARCHAR}
+    </update>
+
     <select id="getStatusById" resultType="java.lang.Integer" parameterType="java.lang.String">
         select status from banxing_tutor where id = #{openid, jdbcType = VARCHAR}
     </select>

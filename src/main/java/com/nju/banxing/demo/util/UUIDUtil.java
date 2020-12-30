@@ -80,6 +80,11 @@ public class UUIDUtil {
         return "OL" + timeStr + getVerCode();
     }
 
+    public static String getCommentCode() {
+        long timeStr = System.currentTimeMillis();
+        return "CC" + timeStr + getVerCode();
+    }
+
     public static String getCoinLogCode() {
         long timeStr = System.currentTimeMillis();
         return "CL" + timeStr + getVerCode();

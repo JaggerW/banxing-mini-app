@@ -30,6 +30,10 @@ public class CommentService {
     @Autowired
     private UserMapper userMapper;
 
+    public boolean insert(CommentDO commentDO){
+        return commentMapper.insert(commentDO) > 0;
+    }
+
     public IPage<CommentDO> getAll(Integer type, String tutorId, Long pageIndex, Long pageSize){
         Page<CommentDO> page = new Page<>(pageIndex,pageSize);
         return commentMapper.selectPage(page, new QueryWrapper<CommentDO>().lambda()

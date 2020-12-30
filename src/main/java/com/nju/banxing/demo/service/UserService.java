@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 
 /**
  * @Author: jaggerw
@@ -160,6 +162,10 @@ public class UserService {
 
     public String getNickNameById(String openid){
         return userMapper.getNickNameById(openid);
+    }
+
+    public Map<String, Object> getNickNameAndAvaById(String openid){
+        return userMapper.getNickNameAndAvaById(openid);
     }
 
     public String getMobileById(String openid){

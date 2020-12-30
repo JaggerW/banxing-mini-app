@@ -178,6 +178,10 @@ public class OrderService {
         return userService.getMobileById(tutorId);
     }
 
+    public Map<String, Object> getTutorInfoByOrderCode(String orderCode){
+        return orderMapper.getTutorInfoByOrderCode(orderCode);
+    }
+
     public Integer getStatusByCode(String orderCode) {
         return orderMapper.getStatusByCode(orderCode);
     }

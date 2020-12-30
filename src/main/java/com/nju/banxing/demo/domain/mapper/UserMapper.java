@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nju.banxing.demo.domain.UserDO;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Map;
+
 
 /**
  * @Author: jaggerw
@@ -16,6 +18,8 @@ public interface UserMapper extends BaseMapper<UserDO> {
     int updateUserLog(@Param("openid") String openid);
 
     String getNickNameById(@Param("openid") String openid);
+
+    Map<String, Object> getNickNameAndAvaById(@Param("openid") String openid);
 
     String getMobileById(@Param("openid") String openid);
 

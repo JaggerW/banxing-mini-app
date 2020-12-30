@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.swing.*;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,9 @@ public class HomeController {
         List<CommentVO> list = page.getRecords().stream().map(commentDO -> {
             CommentVO commentVO = new CommentVO();
             BeanUtils.copyProperties(commentDO, commentVO);
-            commentVO.setNickName(userService.getNickNameById(commentDO.getUserId()));
+            Map<String, Object> map = userService.getNickNameAndAvaById(commentDO.getUserId());
+            commentVO.setNickName((String) map.get("nickName"));
+            commentVO.setUserAvatarUrl((String) map.get("avatarUrl"));
             commentVO.setCommentTimeStamp(DateUtil.toTimeStamp(commentDO.getCommentTime()));
             return commentVO;
         }).collect(Collectors.toList());

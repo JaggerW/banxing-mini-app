@@ -17,6 +17,9 @@ import java.util.Map;
  */
 public interface TutorMapper extends BaseMapper<TutorDO> {
 
+    Integer updateCommentScore(@Param("openid") String tutorId,
+                               @Param("score") Float score);
+
     Map<String, Object> getApplyInfoById(@Param("openid") String tutorId);
 
     Map<String, Object> getTutorInfoById(@Param("openid") String tutorId);

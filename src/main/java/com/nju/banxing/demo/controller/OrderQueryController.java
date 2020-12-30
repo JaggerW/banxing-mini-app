@@ -13,10 +13,7 @@ import com.nju.banxing.demo.enums.TutorStatusEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.request.OrderListQuery;
-import com.nju.banxing.demo.service.CommentService;
-import com.nju.banxing.demo.service.OrderService;
-import com.nju.banxing.demo.service.TutorService;
-import com.nju.banxing.demo.service.UserService;
+import com.nju.banxing.demo.service.*;
 import com.nju.banxing.demo.util.TXMeetingUtil;
 import com.nju.banxing.demo.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +49,9 @@ public class OrderQueryController {
     @Autowired
     private CommentService commentService;
 
-    // TODO 未读更新
+    @Autowired
+    private ReadService readService;
+
 
     // 预约订单列表（导师端）
     @GetMapping("/reserve_list")
@@ -61,6 +60,7 @@ public class OrderQueryController {
                                                        @RequestBody OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
+        readService.updateOrderApplyTimeByTutorId(openid);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
     }
 
@@ -83,6 +83,7 @@ public class OrderQueryController {
                                                        @RequestBody OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getCommentListByUserIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
+        readService.updateOrderCommentTimeByUserId(openid);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
     }
 
@@ -130,6 +131,7 @@ public class OrderQueryController {
                                                           @RequestBody OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getReplyOrderListByUserIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
+        readService.updateOrderReplyTimeByUserId(openid);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
 
     }
