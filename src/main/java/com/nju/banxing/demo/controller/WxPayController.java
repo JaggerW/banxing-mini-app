@@ -47,8 +47,6 @@ public class WxPayController {
     @Autowired
     private PayService payService;
 
-    // TODO 提现
-
     @PostMapping("/cancel")
     @MethodLog("取消微信支付")
     public SingleResult<Boolean> cancelPay(String openid,
