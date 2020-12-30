@@ -70,6 +70,8 @@ public class HomeController {
             TutorSimpleInfoVO tutorSimpleInfoVO = new TutorSimpleInfoVO();
             BeanUtils.copyProperties(tutorDO, tutorSimpleInfoVO);
             tutorSimpleInfoVO.setOpenid(tutorDO.getId());
+            Float score = calCommentScore(tutorDO);
+            tutorSimpleInfoVO.setCommentScore(score);
             return tutorSimpleInfoVO;
         }).collect(Collectors.toList());
 
@@ -118,6 +120,8 @@ public class HomeController {
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){
         TutorDetailInfoVO vo = new TutorDetailInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);
+        Float score = calCommentScore(tutorDO);
+        vo.setCommentScore(score);
         vo.setOpenid(tutorDO.getId());
         String workTime = tutorDO.getWorkTime();
         List<TimePair> timePairList = JSON.parseArray(workTime, TimePair.class);
@@ -137,6 +141,12 @@ public class HomeController {
         }).collect(Collectors.toList());
         vo.setWorkTimeList(workTimeVOList);
         return vo;
+    }
+
+    private Float calCommentScore(TutorDO tutorDO){
+        Integer count = tutorDO.getConsultationCount();
+        Float commentScore = tutorDO.getCommentScore();
+        return commentScore / count;
     }
 
 }

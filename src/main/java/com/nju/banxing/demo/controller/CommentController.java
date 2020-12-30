@@ -46,6 +46,8 @@ public class CommentController {
     public SingleResult<Boolean> comment(String openid,
                                          @Validated @RequestBody CommentRequest request){
 
+        // TODO 关于score范围的校验
+
         CommentDO commentDO = buildDO(request, openid);
 
         commentService.insert(commentDO);
