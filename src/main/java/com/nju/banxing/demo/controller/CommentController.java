@@ -4,11 +4,13 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.request.CommentRequest;
+import com.nju.banxing.demo.service.CoinService;
 import com.nju.banxing.demo.service.CommentService;
 import com.nju.banxing.demo.service.OrderService;
 import com.nju.banxing.demo.service.TutorService;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
+import com.nju.banxing.demo.vo.CoinVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,9 @@ public class CommentController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private CoinService coinService;
+
     @PostMapping("/add")
     @MethodLog("发表新评论")
     @Transactional
@@ -47,6 +52,7 @@ public class CommentController {
                                          @Validated @RequestBody CommentRequest request){
 
         // TODO 关于score范围的校验
+        // TODO 资金转移至可提现
 
         CommentDO commentDO = buildDO(request, openid);
 

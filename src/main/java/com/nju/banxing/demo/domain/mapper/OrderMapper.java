@@ -19,6 +19,10 @@ import java.util.Map;
  */
 public interface OrderMapper extends BaseMapper<OrderDO> {
 
+    List<String> getErrorOrderCode();
+
+    List<String> getAutoRejectOrderCode();
+
     Integer getStatusByCode(@Param("orderCode") String orderCode);
 
     String getTutorIdByCode(@Param("orderCode") String orderCode);
@@ -185,4 +189,5 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     Map<String, Object> getOrderConferenceInfoByOrderCode(@Param("orderCode") String orderCode,
                                                           @Param("rowStatus") Integer rowStatus);
+
 }

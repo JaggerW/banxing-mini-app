@@ -120,7 +120,7 @@ public class TutorController {
             // 校验参数
             String content = request.getContent();
             checkRejectContent(content);
-            WxRefundRequest refundRequest = buildRefundRequest(openid, request);
+            WxRefundRequest refundRequest = buildRefundRequest(openid, request.getOrderCode());
             try {
                 WxRefundVO wxRefundVO = weixinService.applyRefund(refundRequest);
 
@@ -227,8 +227,8 @@ public class TutorController {
     }
 
 
-    private WxRefundRequest buildRefundRequest(String tutorId, TutorHandleOrderRequest request) {
-        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
+    private WxRefundRequest buildRefundRequest(String tutorId, String orderCode) {
+        OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, tutorId);
         if (ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())) {
             // 已付款状态
 

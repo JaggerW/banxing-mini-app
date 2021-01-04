@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Lists;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,30 @@ public class OrderService {
 
     @Autowired
     private UserService userService;
+
+    // task
+
+    public List<String> getErrorOrderCode(){
+        return orderMapper.getErrorOrderCode();
+    }
+
+    public List<Object> getAutoRejectOrderCode(){
+        return orderMapper.selectObjs(
+                new QueryWrapper<OrderDO>().lambda()
+                        .select(OrderDO::getId)
+                        .eq(OrderDO::getOrderStatus, OrderStatusEnum.ORDER_PAID.getCode())
+                        .eq(OrderDO::getRowStatus, RowStatusEnum.VALID.getCode())
+                        .le(OrderDO::getReserveStartTime, DateUtil.now().plusHours(3L)));
+    }
+
+    public boolean enableComment(){
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .set(OrderDO::getCommentStatus, CommentStatusEnum.TO_COMMENT.getCode())
+                        .eq(OrderDO::getCommentStatus, CommentStatusEnum.NULL.getCode())
+                        .eq(OrderDO::getRowStatus, RowStatusEnum.VALID.getCode())
+                        .le(OrderDO::getReserveEndTime, DateUtil.now())) > 0;
+    }
 
     @Transactional
     public boolean initOrder(String openid, String orderCode, BigDecimal consultationCost, BigDecimal totalCost, OrderCreateRequest request) {
@@ -245,6 +271,18 @@ public class OrderService {
                         .set(OrderDO::getReplyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.REFUSED.getCode())
+                        .set(OrderDO::getVersion, version + 1)
+                        .set(OrderDO::getRejectReason, content)) > 0;
+    }
+
+    public boolean updateOrder4AutoReject(String orderCode, Integer orderStatus, Integer version, String content){
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getReplyTime, DateUtil.now())
+                        .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getTutorStatus, TutorStatusEnum.AUTO_REFUSED.getCode())
                         .set(OrderDO::getVersion, version + 1)
                         .set(OrderDO::getRejectReason, content)) > 0;
     }

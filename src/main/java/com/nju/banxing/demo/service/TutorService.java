@@ -284,4 +284,35 @@ public class TutorService {
         }
         return false;
     }
+
+    @Transactional
+    @Retry
+    public boolean autoReject(String orderCode, String content, WxRefundVO wxRefundVO){
+        Map<String, Integer> map = orderService.getStatusAndVersionByCode(orderCode);
+        Integer version = map.get("version");
+        Integer status = map.get("status");
+        OrderStatusEnum nextStatus = OrderStatusEnum.getEnumByCode(status).getNext(false);
+        boolean b = orderService.updateOrder4AutoReject(orderCode, nextStatus.getCode(), version, content);
+        if(!b){
+            throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+        }
+
+        // 更新订单流水+退单单号
+        OrderLogDO orderLogDO = new OrderLogDO();
+        orderLogDO.setId(UUIDUtil.getOrderLogCode());
+        orderLogDO.setCreator("sys");
+        orderLogDO.setModifier("sys");
+        orderLogDO.setPreStatus(status);
+        orderLogDO.setAfterStatus(nextStatus.getCode());
+        orderLogDO.setOrderCode(orderCode);
+        orderLogDO.setProcessType(OrderProcessTypeEnum.SUCCESS.getCode());
+        HashMap<Object, Object> successMap = Maps.newHashMap();
+        successMap.put("wxOrderRefundCode", wxRefundVO.getOrderRefundCode());
+        successMap.put("wxRefundId",wxRefundVO.getRefundId());
+        successMap.put("wxRefundFee",wxRefundVO.getRefundFee());
+        orderLogDO.setProcessContent("申请退款：" + JSON.toJSONString(successMap));
+        int insertOrderLog = orderLogMapper.insert(orderLogDO);
+
+        return insertOrderLog > 0;
+    }
 }
