@@ -47,6 +47,9 @@ public class CodeMsg {
     public static final CodeMsg OUT_OF_TIME_RANGE = new CodeMsg(504,"咨询时间不可超出导师当前可工作范围");
     public static final CodeMsg NULL_ORDER = new CodeMsg(505, "查无此单");
 
+    // 服务端 资金
+    public static final CodeMsg OCCUPY_ERROR = new CodeMsg(600, "待提现资金总额小于将转化为可提现资金");
+
     // 微信
     public static final CodeMsg WX_ERROR_CHECK_USER_INFO = new CodeMsg(200,"用户信息校验失败");
     public static final CodeMsg WX_ERROR_GET_USER_INFO = new CodeMsg(201,"用户信息获取失败");
@@ -63,8 +66,8 @@ public class CodeMsg {
     public static final CodeMsg ERROR_DATE = new CodeMsg(400, "获取日期错误");
 
     // 其他
-    public static final CodeMsg RETRY_ON_FAIL = new CodeMsg(500, "尝试失败，需要retry");
-    public static final CodeMsg ERROR_PARSE_TIME = new CodeMsg(501,"时间解析错误");
+    public static final CodeMsg RETRY_ON_FAIL = new CodeMsg(700, "尝试失败，需要retry");
+    public static final CodeMsg ERROR_PARSE_TIME = new CodeMsg(701,"时间解析错误");
 
     public CodeMsg fillArgs(Object ... args){
         int code  = this.code;

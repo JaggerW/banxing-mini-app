@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 
@@ -52,14 +53,10 @@ public class CommentController {
                                          @Validated @RequestBody CommentRequest request){
 
         // TODO 关于score范围的校验
-        // TODO 资金转移至可提现
 
         CommentDO commentDO = buildDO(request, openid);
-
-        commentService.insert(commentDO);
-        tutorService.updateCommentScore(commentDO.getTutorId(),request.getScore());
-
-        return SingleResult.success(true);
+        boolean b = commentService.publishNewComment(commentDO);
+        return SingleResult.success(b);
     }
 
     private CommentDO buildDO(CommentRequest request, String openid){

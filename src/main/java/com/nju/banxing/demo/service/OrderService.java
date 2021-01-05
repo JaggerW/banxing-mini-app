@@ -59,6 +59,11 @@ public class OrderService {
                         .le(OrderDO::getReserveStartTime, DateUtil.now().plusHours(3L)));
     }
 
+    public List<Map<String, Object>> getAutoCommentOrderInfo(){
+
+        return orderMapper.getAutoCommentOrderInfo();
+    }
+
     public boolean enableComment(){
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
@@ -139,8 +144,8 @@ public class OrderService {
 
     public IPage<Map<String, Object>> getCommentListByUserIdAndProcessFlag(String userId, Boolean processFlag, Long pageIndex, Long pageSize) {
         Long offset = (pageIndex - 1) * pageSize;
-        Long count = orderMapper.getOrderCountByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode());
-        List<Map<String, Object>> orderList = orderMapper.getOrderListByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
+        Long count = orderMapper.getCommentOrderCountByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode());
+        List<Map<String, Object>> orderList = orderMapper.getCommentOrderListByUserIdAndProcessFlag(userId, processFlag, CommentStatusEnum.TO_COMMENT.getCode(), RowStatusEnum.VALID.getCode(), offset, pageSize);
         return buildIPage(pageIndex,pageSize,count,orderList);
     }
 

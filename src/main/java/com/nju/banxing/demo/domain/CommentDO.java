@@ -47,11 +47,6 @@ public class CommentDO implements Serializable {
     private String orderCode;
 
     /**
-     * 评价者用户头像
-     */
-    private String userAvatarUrl;
-
-    /**
      * 咨询类型
      */
     private Integer consultationType;

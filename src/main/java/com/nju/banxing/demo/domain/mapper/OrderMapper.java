@@ -21,7 +21,7 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     List<String> getErrorOrderCode();
 
-    List<String> getAutoRejectOrderCode();
+    List<Map<String, Object>> getAutoCommentOrderInfo();
 
     Integer getStatusByCode(@Param("orderCode") String orderCode);
 

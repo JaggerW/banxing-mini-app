@@ -4,7 +4,9 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.config.AppContantConfig;
+import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.OrderDO;
+import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.request.WxRefundRequest;
 import com.nju.banxing.demo.service.CommentService;
 import com.nju.banxing.demo.service.OrderService;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: jaggerw
@@ -96,6 +99,28 @@ public class ScheduleController {
         }
     }
 
+
+    // 学员超时未评论：自动评论  (1min)
+    @Scheduled(cron = "0 0/1 * * * ?")
+    @Async
+    @MethodLog("定时任务：学员超时未评论自动好评，1min")
+    public void autoComment(){
+        List<Map<String, Object>> list = orderService.getAutoCommentOrderInfo();
+        for (Map<String, Object> map : list){
+            try {
+                String orderCode = (String) map.get("orderCode");
+                String userId = (String) map.get("userId");
+                String tutorId = (String) map.get("tutorId");
+                Integer consultationType = (Integer) map.get("consultationType");
+                commentService.publishNewComment(buildCommentDO(orderCode,userId,tutorId,consultationType));
+            }catch (Exception e){
+                log.error("自动评论定时任务异常：",e);
+                log.error("orderCode : {};", map.get("orderCode"));
+            }
+        }
+    }
+
+
     private WxRefundRequest buildRefundRequest(String orderCode) {
         BigDecimal totalCost = orderService.getTotalCostByCode(orderCode);
         WxRefundRequest refundRequest = new WxRefundRequest();
@@ -115,7 +140,19 @@ public class ScheduleController {
         weixinService.sendWxMessage(openid,AppContantConfig.WX_MSG_MEETING_REJECT_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_REJECT_PAGE,dataList);
     }
 
-    //      TODO        学员超时未评论：自动评论  (1min)
+    private CommentDO buildCommentDO(String orderCode, String userId, String tutorId, Integer consultationType){
+        CommentDO commentDO = new CommentDO();
+        commentDO.setUserId(userId);
+        commentDO.setTutorId(tutorId);
+        commentDO.setConsultationType(consultationType);
+        commentDO.setId(UUIDUtil.getCommentCode());
+        commentDO.setOrderCode(orderCode);
+        commentDO.setModifier("sys");
+        commentDO.setCreator("sys");
+        commentDO.setCommentScore(5F);
+        commentDO.setCommentContent("用户超时未评论，系统默认好评。");
+        return commentDO;
+    }
 
 
 }

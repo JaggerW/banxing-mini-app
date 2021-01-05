@@ -7,9 +7,15 @@
         where error_flag = 1 and row_status = 0
     </select>
 
-    <select id="getAutoRejectOrderCode" resultType="java.lang.String">
-        select id from banxing_order
-        where order_status = 30 and row_status = 0
+    <select id="getAutoCommentOrderInfo" resultType="java.util.Map">
+        select
+        id as orderCode,
+        user_id as userId,
+        tutor_id as tutorId,
+        consultation_type as consultationType
+        from banxing_order
+        where comment_status = 0 and row_status = 0
+        <![CDATA[and reserve_end_time < DATE_ADD(NOW(), INTERVAL 2 DAY) ]]>
     </select>
 
     <select id="getStatusByCode" resultType="java.lang.Integer">
