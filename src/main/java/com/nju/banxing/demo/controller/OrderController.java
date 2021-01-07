@@ -233,6 +233,9 @@ public class OrderController {
         for (int i = 0; i < 7; i++) {
             dayKey = (dayKey -1 + i)%7+1;
             TimePair timePair = timePairMap.get(dayKey);
+            if(ObjectUtils.isEmpty(timePair)){
+                continue;
+            }
             boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
             if(!b){
                 startTime = timePair.getStartTime();
