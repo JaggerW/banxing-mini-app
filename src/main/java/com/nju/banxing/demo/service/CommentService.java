@@ -58,7 +58,7 @@ public class CommentService {
     public IPage<CommentDO> getAll(Integer type, String tutorId, Long pageIndex, Long pageSize){
         Page<CommentDO> page = new Page<>(pageIndex,pageSize);
         return commentMapper.selectPage(page, new QueryWrapper<CommentDO>().lambda()
-                .eq(CommentDO::getId, tutorId)
+                .eq(CommentDO::getTutorId, tutorId)
                 .eq(CommentDO::getConsultationType, type));
     }
 
