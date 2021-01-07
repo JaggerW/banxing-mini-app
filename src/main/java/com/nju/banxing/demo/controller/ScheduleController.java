@@ -54,31 +54,43 @@ public class ScheduleController {
 
 
     // 1. 异常单 -> 报警  (30min)
-    @Scheduled(cron = "0 0/30 * * * ?")
+//    @Scheduled(cron = "0 0/30 * * * ?")
     @Async
-    @MethodLog("定时任务：检测异常单报警，30min")
     public void errorTask(){
+        long start = System.currentTimeMillis();
+        log.info("Description    :{}", "定时任务：检测异常单报警，30min");
+
         List<String> list = orderService.getErrorOrderCode();
         // TODO 通知管理员异常单
+
+
+        log.info("TimeCost       :{}", System.currentTimeMillis() - start);
 
     }
 
     // 2. 会议结束单 -> 可评论  (1min)
-    @Scheduled(cron = "0 0/1 * * * ?")
+//    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
-    @MethodLog("定时任务：更新会议结束单为可评论状态，1min")
     public void enableComment(){
+        long start = System.currentTimeMillis();
+        log.info("Description    :{}", "定时任务：更新会议结束单为可评论状态，1min");
+
         boolean b = orderService.enableComment();
         if (b){
             log.info("更新成功");
         }
+
+        log.info("TimeCost       :{}", System.currentTimeMillis() - start);
     }
 
     // 3. 超时单 -> 导师超时未处理：自动拒绝  (1min)
-    @Scheduled(cron = "0 0/1 * * * ?")
+//    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
-    @MethodLog("定时任务：导师超时未处理自动拒绝，1min")
     public void autoReject(){
+        long start = System.currentTimeMillis();
+        log.info("Description    :{}", "定时任务：导师超时未处理自动拒绝，1min");
+
+
         String content = "导师超时未处理，系统已自动拒绝该申请。";
         List<Object> list = orderService.getAutoRejectOrderCode();
         for (Object o : list){
@@ -97,14 +109,19 @@ public class ScheduleController {
                 log.error("申请微信支付退款失败");
             }
         }
+
+        log.info("TimeCost       :{}", System.currentTimeMillis() - start);
     }
 
 
     // 学员超时未评论：自动评论  (1min)
-    @Scheduled(cron = "0 0/1 * * * ?")
+//    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
-    @MethodLog("定时任务：学员超时未评论自动好评，1min")
     public void autoComment(){
+        long start = System.currentTimeMillis();
+        log.info("Description    :{}", "定时任务：学员超时未评论自动好评，1min");
+
+
         List<Map<String, Object>> list = orderService.getAutoCommentOrderInfo();
         for (Map<String, Object> map : list){
             try {
@@ -118,6 +135,8 @@ public class ScheduleController {
                 log.error("orderCode : {};", map.get("orderCode"));
             }
         }
+
+        log.info("TimeCost       :{}", System.currentTimeMillis() - start);
     }
 
 
