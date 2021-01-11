@@ -51,12 +51,6 @@ public class HomeController {
     @Autowired
     private TutorService tutorService;
 
-    @Autowired
-    private CommentService commentService;
-
-    @Autowired
-    private UserService userService;
-
 
     @GetMapping("/tutor_list")
     @MethodLog("获取首页列表")
