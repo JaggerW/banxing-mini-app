@@ -13,6 +13,7 @@ import com.nju.banxing.demo.service.ReadService;
 import com.nju.banxing.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,14 +68,15 @@ public class TestController {
 
     @GetMapping("/trans_test")
     @MethodLog("测试事务")
+    @Transactional
     public SingleResult<Boolean> testTransaction(){
         log.info("===== testTransaction =====");
         ReadDO readDO = new ReadDO();
-        readDO.setId("testUser_001");
-        ReadDO updateReadDO = new ReadDO();
-        updateReadDO.setId("testUser_001");
-        updateReadDO.setExtension(JSON.toJSONString(readDO));
-
+        readDO.setId("test_user_002");
+        boolean insert = readService.insert(readDO);
+        System.out.println(insert);
+        boolean other = readService.insert(readDO);
+        System.out.println(other);
         return SingleResult.success(true);
     }
 

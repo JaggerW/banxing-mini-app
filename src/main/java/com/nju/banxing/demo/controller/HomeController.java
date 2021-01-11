@@ -93,28 +93,6 @@ public class HomeController {
         return SingleResult.success(detail);
     }
 
-    @GetMapping("/comment_list")
-    @MethodLog("获取评论列表")
-    public PagedResult<CommentVO> getComment(CommentListQuery query){
-        Integer type = query.getConsultationType();
-        if(ObjectUtils.isEmpty(type) || (ObjectUtils.isNotEmpty(type) && type != 1 && type != 2)){
-            type = 1;
-        }
-
-        IPage<CommentDO> page = commentService.getAll(type, query.getTutorId(), query.getPageIndex(), query.getPageSize());
-        List<CommentVO> list = page.getRecords().stream().map(commentDO -> {
-            CommentVO commentVO = new CommentVO();
-            BeanUtils.copyProperties(commentDO, commentVO);
-            Map<String, Object> map = userService.getNickNameAndAvaById(commentDO.getUserId());
-            commentVO.setNickName((String) map.get("nickName"));
-            commentVO.setUserAvatarUrl((String) map.get("avatarUrl"));
-            commentVO.setCommentTimeStamp(DateUtil.toTimeStamp(commentDO.getCommentTime()));
-            return commentVO;
-        }).collect(Collectors.toList());
-
-        return PagedResult.success(list,page.getCurrent(),page.getSize(),page.getTotal(),page.getPages());
-    }
-
 
 
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){
