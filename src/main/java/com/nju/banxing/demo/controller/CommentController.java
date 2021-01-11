@@ -46,7 +46,7 @@ public class CommentController {
     private UserService userService;
 
 
-    @GetMapping("/comment_list")
+    @GetMapping("/list")
     @MethodLog("获取评论列表")
     public PagedResult<CommentVO> getComment(CommentListQuery query){
         Integer type = query.getConsultationType();
