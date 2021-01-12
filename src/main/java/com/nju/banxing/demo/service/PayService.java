@@ -58,7 +58,7 @@ public class PayService {
             // 付款中
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
             boolean update = orderService.updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
-            if(update){
+            if(!update){
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }
 
@@ -92,7 +92,7 @@ public class PayService {
         if (OrderStatusEnum.ORDER_TO_PAY.getCode().equals(orderStatus)) {
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(false);
             boolean update = orderService.updateOrderStatus(orderCode, nextOrderStatus.getCode(), version);
-            if(update){
+            if(!update){
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }
 
@@ -138,7 +138,7 @@ public class PayService {
             // 更新订单状态
             OrderStatusEnum nextOrderStatus = OrderStatusEnum.getEnumByCode(orderStatus).getNext(true);
             boolean updateOrder = orderService.updateOrder4SuccessPay(orderCode, nextOrderStatus.getCode(), version);
-            if(updateOrder){
+            if(!updateOrder){
                 log.error("更新订单状态失败");
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }
@@ -182,7 +182,7 @@ public class PayService {
 
             // 更新订单
             boolean updateOrderStatus = orderService.updateOrderStatus(orderDO.getId(), nextStatus.getCode(), version);
-            if(updateOrderStatus){
+            if(!updateOrderStatus){
                 log.error("更新订单状态失败");
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }
@@ -218,7 +218,7 @@ public class PayService {
         if(OrderStatusEnum.APPLY_REFUND.getCode().equals(orderStatus)){
             // 设置异常单
             boolean update = orderService.updateOrder4FailRefund(orderDO.getId(), version);
-            if(update){
+            if(!update){
                 log.error("更新订单状态失败");
                 throw new RetryException(CodeMsg.RETRY_ON_FAIL);
             }
