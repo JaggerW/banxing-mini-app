@@ -199,7 +199,7 @@ public class OrderController {
 
         String originalFilename = file.getOriginalFilename();
         String extension = "." + FilenameUtils.getExtension(originalFilename);
-        if(!"PDF".equals(extension.toUpperCase())){
+        if(!".PDF".equals(extension.toUpperCase())){
             return SingleResult.error(CodeMsg.ERROR_EXTENSION);
         }
         String fileName = UUIDUtil.getPdfFileName();
