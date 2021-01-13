@@ -122,9 +122,10 @@ public class DateUtil {
 
     public static boolean isIncluded(LocalTime sourceStart, LocalTime sourceEnd,
                                      LocalTime rangeStart, LocalTime rangeEnd) {
+
         return (sourceStart.isBefore(sourceEnd) || sourceStart.equals(sourceEnd))
-                && sourceStart.isAfter(rangeStart)
-                && sourceEnd.isBefore(rangeEnd);
+                && (sourceStart.isAfter(rangeStart) || sourceStart.equals(rangeStart))
+                && (sourceEnd.isBefore(rangeEnd) || sourceEnd.equals(rangeEnd));
     }
 
     /**

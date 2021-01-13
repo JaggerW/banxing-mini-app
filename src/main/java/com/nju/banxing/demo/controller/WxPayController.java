@@ -50,7 +50,7 @@ public class WxPayController {
     @PostMapping("/cancel")
     @MethodLog("取消微信支付")
     public SingleResult<Boolean> cancelPay(String openid,
-                                           @RequestParam(value = "orderCode") String orderCode){
+                                           @RequestBody String orderCode){
 
         boolean b = payService.cancelPay(orderCode, openid);
         return SingleResult.success(b);
