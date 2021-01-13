@@ -123,9 +123,13 @@ public class DateUtil {
     public static boolean isIncluded(LocalTime sourceStart, LocalTime sourceEnd,
                                      LocalTime rangeStart, LocalTime rangeEnd) {
 
+        // 只比较时分
+        LocalTime formatRangeStart = LocalTime.of(rangeStart.getHour(),rangeStart.getMinute());
+        LocalTime formatRangeEnd = LocalTime.of(rangeEnd.getHour(),rangeEnd.getMinute());
+
         return (sourceStart.isBefore(sourceEnd) || sourceStart.equals(sourceEnd))
-                && (sourceStart.isAfter(rangeStart) || sourceStart.equals(rangeStart))
-                && (sourceEnd.isBefore(rangeEnd) || sourceEnd.equals(rangeEnd));
+                && (sourceStart.isAfter(formatRangeStart) || sourceStart.equals(formatRangeStart))
+                && (sourceEnd.isBefore(formatRangeEnd) || sourceEnd.equals(formatRangeEnd));
     }
 
     /**

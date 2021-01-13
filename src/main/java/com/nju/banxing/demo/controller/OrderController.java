@@ -294,16 +294,15 @@ public class OrderController {
         }
 
         int dayKey = reserveDate.getDayOfWeek().getValue();
-        List<WorkTimeVO> workTimeVOS = JSON.parseArray(workTimeById, WorkTimeVO.class);
-        for(WorkTimeVO workTime : workTimeVOS){
-            if(workTime.getKey().equals(dayKey)){
-                boolean included = DateUtil.isIncluded(request.getReserveStartTime(), calEndTime, workTime.getStartTime(), workTime.getEndTime());
-                if(!included){
-                    deleteRedis(request.getDupKey());
-                    throw new GlobalException(CodeMsg.OUT_OF_TIME_RANGE);
-                }
-                break;
-            }
+        Map<Integer, TimePair> timePairMap = JSON.parseArray(workTimeById, TimePair.class).stream().collect(Collectors.toMap(TimePair::getKey, Function.identity()));
+        TimePair timePair = timePairMap.get(dayKey);
+        if (ObjectUtils.isEmpty(timePair)){
+            throw new GlobalException(CodeMsg.OUT_OF_TIME_RANGE);
+        }
+        boolean included = DateUtil.isIncluded(request.getReserveStartTime(), calEndTime, timePair.getStartTime(), timePair.getEndTime());
+        if(!included){
+            deleteRedis(request.getDupKey());
+            throw new GlobalException(CodeMsg.OUT_OF_TIME_RANGE);
         }
     }
 
