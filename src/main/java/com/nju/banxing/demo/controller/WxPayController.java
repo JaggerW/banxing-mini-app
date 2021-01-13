@@ -86,18 +86,18 @@ public class WxPayController {
                     payService.successPay(result);
 
                     // TODO 短信通知导师，需要企业申请
-                    String verCode = "123456";
-                    String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
-                    // 阿里云发送短信
-                    AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-                    aliyunSmsVO.setPhoneNumber(mobile);
-                    aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
-                    aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
-
-                    LoginVerSmsTemplate template = new LoginVerSmsTemplate();
-                    template.setCode(verCode);
-                    aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
-                    aliyunService.sendSMS(aliyunSmsVO);
+//                    String verCode = "123456";
+//                    String mobile = orderService.getTutorMobileByOrderCode(result.getOutTradeNo());
+//                    // 阿里云发送短信
+//                    AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+//                    aliyunSmsVO.setPhoneNumber(mobile);
+//                    aliyunSmsVO.setSignName(AppContantConfig.ALIYUN_SMS_SIGN_NAME);
+//                    aliyunSmsVO.setTemplateCode(AppContantConfig.ALIYUN_SMS_LOGIN_VERIFICATION_TEMPLATE_CODE);
+//
+//                    LoginVerSmsTemplate template = new LoginVerSmsTemplate();
+//                    template.setCode(verCode);
+//                    aliyunSmsVO.setTemplateParam(JSON.toJSONString(template));
+//                    aliyunService.sendSMS(aliyunSmsVO);
                 }else {
                     // 支付失败
                     payService.failPay(result);
