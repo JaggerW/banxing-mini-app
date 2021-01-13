@@ -57,7 +57,7 @@ public class TutorDO implements Serializable {
     private String currentProfession;
 
     /**
-     * 指导方向：0001，保研；0010，考研
+     * 指导方向：0001，考研；0010，保研
      */
     private Integer consultationType;
 

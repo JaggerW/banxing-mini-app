@@ -8,6 +8,7 @@ import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.TutorDO;
+import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.request.CommentListQuery;
@@ -56,8 +57,11 @@ public class HomeController {
     @MethodLog("获取首页列表")
     public PagedResult<TutorSimpleInfoVO> list(TutorListQuery query){
         Integer type = query.getConsultationType();
-        if(ObjectUtils.isEmpty(type) || (ObjectUtils.isNotEmpty(type) && type != 1 && type != 2)){
-            type = 1;
+        if(ObjectUtils.isEmpty(type)
+                || (ObjectUtils.isNotEmpty(type)
+                    && !ConsultationTypeEnum.KAO_YAN.getCode().equals(type)
+                    && !ConsultationTypeEnum.BAO_YAN.getCode().equals(type))){
+            type = ConsultationTypeEnum.KAO_YAN.getCode();
         }
         IPage<TutorDO> page = tutorService.getAll(type, query.getKeyword(),query.getPageIndex(),query.getPageSize());
         List<TutorSimpleInfoVO> voList = page.getRecords().stream().map(tutorDO -> {

@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 public enum ConsultationTypeEnum {
 
-    BAO_YAN(1,"保研"),
-    KAO_YAN(2,"考研");
+    KAO_YAN(1,"考研"),
+    BAO_YAN(2,"保研");
 
     private Integer code;
     private String desc;

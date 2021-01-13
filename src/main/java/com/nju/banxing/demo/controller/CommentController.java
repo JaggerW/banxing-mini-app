@@ -5,6 +5,7 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.domain.CommentDO;
+import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.request.CommentListQuery;
 import com.nju.banxing.demo.request.CommentRequest;
 import com.nju.banxing.demo.service.*;
@@ -50,8 +51,11 @@ public class CommentController {
     @MethodLog("获取评论列表")
     public PagedResult<CommentVO> getComment(CommentListQuery query){
         Integer type = query.getConsultationType();
-        if(ObjectUtils.isEmpty(type) || (ObjectUtils.isNotEmpty(type) && type != 1 && type != 2)){
-            type = 1;
+        if(ObjectUtils.isEmpty(type)
+                || (ObjectUtils.isNotEmpty(type)
+                    && !ConsultationTypeEnum.KAO_YAN.getCode().equals(type)
+                    && !ConsultationTypeEnum.BAO_YAN.getCode().equals(type))){
+            type = ConsultationTypeEnum.KAO_YAN.getCode();
         }
 
         IPage<CommentDO> page = commentService.getAll(type, query.getTutorId(), query.getPageIndex(), query.getPageSize());
