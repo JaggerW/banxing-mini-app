@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.controller;
 
+import com.nju.banxing.demo.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Demo{
     public static void main(String[] args) {
 
+        int value = DateUtil.now().getDayOfWeek().getValue();
+        System.out.println(value);
     }
 
     public static int getValue(){

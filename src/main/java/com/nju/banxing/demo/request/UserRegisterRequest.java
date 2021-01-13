@@ -26,7 +26,7 @@ public class UserRegisterRequest implements Serializable {
     private String iv;
 
     @NotNull(message = "昵称不能为空")
-    @Length(min = 3, max = 8)
+    @Length(min = 3, max = 8, message = "昵称长度需在3-8个字符之间")
     private String nickName;
 
     @NotNull(message = "手机号不能为空")

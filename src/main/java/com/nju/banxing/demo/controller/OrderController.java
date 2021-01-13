@@ -231,9 +231,10 @@ public class OrderController {
         LocalTime entTime = LocalTime.of(0,0,0,0);
         int dayKey = DateUtil.now().getDayOfWeek().getValue();
         for (int i = 0; i < 7; i++) {
-            dayKey = (dayKey -1 + i)%7+1;
+            dayKey = dayKey > 7 ? dayKey % 7 : dayKey;
             TimePair timePair = timePairMap.get(dayKey);
             if(ObjectUtils.isEmpty(timePair)){
+                ++dayKey;
                 continue;
             }
             boolean b = DateUtil.equalZero(timePair.getStartTime(), timePair.getEndTime());
@@ -242,7 +243,9 @@ public class OrderController {
                 entTime = timePair.getEndTime();
                 break;
             }
+            ++dayKey;
         }
+
         reserveVO.setStartTime(startTime);
         reserveVO.setStartTimeSecondOfDay(DateUtil.getSecond(startTime));
 
