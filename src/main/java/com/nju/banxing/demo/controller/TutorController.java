@@ -203,13 +203,13 @@ public class TutorController {
 
     @PostMapping("/upload_image")
     @MethodLog("上传审核文件")
-    public SingleResult<String> upload (@RequestBody MultipartFile file){
+    public SingleResult<String> upload (@RequestBody MultipartFile image){
 
-        if(ObjectUtils.isEmpty(file) || file.isEmpty()){
+        if(ObjectUtils.isEmpty(image) || image.isEmpty()){
             return SingleResult.error(CodeMsg.FAIL_UPLOAD);
         }
 
-        String originalFilename = file.getOriginalFilename();
+        String originalFilename = image.getOriginalFilename();
         String extension = "." + FilenameUtils.getExtension(originalFilename);
         if(!"PNG".equals(extension.toUpperCase()) && !"JPG".equals(extension.toUpperCase()) && !"JPEG".equals(extension.toUpperCase())){
             return SingleResult.error(CodeMsg.ERROR_EXTENSION);
@@ -218,7 +218,7 @@ public class TutorController {
         String realName = fileName+extension;
 
         try {
-            String url = aliyunService.uploadFile(AppContantConfig.ALIYUN_OSS_IMAGES_FOLDER, realName, file.getInputStream());
+            String url = aliyunService.uploadFile(AppContantConfig.ALIYUN_OSS_IMAGES_FOLDER, realName, image.getInputStream());
             return SingleResult.success(url);
         } catch (Exception e) {
             e.printStackTrace();

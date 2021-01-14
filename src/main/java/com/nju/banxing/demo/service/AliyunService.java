@@ -76,10 +76,9 @@ public class AliyunService {
      * @return
      */
     public String uploadFile(String folderName, String fileName, InputStream inputStream){
-
+        log.info("START UPLOAD FILE WITH ALIYUN OSS");
         OSS ossClient = new OSSClientBuilder().build(
                 AppContantConfig.ALIYUN_OSS_END_POINT, aliyunConfig.getId(), aliyunConfig.getSecret());
-        log.info("Getting Started with OSS SDK for Java");
         try {
             if (!ossClient.doesBucketExist(AppContantConfig.ALIYUN_OSS_BUCKET)) {
                 /*
