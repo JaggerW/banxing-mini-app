@@ -211,7 +211,7 @@ public class TutorController {
 
         String originalFilename = image.getOriginalFilename();
         String extension = "." + FilenameUtils.getExtension(originalFilename);
-        if(!"PNG".equals(extension.toUpperCase()) && !"JPG".equals(extension.toUpperCase()) && !"JPEG".equals(extension.toUpperCase())){
+        if(!".PNG".equals(extension.toUpperCase()) && !".JPG".equals(extension.toUpperCase()) && !".JPEG".equals(extension.toUpperCase())){
             return SingleResult.error(CodeMsg.ERROR_EXTENSION);
         }
         String fileName = UUIDUtil.getImageFileName();
