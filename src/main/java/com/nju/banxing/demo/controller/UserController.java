@@ -51,9 +51,15 @@ public class UserController {
     private ReadService readService;
 
 
-    @GetMapping(value = "/test")
+    @PostMapping(value = "/post_test")
     @MethodLog("测试")
-    public SingleResult<String> test() {
+    public SingleResult<String> testPost() {
+        return SingleResult.success("hello world");
+    }
+
+    @GetMapping(value = "/get_test")
+    @MethodLog("测试")
+    public SingleResult<String> testGet() {
         return SingleResult.success("hello world");
     }
 

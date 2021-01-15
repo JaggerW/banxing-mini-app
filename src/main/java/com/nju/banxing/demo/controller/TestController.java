@@ -1,7 +1,5 @@
 package com.nju.banxing.demo.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.annotation.Retry;
 import com.nju.banxing.demo.common.SingleResult;
@@ -10,6 +8,7 @@ import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.service.ReadService;
+import com.nju.banxing.demo.service.TutorService;
 import com.nju.banxing.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +35,27 @@ public class TestController {
     @Autowired
     private ReadService readService;
 
+    @Autowired
+    private TutorService tutorService;
+
     @PostMapping("/delete_user")
     @MethodLog("删除用户")
     public SingleResult<Boolean> deleteUser(String openid){
         boolean b = userService.deleteUser(openid);
+        return SingleResult.success(b);
+    }
+
+    @PostMapping("delete_tutor")
+    @MethodLog("删除导师")
+    public SingleResult<Boolean> deleteTutor(String openid){
+        boolean b = tutorService.delete(openid);
+        return SingleResult.success(b);
+    }
+
+    @PostMapping("handle_tutor")
+    @MethodLog("处理导师请求")
+    public SingleResult<Boolean> handleTutor(String openid, Integer status){
+        boolean b = tutorService.handleTutor(openid, status);
         return SingleResult.success(b);
     }
 

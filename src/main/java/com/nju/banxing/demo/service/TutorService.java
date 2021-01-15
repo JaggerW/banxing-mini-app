@@ -65,7 +65,25 @@ public class TutorService {
     private CoinService coinService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private WxMaConfig wxMaConfig;
+
+    public boolean delete(String tutorId){
+        return tutorMapper.deleteById(tutorId) > 0;
+    }
+
+    public boolean handleTutor(String tutorId, Integer status){
+        boolean update = tutorMapper.update(null,
+                new UpdateWrapper<TutorDO>().lambda()
+                        .eq(TutorDO::getId, tutorId)
+                        .set(TutorDO::getStatus, status)) > 0;
+
+        boolean b = userService.acceptTutor(tutorId);
+
+        return update && b;
+    }
 
     public int getStatus(String tutorId){
         Integer statusById = tutorMapper.getStatusById(tutorId);

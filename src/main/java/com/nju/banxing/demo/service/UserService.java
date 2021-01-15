@@ -43,6 +43,13 @@ public class UserService {
     @Autowired
     private RedisService redisService;
 
+    public boolean acceptTutor(String openid){
+        return userMapper.update(null,
+                new UpdateWrapper<UserDO>().lambda()
+                        .eq(UserDO::getId,openid)
+                        .set(UserDO::getTutorFlag,true)) > 0;
+    }
+
     public UserDO getById(String openid) {
         return userMapper.selectById(openid);
     }
