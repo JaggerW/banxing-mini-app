@@ -193,9 +193,12 @@ public class UserController {
     public SingleResult<Boolean> updateUserInfo(String openid, @Validated @RequestBody UserRegisterRequest registerRequest){
 
         // 校验验证码
-        if (!checkVerCode(openid, registerRequest.getMobile(), registerRequest.getVerCode())) {
-            return SingleResult.error(CodeMsg.ERROR_VER_CODE);
+        if(registerRequest.getMobileFlag()){
+            if (!checkVerCode(openid, registerRequest.getMobile(), registerRequest.getVerCode())) {
+                return SingleResult.error(CodeMsg.ERROR_VER_CODE);
+            }
         }
+
 
         boolean b = userService.updateUserInfo(openid, registerRequest);
         if(b){

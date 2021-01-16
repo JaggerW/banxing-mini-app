@@ -37,7 +37,10 @@ public class UserRegisterRequest implements Serializable {
     @IsEmail
     private String email;
 
-    @NotNull(message = "请输入验证码")
+    // 手机号码是否改变
+    private Boolean mobileFlag = true;
+
+//    @NotNull(message = "请输入验证码")
     private String verCode;
 
 }
