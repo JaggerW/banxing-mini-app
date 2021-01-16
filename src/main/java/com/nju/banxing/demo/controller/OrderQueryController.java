@@ -330,6 +330,7 @@ public class OrderQueryController {
         String userId = (String) voMap.get("userId");
         vo.setNickName(userService.getNickNameById(userId));
         vo.setOrderCode((String) voMap.get("orderCode"));
+        vo.setTutorStatus((Integer) voMap.get("tutorStatus"));
 
         Timestamp startTime = (Timestamp) voMap.get("reserveStartTime");
         Timestamp endTime = (Timestamp) voMap.get("reserveEndTime");

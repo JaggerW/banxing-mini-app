@@ -292,6 +292,7 @@
         resume_url as resumeUrl,
         reject_reason as rejectReason,
         conference_link as conferenceLink,
+        tutor_status as tutorStatus,
         user_id as userId
         from banxing_order
         where id = #{orderCode, jdbcType = VARCHAR}

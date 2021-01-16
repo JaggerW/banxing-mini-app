@@ -17,4 +17,5 @@ public class ReserveOrderDetailVO extends OrderListInfoVO {
     private String resumeUrl;
     private String rejectReason;
     private String conferenceLink;
+    private Integer tutorStatus;
 }
