@@ -200,12 +200,8 @@ public class UserController {
         }
 
 
-        boolean b = userService.updateUserInfo(openid, registerRequest);
-        if(b){
-            return SingleResult.success(true);
-        }else {
-            return SingleResult.error(CodeMsg.FAIL_UPDATE);
-        }
+        userService.updateUserInfo(openid, registerRequest);
+        return SingleResult.success(true);
     }
 
 

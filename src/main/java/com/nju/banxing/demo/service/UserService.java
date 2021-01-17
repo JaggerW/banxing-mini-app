@@ -157,14 +157,15 @@ public class UserService {
                         .set(UserDO::getModifyTime, DateUtil.now())
                         .set(UserDO::getModifier,openid));
 
-        int tutorUpdate = tutorMapper.update(null,
+        // 如果导师表中无用户信息则会更新失败
+        tutorMapper.update(null,
                 new UpdateWrapper<TutorDO>().lambda()
                         .eq(TutorDO::getId, openid)
                         .set(TutorDO::getNickName, registerRequest.getNickName())
                         .set(TutorDO::getModifyTime, DateUtil.now())
                         .set(TutorDO::getCreator, openid));
 
-        return userUpdate>0&&tutorUpdate>0;
+        return userUpdate > 0;
     }
 
     public String getNickNameById(String openid){
