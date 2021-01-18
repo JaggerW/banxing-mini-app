@@ -36,7 +36,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.SocketHandler;
 
 /**
  * @Author: jaggerw
@@ -311,7 +310,7 @@ public class TutorController {
     private TutorBaseInfoVO buildTutorBaseInfoVO(TutorDO tutorDO) {
         TutorBaseInfoVO vo = new TutorBaseInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);
-        TutorScoreInfo scoreInfo = tutorDO.getScoreInfo();
+        TutorScoreInfo scoreInfo = tutorDO.getScoreInfoObject();
         vo.setFirstRank(scoreInfo.getFirstRank());
         vo.setFirstScore(scoreInfo.getFirstScore());
         vo.setFirstTotal(scoreInfo.getFirstTotal());

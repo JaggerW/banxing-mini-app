@@ -16,7 +16,9 @@ public class AdminController {
 
     // TODO 权限管理
 
-    // TODO 审核导师资格
+    // TODO 获取导师待审核列表（直接从导师列表中取，导师状态为待审核的）
+
+    // TODO 处理导师申请
 
     // TODO 客服
 }

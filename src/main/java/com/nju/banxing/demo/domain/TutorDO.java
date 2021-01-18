@@ -75,7 +75,7 @@ public class TutorDO implements Serializable {
      */
     private String scoreInfo;
 
-    public TutorScoreInfo getScoreInfo(){
+    public TutorScoreInfo getScoreInfoObject(){
         if (StringUtils.isNotEmpty(this.scoreInfo)){
             return JSON.parseObject(this.scoreInfo, TutorScoreInfo.class);
         }

@@ -6,18 +6,13 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.common.TimePair;
-import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.TutorDO;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.enums.DayOfWeekEnum;
 import com.nju.banxing.demo.exception.CodeMsg;
-import com.nju.banxing.demo.request.CommentListQuery;
 import com.nju.banxing.demo.request.TutorListQuery;
-import com.nju.banxing.demo.service.CommentService;
 import com.nju.banxing.demo.service.TutorService;
-import com.nju.banxing.demo.service.UserService;
 import com.nju.banxing.demo.util.DateUtil;
-import com.nju.banxing.demo.vo.CommentVO;
 import com.nju.banxing.demo.vo.TutorDetailInfoVO;
 import com.nju.banxing.demo.vo.TutorSimpleInfoVO;
 import com.nju.banxing.demo.vo.WorkTimeVO;
@@ -31,10 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.swing.*;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -67,7 +60,7 @@ public class HomeController {
         List<TutorSimpleInfoVO> voList = page.getRecords().stream().map(tutorDO -> {
             TutorSimpleInfoVO tutorSimpleInfoVO = new TutorSimpleInfoVO();
             BeanUtils.copyProperties(tutorDO, tutorSimpleInfoVO);
-            tutorSimpleInfoVO.setTutorScoreInfo(tutorDO.getScoreInfo());
+            tutorSimpleInfoVO.setTutorScoreInfo(tutorDO.getScoreInfoObject());
             tutorSimpleInfoVO.setOpenid(tutorDO.getId());
             Float score = calCommentScore(tutorDO);
             tutorSimpleInfoVO.setCommentScore(score);
@@ -97,7 +90,7 @@ public class HomeController {
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){
         TutorDetailInfoVO vo = new TutorDetailInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);
-        vo.setTutorScoreInfo(tutorDO.getScoreInfo());
+        vo.setTutorScoreInfo(tutorDO.getScoreInfoObject());
         Float score = calCommentScore(tutorDO);
         vo.setCommentScore(score);
         vo.setOpenid(tutorDO.getId());

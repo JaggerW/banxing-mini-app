@@ -163,9 +163,13 @@ public class TutorService {
 
         // 设置成绩
         TutorScoreInfo tutorScoreInfo = buildScoreInfo(request);
-        tutorDO.setScoreInfo(JSON.toJSONString(tutorScoreInfo));
+        String scoreInfo = JSON.toJSONString(tutorScoreInfo);
+        System.out.println(tutorScoreInfo);
+        System.out.println(scoreInfo);
+        tutorDO.setScoreInfo(scoreInfo);
 
         tutorDO.setId(openid);
+        System.out.println(JSON.toJSONString(request.getWorkTimeList()));
         tutorDO.setWorkTime(JSON.toJSONString(request.getWorkTimeList()));
         tutorDO.setModifier(openid);
         return tutorMapper.updateById(tutorDO) > 0;
