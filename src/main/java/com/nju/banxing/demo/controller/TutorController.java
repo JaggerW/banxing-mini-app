@@ -152,10 +152,8 @@ public class TutorController {
     @MethodLog("申请注册导师")
     public SingleResult<Boolean> register(String openid,
                                           @Validated @RequestBody TutorRegisterRequest request){
-        Integer consultationType = request.getConsultationType();
-        if(ConsultationTypeEnum.KAO_YAN.getCode().equals(consultationType)){
-            checkParam(request);
-        }
+
+        checkParam(request);
 
         checkWorkTime(request);
 
@@ -189,10 +187,7 @@ public class TutorController {
     public SingleResult<Boolean> update_info(String openid,
                                              @Validated @RequestBody TutorUpdateRequest request){
 
-        Integer consultationType = request.getConsultationType();
-        if(ConsultationTypeEnum.KAO_YAN.getCode().equals(consultationType)){
-            checkParam(request);
-        }
+        checkParam(request);
 
         boolean update = tutorService.update(openid, request);
         if(update){
@@ -334,23 +329,44 @@ public class TutorController {
     }
 
     private void checkParam(BaseTutorInfo request){
-        if(null == request.getFirstScore()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试成绩不能为空"));
+        // 如果是考研
+        if(ConsultationTypeEnum.KAO_YAN.getCode().equals(request.getConsultationType())){
+
+            if(null == request.getFirstScore()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试成绩不能为空"));
+            }
+            if(null == request.getFirstRank() || null == request.getFirstTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能为空"));
+            }
+            if(request.getFirstRank() > request.getFirstTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能大于初试总人数"));
+            }
+            if(null == request.getSecondScore()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试成绩不能为空"));
+            }
+            if(null == request.getSecondRank() || null == request.getSecondTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能为空"));
+            }
+            if(request.getSecondRank() > request.getSecondTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能大于复试总人数"));
+            }
         }
-        if(null == request.getFirstRank() || null == request.getFirstTotal()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能为空"));
-        }
-        if(request.getFirstRank() > request.getFirstTotal()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("初试排名不能大于初试总人数"));
-        }
-        if(null == request.getSecondScore()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试成绩不能为空"));
-        }
-        if(null == request.getSecondRank() || null == request.getSecondTotal()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能为空"));
-        }
-        if(request.getSecondRank() > request.getSecondTotal()){
-            throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("复试排名不能大于复试总人数"));
+
+        // 如果是保研
+        if(ConsultationTypeEnum.BAO_YAN.getCode().equals(request.getConsultationType())){
+
+            if(null == request.getGpa()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("学分绩点不能为空"));
+            }
+            if(null == request.getMaxGPA()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("总绩点不能为空"));
+            }
+            if(null == request.getGpaRank() || null == request.getGpaTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("专业排名不能为空"));
+            }
+            if(request.getGpaRank() > request.getGpaTotal()){
+                throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("专业排名不能大于专业总人数"));
+            }
         }
     }
 
