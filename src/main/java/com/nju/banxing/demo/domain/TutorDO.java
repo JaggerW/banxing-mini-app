@@ -81,36 +81,6 @@ public class TutorDO implements Serializable {
         }
         return null;
     }
-//
-//    /**
-//     * 初试成绩
-//     */
-//    private Float firstScore;
-//
-//    /**
-//     * 复试成绩
-//     */
-//    private Float secondScore;
-//
-//    /**
-//     * 初试排名
-//     */
-//    private Integer firstRank;
-//
-//    /**
-//     * 初试总人数
-//     */
-//    private Integer firstTotal;
-//
-//    /**
-//     * 复试排名
-//     */
-//    private Integer secondRank;
-//
-//    /**
-//     * 复试总人数
-//     */
-//    private Integer secondTotal;
 
     /**
      * 学生证首页

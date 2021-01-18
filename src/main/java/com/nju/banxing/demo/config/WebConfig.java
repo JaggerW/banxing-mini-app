@@ -1,7 +1,7 @@
 package com.nju.banxing.demo.config;
 
-import com.nju.banxing.demo.aspect.SecurityInterceptor;
-import org.checkerframework.checker.units.qual.A;
+import com.nju.banxing.demo.aspect.AdminInterceptor;
+import com.nju.banxing.demo.aspect.TokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,10 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
-    private SecurityInterceptor securityInterceptor;
+    private TokenInterceptor tokenInterceptor;
+
+    @Autowired
+    private AdminInterceptor adminInterceptor;
 
     @Autowired
     private UserTokenArgumentResolver userTokenArgumentResolver;
@@ -35,7 +38,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(securityInterceptor).addPathPatterns("/banxing/**");
+        registry.addInterceptor(tokenInterceptor).addPathPatterns("/banxing/**");
+        registry.addInterceptor(adminInterceptor).addPathPatterns("/banxing/admin/**");
     }
 
     @Override

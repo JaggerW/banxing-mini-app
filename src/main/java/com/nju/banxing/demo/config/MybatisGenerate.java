@@ -26,7 +26,7 @@ public class MybatisGenerate {
         gc.setAuthor("JaggerW");
         gc.setOpen(false);
         gc.setFileOverride(false);
-        gc.setIdType(IdType.ASSIGN_ID);
+//        gc.setIdType(IdType.ASSIGN_ID);
         gc.setDateType(DateType.ONLY_DATE);
         gc.setEntityName("%sDO");
         gc.setMapperName("%sMapper");
@@ -51,7 +51,7 @@ public class MybatisGenerate {
         mpg.setPackageInfo(pc);
 
         StrategyConfig sc = new StrategyConfig();
-        sc.setInclude("coin","coin_log","order","order_log");
+        sc.setInclude("banxing_user_role");
         sc.setNaming(NamingStrategy.underline_to_camel);
         sc.setColumnNaming(NamingStrategy.underline_to_camel);
         sc.setEntityLombokModel(true);

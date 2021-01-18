@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Service
 @Slf4j
-public class SecurityInterceptor implements HandlerInterceptor {
+public class TokenInterceptor implements HandlerInterceptor {
 
     @Autowired
     private UserService userService;
