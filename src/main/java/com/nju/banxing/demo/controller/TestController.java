@@ -7,6 +7,7 @@ import com.nju.banxing.demo.domain.ReadDO;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.GlobalException;
 import com.nju.banxing.demo.exception.RetryException;
+import com.nju.banxing.demo.service.AdminService;
 import com.nju.banxing.demo.service.ReadService;
 import com.nju.banxing.demo.service.TutorService;
 import com.nju.banxing.demo.service.UserService;
@@ -37,6 +38,20 @@ public class TestController {
 
     @Autowired
     private TutorService tutorService;
+
+    @Autowired
+    private AdminService adminService;
+
+    @PostMapping("/create_admin")
+    @MethodLog("设置管理员")
+    public SingleResult<Boolean> createAdmin(String openid){
+
+        userService.setAdmin(openid);
+
+        adminService.setAdmin(openid);
+
+        return SingleResult.success(true);
+    }
 
     @PostMapping("/delete_user")
     @MethodLog("删除用户")

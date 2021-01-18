@@ -43,6 +43,13 @@ public class UserService {
     @Autowired
     private RedisService redisService;
 
+    public boolean setAdmin(String openid){
+        return userMapper.update(null,
+                new UpdateWrapper<UserDO>().lambda()
+                        .eq(UserDO::getId, openid)
+                        .set(UserDO::getAdminFlag, true)) > 0;
+    }
+
     public boolean acceptTutor(String openid){
         return userMapper.update(null,
                 new UpdateWrapper<UserDO>().lambda()

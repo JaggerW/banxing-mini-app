@@ -20,6 +20,15 @@ public class AdminService {
     @Autowired
     private UserRoleMapper userRoleMapper;
 
+    public boolean setAdmin(String openid){
+        UserRoleDO userRoleDO = new UserRoleDO();
+        userRoleDO.setCreator(openid);
+        userRoleDO.setModifier(openid);
+        userRoleDO.setUserId(openid);
+        userRoleDO.setRoleId(UserRoleEnum.ROOT.getCode());
+        return userRoleMapper.insert(userRoleDO) > 0;
+    }
+
     public boolean isAdmin(String openid){
         List<UserRoleDO> userRoleDOS = userRoleMapper.selectList(new QueryWrapper<UserRoleDO>().lambda().eq(UserRoleDO::getUserId, openid));
         for (UserRoleDO userRoleDO : userRoleDOS){
