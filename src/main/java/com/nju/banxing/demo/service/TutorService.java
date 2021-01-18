@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.service;
 
+import ch.qos.logback.classic.turbo.TurboFilter;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,10 +17,7 @@ import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.enums.*;
 import com.nju.banxing.demo.exception.CodeMsg;
 import com.nju.banxing.demo.exception.RetryException;
-import com.nju.banxing.demo.request.TutorHandleOrderRequest;
-import com.nju.banxing.demo.request.TutorReapplyRequest;
-import com.nju.banxing.demo.request.TutorRegisterRequest;
-import com.nju.banxing.demo.request.TutorUpdateRequest;
+import com.nju.banxing.demo.request.*;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import com.nju.banxing.demo.vo.WxRefundVO;
@@ -115,6 +113,10 @@ public class TutorService {
     public boolean register(String openid, TutorRegisterRequest request) {
         TutorDO tutorDO = new TutorDO();
         BeanUtils.copyProperties(request, tutorDO);
+        // 设置成绩
+        TutorScoreInfo tutorScoreInfo = buildScoreInfo(request);
+        tutorDO.setScoreInfo(JSON.toJSONString(tutorScoreInfo));
+
         tutorDO.setId(openid);
         tutorDO.setWorkTime(JSON.toJSONString(request.getWorkTimeList()));
         tutorDO.setKeyword(request.getCurrentUniversity() + request.getCurrentProfession());
@@ -158,6 +160,11 @@ public class TutorService {
     public boolean update(String openid, TutorUpdateRequest request){
         TutorDO tutorDO = new TutorDO();
         BeanUtils.copyProperties(request, tutorDO);
+
+        // 设置成绩
+        TutorScoreInfo tutorScoreInfo = buildScoreInfo(request);
+        tutorDO.setScoreInfo(JSON.toJSONString(tutorScoreInfo));
+
         tutorDO.setId(openid);
         tutorDO.setWorkTime(JSON.toJSONString(request.getWorkTimeList()));
         tutorDO.setModifier(openid);
@@ -332,5 +339,21 @@ public class TutorService {
         int insertOrderLog = orderLogMapper.insert(orderLogDO);
 
         return insertOrderLog > 0;
+    }
+
+
+    private TutorScoreInfo buildScoreInfo(BaseTutorInfo request){
+        TutorScoreInfo tutorScoreInfo = new TutorScoreInfo();
+        tutorScoreInfo.setFirstRank(request.getFirstRank());
+        tutorScoreInfo.setFirstScore(request.getFirstScore());
+        tutorScoreInfo.setFirstTotal(request.getFirstTotal());
+        tutorScoreInfo.setGpa(request.getGpa());
+        tutorScoreInfo.setGpaRank(request.getGpaRank());
+        tutorScoreInfo.setGpaTotal(request.getGpaTotal());
+        tutorScoreInfo.setMaxGPA(request.getMaxGPA());
+        tutorScoreInfo.setSecondRank(request.getSecondRank());
+        tutorScoreInfo.setSecondScore(request.getSecondScore());
+        tutorScoreInfo.setSecondTotal(request.getSecondTotal());
+        return tutorScoreInfo;
     }
 }

@@ -160,7 +160,7 @@ public class OrderController {
 
         try {
             // 发起微信支付
-            WxPayOrderRequest orderRequest = buildOrderRequest(openid, request, orderCode, totalCost, httpServletRequest);
+            WxPayOrderRequest orderRequest = buildOrderRequest(openid, orderCode, totalCost, httpServletRequest);
             WxPayOrderVO payOrder = weixinService.createPayOrder(orderRequest);
             payOrder.setOrderCode(orderCode);
 
@@ -262,7 +262,7 @@ public class OrderController {
         return reserveVO;
     }
 
-    private WxPayOrderRequest buildOrderRequest(String openid, OrderCreateRequest createRequest, String outTradeNo, BigDecimal totalCost, HttpServletRequest httpServletRequest){
+    private WxPayOrderRequest buildOrderRequest(String openid, String outTradeNo, BigDecimal totalCost, HttpServletRequest httpServletRequest){
         WxPayOrderRequest request = new WxPayOrderRequest();
         request.setBody("预约支付测试");
         request.setDetail("预约支付测试详情");

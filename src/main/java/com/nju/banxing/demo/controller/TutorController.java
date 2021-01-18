@@ -9,6 +9,7 @@ import com.nju.banxing.demo.common.TimePair;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.TutorDO;
+import com.nju.banxing.demo.domain.TutorScoreInfo;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
 import com.nju.banxing.demo.enums.TutorStatusEnum;
@@ -35,6 +36,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.SocketHandler;
 
 /**
  * @Author: jaggerw
@@ -314,6 +316,17 @@ public class TutorController {
     private TutorBaseInfoVO buildTutorBaseInfoVO(TutorDO tutorDO) {
         TutorBaseInfoVO vo = new TutorBaseInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);
+        TutorScoreInfo scoreInfo = tutorDO.getScoreInfo();
+        vo.setFirstRank(scoreInfo.getFirstRank());
+        vo.setFirstScore(scoreInfo.getFirstScore());
+        vo.setFirstTotal(scoreInfo.getFirstTotal());
+        vo.setSecondRank(scoreInfo.getSecondRank());
+        vo.setSecondScore(scoreInfo.getSecondScore());
+        vo.setSecondTotal(scoreInfo.getSecondTotal());
+        vo.setGpa(scoreInfo.getGpa());
+        vo.setGpaRank(scoreInfo.getGpaRank());
+        vo.setGpaTotal(scoreInfo.getGpaTotal());
+        vo.setMaxGPA(scoreInfo.getMaxGPA());
         String workTime = tutorDO.getWorkTime();
         List<TimePair> timePairs = JSONArray.parseArray(workTime, TimePair.class);
         vo.setWorkTimeList(timePairs);

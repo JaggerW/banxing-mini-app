@@ -44,6 +44,15 @@ public class BaseTutorInfo implements Serializable {
 
     private Integer secondTotal;
 
+    // 若考研则可以为空
+    private Float gpa;
+
+    private Integer maxGPA;
+
+    private Integer gpaRank;
+
+    private Integer gpaTotal;
+
     @Length(min = 100, message = "自我介绍至少需要100字以上")
     @Length(max = 500, message = "自我介绍不得超过500字以上")
     private String introduction;

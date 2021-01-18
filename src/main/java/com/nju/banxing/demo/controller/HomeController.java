@@ -67,6 +67,7 @@ public class HomeController {
         List<TutorSimpleInfoVO> voList = page.getRecords().stream().map(tutorDO -> {
             TutorSimpleInfoVO tutorSimpleInfoVO = new TutorSimpleInfoVO();
             BeanUtils.copyProperties(tutorDO, tutorSimpleInfoVO);
+            tutorSimpleInfoVO.setTutorScoreInfo(tutorDO.getScoreInfo());
             tutorSimpleInfoVO.setOpenid(tutorDO.getId());
             Float score = calCommentScore(tutorDO);
             tutorSimpleInfoVO.setCommentScore(score);
@@ -96,6 +97,7 @@ public class HomeController {
     private TutorDetailInfoVO buildVO(TutorDO tutorDO){
         TutorDetailInfoVO vo = new TutorDetailInfoVO();
         BeanUtils.copyProperties(tutorDO,vo);
+        vo.setTutorScoreInfo(tutorDO.getScoreInfo());
         Float score = calCommentScore(tutorDO);
         vo.setCommentScore(score);
         vo.setOpenid(tutorDO.getId());

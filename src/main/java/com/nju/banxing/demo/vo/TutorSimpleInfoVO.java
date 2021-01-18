@@ -1,5 +1,6 @@
 package com.nju.banxing.demo.vo;
 
+import com.nju.banxing.demo.domain.TutorScoreInfo;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -24,11 +25,6 @@ public class TutorSimpleInfoVO implements Serializable {
     private String bachelorUniversity;
     private String bachelorProfession;
     private String introduction;
-    private Float firstScore;
-    private Integer firstRank;
-    private Integer firstTotal;
-    private Float secondScore;
-    private Integer secondRank;
-    private Integer secondTotal;
+    private TutorScoreInfo tutorScoreInfo;
 
 }

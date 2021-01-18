@@ -1,6 +1,9 @@
 package com.nju.banxing.demo.domain;
 
 import java.math.BigDecimal;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 
@@ -10,6 +13,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>
@@ -67,34 +71,46 @@ public class TutorDO implements Serializable {
     private BigDecimal consultationCost;
 
     /**
-     * 初试成绩
+     * 成绩信息
      */
-    private Float firstScore;
+    private String scoreInfo;
 
-    /**
-     * 复试成绩
-     */
-    private Float secondScore;
-
-    /**
-     * 初试排名
-     */
-    private Integer firstRank;
-
-    /**
-     * 初试总人数
-     */
-    private Integer firstTotal;
-
-    /**
-     * 复试排名
-     */
-    private Integer secondRank;
-
-    /**
-     * 复试总人数
-     */
-    private Integer secondTotal;
+    public TutorScoreInfo getScoreInfo(){
+        if (StringUtils.isNotEmpty(this.scoreInfo)){
+            return JSON.parseObject(this.scoreInfo, TutorScoreInfo.class);
+        }
+        return null;
+    }
+//
+//    /**
+//     * 初试成绩
+//     */
+//    private Float firstScore;
+//
+//    /**
+//     * 复试成绩
+//     */
+//    private Float secondScore;
+//
+//    /**
+//     * 初试排名
+//     */
+//    private Integer firstRank;
+//
+//    /**
+//     * 初试总人数
+//     */
+//    private Integer firstTotal;
+//
+//    /**
+//     * 复试排名
+//     */
+//    private Integer secondRank;
+//
+//    /**
+//     * 复试总人数
+//     */
+//    private Integer secondTotal;
 
     /**
      * 学生证首页
