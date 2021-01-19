@@ -57,7 +57,7 @@ public class OrderQueryController {
     @GetMapping("/reserve_list")
     @MethodLog("获取预约申请列表（导师中心）")
     public PagedResult<OrderListInfoVO> getReserveList(String openid,
-                                                       @RequestBody OrderListQuery query){
+                                                       OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getOrderListByTutorIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
         readService.updateOrderApplyTimeByTutorId(openid);
@@ -80,7 +80,7 @@ public class OrderQueryController {
     @GetMapping("/comment_list")
     @MethodLog("获取评价订单列表（用户中心）")
     public PagedResult<OrderListInfoVO> getCommentList(String openid,
-                                                       @RequestBody OrderListQuery query){
+                                                       OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getCommentListByUserIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
         readService.updateOrderCommentTimeByUserId(openid);
@@ -103,7 +103,7 @@ public class OrderQueryController {
     @GetMapping("/order_list")
     @MethodLog("获取订单列表（用户中心）")
     public PagedResult<OrderListInfoVO> getOrderList(String openid,
-                                                     @RequestBody OrderListQuery query){
+                                                     OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getOrderListByUserIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
@@ -128,7 +128,7 @@ public class OrderQueryController {
     @GetMapping("/reply_list")
     @MethodLog("获取反馈订单列表（用户中心）")
     public PagedResult<OrderListInfoVO> getReplyOrderList(String openid,
-                                                          @RequestBody OrderListQuery query){
+                                                          OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getReplyOrderListByUserIdAndProcessFlag(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
         readService.updateOrderReplyTimeByUserId(openid);
@@ -152,7 +152,7 @@ public class OrderQueryController {
     @GetMapping("/schedule_list_user")
     @MethodLog("获取日程安排列表（用户中心）")
     public PagedResult<ScheduleListInfoVO> getScheduleListUser(String openid,
-                                                               @RequestBody OrderListQuery query){
+                                                               OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getScheduleListByUserId(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<ScheduleListInfoVO> data = buildScheduleVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
@@ -162,7 +162,7 @@ public class OrderQueryController {
     @GetMapping("/schedule_list_tutor")
     @MethodLog("获取日程安排列表（导师中心）")
     public PagedResult<OrderListInfoVO> getScheduleListTutor(String openid,
-                                                             @RequestBody OrderListQuery query){
+                                                             OrderListQuery query){
         IPage<Map<String, Object>> orderList = orderService.getScheduleListByTutorId(openid, query.getProcessFlag(), query.getPageIndex(), query.getPageSize());
         List<OrderListInfoVO> data = buildOrderVO(orderList);
         return PagedResult.success(data,orderList.getCurrent(),orderList.getSize(),orderList.getTotal(),orderList.getPages());
