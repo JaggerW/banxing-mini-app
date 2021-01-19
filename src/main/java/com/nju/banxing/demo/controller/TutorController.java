@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -187,6 +188,7 @@ public class TutorController {
                                              @Validated @RequestBody TutorUpdateRequest request){
 
         checkParam(request);
+        checkWorkTime(request);
 
         boolean update = tutorService.update(openid, request);
         if(update){
@@ -371,14 +373,18 @@ public class TutorController {
 
     private void checkWorkTime(BaseTutorInfo request) {
         List<TimePair> workTimeList = request.getWorkTimeList();
-        boolean flag = true;
+        int zeroCount = 0;
         for (TimePair timePair : workTimeList){
-            flag = flag && DateUtil.equalZero(timePair.getStartTime(),timePair.getEndTime());
-            if(!flag){
-                break;
+            LocalTime startTime = timePair.getStartTime();
+            LocalTime endTime = timePair.getEndTime();
+            if(DateUtil.equalZero(startTime,endTime)){
+                ++zeroCount;
+            }
+            else if (startTime.plusMinutes(10L).isAfter(endTime)){
+                throw new GlobalException(CodeMsg.ERROR_WORK_TIME);
             }
         }
-        if(flag){
+        if(zeroCount == 7){
             throw new GlobalException(CodeMsg.BIND_ERROR.fillArgs("工作时间不能都设为空"));
         }
     }

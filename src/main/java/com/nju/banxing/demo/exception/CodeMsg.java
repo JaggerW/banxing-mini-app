@@ -38,6 +38,7 @@ public class CodeMsg {
     public static final CodeMsg FAIL_UPDATE_TUTOR = new CodeMsg(110,"导师信息更新失败");
     public static final CodeMsg ERROR_MEETING_MESSAGE = new CodeMsg(111,"请粘贴正确的腾讯会议生成链接后再点击提交");
     public static final CodeMsg ERROR_MEETING_TIME = new CodeMsg(112,"会议开始时间与订单不符，请重新填写腾讯会议生成链接");
+    public static final CodeMsg ERROR_WORK_TIME = new CodeMsg(113,"开始时间至少须早于结束时间十分钟");
 
     // 服务端 订单
     public static final CodeMsg ERROR_ORDER = new CodeMsg(500, "下单失败");
