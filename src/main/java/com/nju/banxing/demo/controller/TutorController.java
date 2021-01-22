@@ -88,7 +88,7 @@ public class TutorController {
 
     @PostMapping("/handle_order")
     @MethodLog("导师提交预约申请处理结果")
-    public SingleResult<String> handleOrder(String openid,
+    public SingleResult<Boolean> handleOrder(String openid,
                                             @Validated @RequestBody TutorHandleOrderRequest request){
         if(ObjectUtils.isEmpty(request)){
             return SingleResult.error(CodeMsg.BIND_ERROR.fillArgs("request不得为空"));
@@ -111,7 +111,7 @@ public class TutorController {
                 sendSuccessWxMes(request.getOrderCode(),userId, TXMeetingInfoVO);
 
                 // 处理成功
-                return SingleResult.success("提交成功，请按照约定的时间完成咨询服务");
+                return SingleResult.success(true, "提交成功，请按照约定的时间完成咨询服务");
             }else {
                 throw new GlobalException(CodeMsg.SERVER_ERROR);
             }
@@ -130,8 +130,8 @@ public class TutorController {
                 if(reject){
                     // 通知学员
                     sendRejectWxMes(userId,content);
+                    return SingleResult.success(true, "提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
 
-                    return SingleResult.success("提交成功，系统会将原因告知学员，同时为了更好的提供服务，请您及时更新自己的工作时间信息");
                 }else {
                     throw new GlobalException(CodeMsg.SERVER_ERROR);
                 }

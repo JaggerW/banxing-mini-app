@@ -25,6 +25,12 @@ public class SingleResult<T> implements Serializable {
         this.data = data;
     }
 
+    private SingleResult(T data, String msg){
+        code = 0;
+        this.msg = msg;
+        this.data = data;
+    }
+
     private SingleResult(CodeMsg codeMsg){
         if(codeMsg != null){
             code = codeMsg.getCode();
@@ -38,6 +44,10 @@ public class SingleResult<T> implements Serializable {
 
     public static <T> SingleResult<T> error(CodeMsg codeMsg){
         return new SingleResult<>(codeMsg);
+    }
+
+    public static <T> SingleResult<T> success(T data, String msg){
+        return new SingleResult<>(data,msg);
     }
 
 }
