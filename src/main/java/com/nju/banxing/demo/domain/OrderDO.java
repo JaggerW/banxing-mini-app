@@ -89,7 +89,7 @@ public class OrderDO implements Serializable {
     /**
      * 腾讯会议URL
      */
-    private String conferenceURL;
+    private String conferenceUrl;
 
     /**
      * 会议原始链接

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.google.common.collect.Lists;
 import com.nju.banxing.demo.domain.OrderDO;
 import com.nju.banxing.demo.domain.OrderLogDO;
 import com.nju.banxing.demo.domain.mapper.OrderLogMapper;
@@ -22,7 +21,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -264,7 +262,7 @@ public class OrderService {
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
                         .set(OrderDO::getVersion, version + 1)
-                        .set(OrderDO::getConferenceURL,meetingUrl)
+                        .set(OrderDO::getConferenceUrl,meetingUrl)
                         .set(OrderDO::getConferenceLink, content)) > 0;
     }
 
