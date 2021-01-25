@@ -281,6 +281,9 @@ public class TutorService {
     @Retry
     public boolean reject(String tutorId, TutorHandleOrderRequest request, WxRefundVO wxRefundVO) {
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
+        if(ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.APPLY_REFUND.getCode().equals(orderDO.getOrderStatus())){
+            return true;
+        }
         // 已付款状态
         if(ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())){
 
