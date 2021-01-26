@@ -41,8 +41,6 @@ public class WxPayController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private AliyunService aliyunService;
 
     @Autowired
     private PayService payService;
