@@ -42,11 +42,10 @@ public class RetryAspect implements Ordered {
     @Around("retry()")
     public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
         int attempt = 0;
-        Object result = null;
         do {
             ++attempt;
             try {
-                result = proceedingJoinPoint.proceed();
+                return proceedingJoinPoint.proceed();
             } catch (RetryException e){
                 if(attempt > this.retryTime){
                     log.error("已超过最大重试次数");
@@ -56,7 +55,7 @@ public class RetryAspect implements Ordered {
                 }
             }
         } while (attempt <= this.retryTime);
-        return result;
+        return null;
     }
 
 
