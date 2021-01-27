@@ -106,13 +106,15 @@ public class TutorController {
 
             // 更新订单
             boolean accept = tutorService.accept(openid, request, TXMeetingInfoVO.getMeetingUrl());
+            log.info("return is : {}",accept);
             if(accept){
                 // 通知学员
                 sendSuccessWxMes(request.getOrderCode(),userId, TXMeetingInfoVO);
 
                 // 处理成功
                 return SingleResult.success(true, "提交成功，请按照约定的时间完成咨询服务");
-            }else {
+            }
+            else {
                 throw new GlobalException(CodeMsg.SERVER_ERROR);
             }
 
@@ -248,6 +250,7 @@ public class TutorController {
 
     private void sendSuccessWxMes(String orderCode, String openid, TXMeetingInfoVO TXMeetingInfoVO) {
 
+        log.info("come in");
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(orderCode, openid);
         String userId = orderDO.getUserId();
         Integer consultationType = orderDO.getConsultationType();
@@ -256,6 +259,7 @@ public class TutorController {
         List<WxMaSubscribeMessage.Data> dataList = weixinService.getMeetingSuccessWxMessage(typeName, TXMeetingInfoVO.getMeetingTime(), TXMeetingInfoVO.getMeetingId(), TXMeetingInfoVO.getMeetingSecret());
         weixinService.sendWxMessage(userId,AppContantConfig.WX_MSG_MEETING_SUCCESS_TEMPLATE_ID,AppContantConfig.WX_MSG_MEETING_SUCCESS_PAGE,dataList);
 
+        log.info("send end");
     }
 
     private void sendRejectWxMes(String openid, String reason){
