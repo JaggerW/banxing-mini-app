@@ -233,13 +233,9 @@ public class TutorService {
     @Retry
     public boolean accept(String tutorId, TutorHandleOrderRequest request, String meetingUrl) {
 
-        log.info("come in");
-
         OrderDO orderDO = orderService.getByOrderCodeAndTutorId(request.getOrderCode(), tutorId);
         // 已付款状态
         if(ObjectUtils.isNotEmpty(orderDO) && OrderStatusEnum.ORDER_PAID.getCode().equals(orderDO.getOrderStatus())){
-
-            log.info("status right");
 
             // 更新订单
             Integer version = orderDO.getVersion();
@@ -262,7 +258,6 @@ public class TutorService {
             coinDO.setModifier(tutorId);
             coinDO.setModifyTime(DateUtil.now());
             boolean updateCoin = coinService.update(coinDO);
-            log.info("updateCoin is : {}", updateCoin);
 
             // 插入资金流水
             CoinLogDO coinLogDO = new CoinLogDO();
@@ -276,7 +271,6 @@ public class TutorService {
             coinLogDO.setCreator(tutorId);
             coinLogDO.setModifier(tutorId);
             boolean insertCoinLog = coinService.insertLog(coinLogDO);
-            log.info("insertCoinLog is : {}",insertCoinLog);
 
             return updateCoin && insertCoinLog;
         }

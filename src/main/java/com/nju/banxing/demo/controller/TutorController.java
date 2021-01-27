@@ -106,7 +106,6 @@ public class TutorController {
 
             // 更新订单
             boolean accept = tutorService.accept(openid, request, TXMeetingInfoVO.getMeetingUrl());
-            log.info("return is : {}",accept);
             if(accept){
                 // 通知学员
                 sendSuccessWxMes(request.getOrderCode(),userId, TXMeetingInfoVO);
