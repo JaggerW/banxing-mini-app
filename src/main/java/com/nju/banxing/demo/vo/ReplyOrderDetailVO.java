@@ -17,4 +17,5 @@ public class ReplyOrderDetailVO extends OrderListInfoVO {
     private String currentProfession;
     private String conferenceLink;
     private String rejectReason;
+    private String conferenceCode;
 }

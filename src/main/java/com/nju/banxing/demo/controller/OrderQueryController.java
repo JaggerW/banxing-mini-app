@@ -18,6 +18,7 @@ import com.nju.banxing.demo.util.TXMeetingUtil;
 import com.nju.banxing.demo.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -343,8 +344,12 @@ public class OrderQueryController {
     private ReplyOrderDetailVO buildReplyDetail(Map<String, Object> voMap) {
         ReplyOrderDetailVO vo = new ReplyOrderDetailVO();
         vo.setOrderCode((String) voMap.get("orderCode"));
-        vo.setConferenceLink((String) voMap.get("conferenceLink"));
+        String conferenceLink = (String) voMap.get("conferenceLink");
+        vo.setConferenceLink(conferenceLink);
         vo.setRejectReason((String) voMap.get("rejectReason"));
+        if(StringUtils.isNotEmpty(conferenceLink)){
+            vo.setConferenceCode(TXMeetingUtil.parseMes(conferenceLink).getMeetingId());
+        }
 
         String tutorId = (String) voMap.get("tutorId");
         Map<String, Object> info = tutorService.getTutorInfoById(tutorId);
