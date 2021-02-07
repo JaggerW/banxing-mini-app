@@ -6,6 +6,7 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.config.AppContantConfig;
 import com.nju.banxing.demo.domain.CommentDO;
 import com.nju.banxing.demo.domain.OrderDO;
+import com.nju.banxing.demo.enums.CommentStatusEnum;
 import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.request.WxRefundRequest;
 import com.nju.banxing.demo.service.CommentService;
@@ -129,7 +130,7 @@ public class ScheduleController {
                 String userId = (String) map.get("userId");
                 String tutorId = (String) map.get("tutorId");
                 Integer consultationType = (Integer) map.get("consultationType");
-                commentService.publishNewComment(buildCommentDO(orderCode,userId,tutorId,consultationType));
+                commentService.publishNewComment(buildCommentDO(orderCode,userId,tutorId,consultationType), CommentStatusEnum.AUTO_COMMENTED.getCode());
             }catch (Exception e){
                 log.error("自动评论定时任务异常：",e);
                 log.error("orderCode : {};", map.get("orderCode"));

@@ -9,9 +9,12 @@ import com.nju.banxing.demo.domain.UserDO;
 import com.nju.banxing.demo.domain.mapper.CommentMapper;
 import com.nju.banxing.demo.domain.mapper.UserMapper;
 import com.nju.banxing.demo.enums.OrderStatusEnum;
+import com.nju.banxing.demo.exception.CodeMsg;
+import com.nju.banxing.demo.exception.RetryException;
 import com.nju.banxing.demo.vo.CommentVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +46,17 @@ public class CommentService {
 
     @Transactional
     @Retry
-    public boolean publishNewComment(CommentDO commentDO){
+    public boolean publishNewComment(CommentDO commentDO, Integer commentStatus){
         BigDecimal totalCost = orderService.getTotalCostByCode(commentDO.getOrderCode());
+        Map<String, Integer> map = orderService.getStatusAndVersionByCode(commentDO.getOrderCode());
+        Integer version = map.get("version");
+        Integer status = map.get("status");
+        Integer nextStatus = OrderStatusEnum.getEnumByCode(status).getNext(true).getCode();
         boolean insert = insert(commentDO);
+        boolean updateOrder4Comment = orderService.updateOrder4Comment(commentDO.getOrderCode(), version, nextStatus, commentStatus);
+        if(!updateOrder4Comment){
+            throw new RetryException(CodeMsg.RETRY_ON_FAIL);
+        }
         boolean update = tutorService.updateCommentScore(commentDO.getTutorId(), commentDO.getCommentScore());
         boolean enableCoin = coinService.enableCoin(commentDO.getUserId(), commentDO.getTutorId(), totalCost, commentDO.getOrderCode());
         return insert && update && enableCoin;

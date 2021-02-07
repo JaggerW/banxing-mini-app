@@ -5,6 +5,7 @@ import com.nju.banxing.demo.annotation.MethodLog;
 import com.nju.banxing.demo.common.PagedResult;
 import com.nju.banxing.demo.common.SingleResult;
 import com.nju.banxing.demo.domain.CommentDO;
+import com.nju.banxing.demo.enums.CommentStatusEnum;
 import com.nju.banxing.demo.enums.ConsultationTypeEnum;
 import com.nju.banxing.demo.request.CommentListQuery;
 import com.nju.banxing.demo.request.CommentRequest;
@@ -82,7 +83,7 @@ public class CommentController {
         // TODO 关于score范围的校验
 
         CommentDO commentDO = buildDO(request, openid);
-        boolean b = commentService.publishNewComment(commentDO);
+        boolean b = commentService.publishNewComment(commentDO, CommentStatusEnum.COMMENTED.getCode());
         return SingleResult.success(b);
     }
 

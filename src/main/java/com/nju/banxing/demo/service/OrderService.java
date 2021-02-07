@@ -67,6 +67,8 @@ public class OrderService {
         return orderMapper.update(null,
                 new UpdateWrapper<OrderDO>().lambda()
                         .set(OrderDO::getCommentStatus, CommentStatusEnum.TO_COMMENT.getCode())
+                        .set(OrderDO::getOrderStatus, OrderStatusEnum.ORDER_COMPLETE.getCode())
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .eq(OrderDO::getCommentStatus, CommentStatusEnum.NULL.getCode())
                         .eq(OrderDO::getOrderStatus, OrderStatusEnum.ORDER_PROCESSING.getCode())
                         .eq(OrderDO::getRowStatus, RowStatusEnum.VALID.getCode())
@@ -234,6 +236,7 @@ public class OrderService {
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getVersion, version + 1)) > 0;
     }
@@ -261,6 +264,7 @@ public class OrderService {
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getReplyTime, DateUtil.now())
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.ACCEPTED.getCode())
                         .set(OrderDO::getVersion, version + 1)
@@ -274,6 +278,7 @@ public class OrderService {
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getReplyTime, DateUtil.now())
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.REFUSED.getCode())
                         .set(OrderDO::getVersion, version + 1)
@@ -286,6 +291,7 @@ public class OrderService {
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getReplyTime, DateUtil.now())
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getOrderStatus, orderStatus)
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.AUTO_REFUSED.getCode())
                         .set(OrderDO::getVersion, version + 1)
@@ -298,6 +304,7 @@ public class OrderService {
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
                         .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getRowStatus,RowStatusEnum.VALID.getCode())
                         .set(OrderDO::getTutorStatus, TutorStatusEnum.TO_CONFIRM.getCode())
                         .set(OrderDO::getVersion, version + 1)) > 0;
@@ -308,7 +315,19 @@ public class OrderService {
                 new UpdateWrapper<OrderDO>().lambda()
                         .eq(OrderDO::getId, orderCode)
                         .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getModifyTime, DateUtil.now())
                         .set(OrderDO::getErrorFlag, OrderErrorFlag.UN_NORMAL.getCode())
+                        .set(OrderDO::getVersion, version + 1)) > 0;
+    }
+
+    public boolean updateOrder4Comment(String orderCode, Integer version, Integer orderStatus, Integer commentStatus) {
+        return orderMapper.update(null,
+                new UpdateWrapper<OrderDO>().lambda()
+                        .eq(OrderDO::getId, orderCode)
+                        .eq(OrderDO::getVersion, version)
+                        .set(OrderDO::getModifyTime, DateUtil.now())
+                        .set(OrderDO::getOrderStatus, orderStatus)
+                        .set(OrderDO::getCommentStatus, commentStatus)
                         .set(OrderDO::getVersion, version + 1)) > 0;
     }
 }
