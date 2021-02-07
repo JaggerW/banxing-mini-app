@@ -84,7 +84,7 @@ public class MethodLogAspect implements Ordered {
             requestInfo.setClassMethod(String.format("%s.%s", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
                     proceedingJoinPoint.getSignature().getName()));
             requestInfo.setRequestParams(getRequestParamsByProceedingJoinPoint(proceedingJoinPoint));
-            requestInfo.setResult(result);
+//            requestInfo.setResult(result);
             requestInfo.setTimeCost(System.currentTimeMillis() - start);
             log.info("===============METHOD INFO================= : {} =====================================",
                     JSON.toJSONString(requestInfo));

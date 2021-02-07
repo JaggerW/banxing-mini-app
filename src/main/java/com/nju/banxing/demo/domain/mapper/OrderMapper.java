@@ -157,13 +157,13 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     /**
      *
-     * @param userId
+     * @param tutorId
      * @param tutorStatus 已同意
      * @param offset
      * @param pageSize
      * @return
      */
-    List<Map<String, Object>> getScheduleListByTutorId(@Param("userId") String userId,
+    List<Map<String, Object>> getScheduleListByTutorId(@Param("tutorId") String tutorId,
                                                        @Param("processFlag") Boolean processFlag,
                                                        @Param("orderStatus") Integer orderStatus,
                                                        @Param("tutorStatus") Integer tutorStatus,
