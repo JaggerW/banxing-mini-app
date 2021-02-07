@@ -54,7 +54,7 @@ public class ScheduleController {
 
 
     // 1. 异常单 -> 报警  (30min)
-//    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     @Async
     public void errorTask(){
         long start = System.currentTimeMillis();
@@ -69,7 +69,7 @@ public class ScheduleController {
     }
 
     // 2. 会议结束单 -> 可评论  (1min)
-//    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
     public void enableComment(){
         long start = System.currentTimeMillis();
@@ -84,7 +84,7 @@ public class ScheduleController {
     }
 
     // 3. 超时单 -> 导师超时未处理：自动拒绝  (1min)
-//    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
     public void autoReject(){
         long start = System.currentTimeMillis();
@@ -115,7 +115,7 @@ public class ScheduleController {
 
 
     // 学员超时未评论：自动评论  (1min)
-//    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     @Async
     public void autoComment(){
         long start = System.currentTimeMillis();
