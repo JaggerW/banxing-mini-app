@@ -14,7 +14,7 @@
         tutor_id as tutorId,
         consultation_type as consultationType
         from banxing_order
-        where comment_status = 0 and row_status = 0
+        where comment_status = 0 and row_status = 0 and order_status = 50
         <![CDATA[and reserve_end_time < DATE_ADD(NOW(), INTERVAL 2 DAY) ]]>
     </select>
 

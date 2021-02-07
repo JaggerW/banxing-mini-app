@@ -13,6 +13,7 @@ import com.nju.banxing.demo.request.OrderCreateRequest;
 import com.nju.banxing.demo.util.DateUtil;
 import com.nju.banxing.demo.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,7 @@ public class OrderService {
                 new UpdateWrapper<OrderDO>().lambda()
                         .set(OrderDO::getCommentStatus, CommentStatusEnum.TO_COMMENT.getCode())
                         .eq(OrderDO::getCommentStatus, CommentStatusEnum.NULL.getCode())
+                        .eq(OrderDO::getOrderStatus, OrderStatusEnum.ORDER_PROCESSING.getCode())
                         .eq(OrderDO::getRowStatus, RowStatusEnum.VALID.getCode())
                         .le(OrderDO::getReserveEndTime, DateUtil.now())) > 0;
     }
