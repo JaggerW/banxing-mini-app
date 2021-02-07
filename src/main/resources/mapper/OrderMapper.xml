@@ -262,7 +262,7 @@
         select
         o.id as orderCode,
         o.reserve_start_time as reserveStartTime,
-        o.reserve_end_time as reserveEndTime
+        o.reserve_end_time as reserveEndTime,
         u.nick_name as userName
         from banxing_order o
         left join banxing_user u
