@@ -209,7 +209,7 @@
         limit #{offset}, #{pageSize}
     </select>
 
-    <select id="getReplyOrderListByUserIdAndProcessFlag" resultType="java.util.Map">
+    <select id="getCommentOrderListByUserIdAndProcessFlag" resultType="java.util.Map">
         select
         o.id as orderCode,
         o.reserve_start_time as reserveStartTime,
