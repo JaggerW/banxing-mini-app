@@ -87,9 +87,11 @@
         where user_id = #{userId, jdbcType = VARCHAR}
         <if test="processFlag != null and processFlag">
             and comment_status = #{commentStatus, jdbcType = INTEGER}
+            and order_status = 50
         </if>
         <if test="processFlag != null and !processFlag">
             and comment_status > #{commentStatus, jdbcType = INTEGER}
+            and order_status = 100
         </if>
         <if test="rowStatus != null">
             and row_status = #{rowStatus, jdbcType = TINYINT}
@@ -221,9 +223,11 @@
         where o.user_id = #{userId, jdbcType = VARCHAR}
         <if test="processFlag != null and processFlag">
             and o.comment_status = #{commentStatus, jdbcType = INTEGER}
+            and o.order_status = 50
         </if>
         <if test="processFlag != null and !processFlag">
             and o.comment_status > #{commentStatus, jdbcType = INTEGER}
+            and o.order_status = 100
         </if>
         <if test="rowStatus != null">
             and o.row_status = #{rowStatus, jdbcType = TINYINT}
